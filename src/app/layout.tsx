@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Open_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 import { Header } from "@/components/Header";
@@ -9,11 +9,25 @@ import { JsonLd } from "@/components/JsonLd";
 import { site } from "@/content/site";
 import { graph, organizationSchema, websiteSchema } from "@/lib/schema";
 
-const openSans = Open_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "600", "700", "800"],
+/**
+ * Open Sans, self-hosted from @fontsource rather than fetched from Google.
+ *
+ * The old WordPress site pulled it from fonts.googleapis.com on every page
+ * load — an extra third-party connection before text could render, and a
+ * request to Google on behalf of every visitor. Serving it from our own
+ * origin is faster and avoids the privacy question entirely.
+ */
+const openSans = localFont({
+  src: [
+    { path: "../../node_modules/@fontsource/open-sans/files/open-sans-latin-300-normal.woff2", weight: "300", style: "normal" },
+    { path: "../../node_modules/@fontsource/open-sans/files/open-sans-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "../../node_modules/@fontsource/open-sans/files/open-sans-latin-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "../../node_modules/@fontsource/open-sans/files/open-sans-latin-700-normal.woff2", weight: "700", style: "normal" },
+    { path: "../../node_modules/@fontsource/open-sans/files/open-sans-latin-800-normal.woff2", weight: "800", style: "normal" },
+  ],
   variable: "--font-open-sans",
   display: "swap",
+  fallback: ["ui-sans-serif", "system-ui", "sans-serif"],
 });
 
 export const metadata: Metadata = {

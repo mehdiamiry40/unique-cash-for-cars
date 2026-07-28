@@ -17,6 +17,13 @@ import { retiredSuburbRedirects } from "./src/content/suburbs";
 const nextConfig: NextConfig = {
   pageExtensions: ["ts", "tsx", "mdx"],
 
+  // There is a stray package-lock.json in the home directory, so Turbopack
+  // guesses $HOME as the workspace root and tries to watch the whole home
+  // folder. Pin it to this project.
+  turbopack: {
+    root: __dirname,
+  },
+
   images: {
     formats: ["image/avif", "image/webp"],
   },
