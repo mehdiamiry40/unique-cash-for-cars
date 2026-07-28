@@ -220,6 +220,26 @@ test("removes eager trackers and uses consent-based analytics and video", async 
   assert.match(html, /mirror-enhancements\.js/);
 });
 
+test("loads restored WordPress images without the removed lazy-load runtime", async () => {
+  for (const route of activeRoutes) {
+    const html = await (await render(route)).text();
+    assert.doesNotMatch(html, /<img\b[^>]*\bdata-src(?:set)?=/i, route);
+    assert.doesNotMatch(
+      html,
+      /<img\b[^>]*\bclass=["'][^"']*\blazy-load\b/i,
+      route,
+    );
+
+    for (const image of html.matchAll(/<img\b[^>]*\bsrc=["']([^"']+)/gi)) {
+      assert.doesNotMatch(
+        image[1],
+        /^data:image\/svg\+xml/i,
+        `${route}: placeholder image remained`,
+      );
+    }
+  }
+});
+
 test("makes the Gold Coast suburb pages materially distinct", async () => {
   const pageTexts = [];
   for (const route of localRoutes) {

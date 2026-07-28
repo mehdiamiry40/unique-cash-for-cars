@@ -89,10 +89,53 @@ function removeElementById(html: string, id: string) {
   return html;
 }
 
+function activateLegacyLazyImages(html: string) {
+  return html.replace(/<img\b[^>]*>/gi, (image) => {
+    const dataSrc = image.match(/\sdata-src=(["'])(.*?)\1/i)?.[2];
+    const dataSrcset = image.match(/\sdata-srcset=(["'])(.*?)\1/i)?.[2];
+    if (!dataSrc && !dataSrcset) return image;
+
+    let activated = image
+      .replace(/\sdata-src=(["']).*?\1/i, "")
+      .replace(/\sdata-srcset=(["']).*?\1/i, "");
+
+    if (dataSrc) {
+      activated = /\ssrc=(["']).*?\1/i.test(activated)
+        ? activated.replace(/\ssrc=(["']).*?\1/i, ` src="${dataSrc}"`)
+        : activated.replace(/>$/, ` src="${dataSrc}">`);
+    }
+
+    if (dataSrcset) {
+      activated = /\ssrcset=(["']).*?\1/i.test(activated)
+        ? activated.replace(
+            /\ssrcset=(["']).*?\1/i,
+            ` srcset="${dataSrcset}"`,
+          )
+        : activated.replace(/>$/, ` srcset="${dataSrcset}">`);
+    }
+
+    activated = activated.replace(
+      /\sclass=(["'])(.*?)\1/i,
+      (_match, quote: string, classNames: string) => {
+        const cleaned = classNames
+          .split(/\s+/)
+          .filter((className) => className && className !== "lazy-load")
+          .join(" ");
+        return cleaned ? ` class=${quote}${cleaned}${quote}` : "";
+      },
+    );
+
+    if (dataSrc && !/\sloading=/i.test(activated)) {
+      activated = activated.replace(/>$/, ' loading="lazy">');
+    }
+
+    return activated;
+  });
+}
+
 function optimizeStaticMarkup(html: string) {
-  let optimized = removeElementById(
-    removeElementById(html, "pum-469"),
-    "text-3",
+  let optimized = activateLegacyLazyImages(
+    removeElementById(removeElementById(html, "pum-469"), "text-3"),
   )
     .replace(
       /<style\b[^>]*\bid=(["'])kirki-inline-styles\1[^>]*>[\s\S]*?<\/style>/gi,
