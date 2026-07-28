@@ -1,6 +1,5 @@
 import pages from "./mirror-pages.json";
 import { renderLocalMain } from "./location-pages";
-import { renderMarketingMain } from "./marketing-pages";
 import { metadataFor, schemaFor } from "./seo";
 import { isPreviewHostname, retiredRouteRedirects } from "./site-config";
 
@@ -213,6 +212,28 @@ function repairLinksAndMarkup(html: string) {
     .replace(/<\/h4>/gi, "</h3>")
     .replace(/<li>\s*(?:Ipswich|Toowoomba|Logan|Adelaide)\s*<\/li>/gi, "")
     .replace(
+      /<p\b[^>]*>[\s\S]*?<\/p>/gi,
+      (paragraph) =>
+        /\b(?:Adelaide|Brisbane|Ipswich|Logan|Toowoomba|Sunshine Coast|Sydney)\b/i.test(
+          paragraph,
+        )
+          ? ""
+          : paragraph,
+    )
+    .replace(
+      /<(h2|h3|h5|h6)\b[^>]*>[\s\S]*?<\/\1>/gi,
+      (heading) =>
+        /\b(?:Adelaide|Brisbane|Ipswich|Logan|Toowoomba|Sunshine Coast|Sydney)\b/i.test(
+          heading,
+        )
+          ? ""
+          : heading,
+    )
+    .replace(
+      /<img\b[^>]*(?:cash-for-cars-(?:ipswich|toowoomba)|\b(?:Adelaide|Brisbane|Ipswich|Logan|Toowoomba|Sunshine Coast|Sydney)\b)[^>]*>/gi,
+      "",
+    )
+    .replace(
       /<p><strong>Address:<\/strong>[\s\S]*?Runcorn QLD 4113[\s\S]*?<\/p>/gi,
       "<p><strong>Service area:</strong> Gold Coast residents only</p>",
     )
@@ -330,16 +351,28 @@ function addConsentBanner(html: string) {
   );
 }
 
-function addBusinessDetails(html: string) {
-  if (html.includes('class="business-details-band"')) return html;
-  return html.replace(
-    /<footer\b/i,
-    `<section class="business-details-band" aria-label="Business details">
-  <div><span>Service area</span><strong>Gold Coast residents only</strong></div>
-  <div><span>Business hours</span><strong>Monday–Friday, 9:00 am–5:00 pm</strong></div>
-  <div><span>Phone</span><a href="tel:0423476111">0423 476 111</a></div>
-</section>
-<footer`,
+function addBusinessHours(html: string) {
+  if (html.includes("<strong>Business hours:</strong>")) return html;
+  const withHours = html.replace(
+    /(<p><strong>Phone:\s*<\/strong><a href="tel:0423476111">0423 476 111<\/a><\/p>)/i,
+    "$1<p><strong>Business hours:</strong> Monday–Friday, 9:00 am–5:00 pm</p>",
+  );
+  if (withHours.includes("<strong>Business hours:</strong>")) {
+    return withHours;
+  }
+  return withHours.replace(
+    /<p><strong>Email:<\/strong>/i,
+    '<p><strong>Phone: </strong><a href="tel:0423476111">0423 476 111</a></p><p><strong>Business hours:</strong> Monday–Friday, 9:00 am–5:00 pm</p><p><strong>Email:</strong>',
+  );
+}
+
+function removeRetiredBlogArticle(html: string) {
+  return html.replace(/<article\b[\s\S]*?<\/article>/gi, (article) =>
+    article.includes(
+      "/top-5-reasons-to-sell-your-car-for-cash-in-brisbane/",
+    )
+      ? ""
+      : article,
   );
 }
 
@@ -353,15 +386,15 @@ function prepareHtml(
   html = optimizeStaticMarkup(html);
   html = removeLegacyDiscoveryLinks(html);
   html = repairLinksAndMarkup(html);
+  html = removeRetiredBlogArticle(html);
   html = replaceYouTubeEmbeds(html);
-  const replacementMain =
-    renderMarketingMain(pathname, html) ?? renderLocalMain(pathname, html);
-  if (replacementMain) {
-    html = html.replace(/<main\b[\s\S]*?<\/main>/i, replacementMain);
+  const localMain = renderLocalMain(pathname, html);
+  if (localMain) {
+    html = html.replace(/<main\b[\s\S]*?<\/main>/i, localMain);
   }
   html = addBlogHeading(html, pathname);
   html = addPrivacyDetails(html, pathname);
-  html = addBusinessDetails(html);
+  html = addBusinessHours(html);
   html = enhanceSeo(html, pathname, origin, noIndex);
   html = addConsentBanner(html);
   return rewriteRequestOrigin(html, origin);
