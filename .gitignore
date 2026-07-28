@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# test-only preview build (tests/rendered-html.test.mjs)
+/.next-preview/

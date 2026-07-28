@@ -21,6 +21,12 @@ const nextConfig: NextConfig = {
   // vulnerabilities. From the parallel migration.
   poweredByHeader: false,
 
+  // Test seam. The preview-indexing test has to run a second build with
+  // VERCEL_ENV=preview to check the noindex path, and `next build` has no
+  // --distDir flag, so it redirects the output here instead of overwriting the
+  // real build. Unset everywhere else, including on Vercel.
+  ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
+
   // There is a stray package-lock.json in the home directory, so Turbopack
   // guesses $HOME as the workspace root and tries to watch the whole home
   // folder. Pin it to this project.

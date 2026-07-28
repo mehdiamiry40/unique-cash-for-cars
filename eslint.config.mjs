@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The preview build the indexing test produces. Same generated content as
+    // .next, which is ignored above — Next's route type files are full of
+    // ts-ignore directives and unused bindings, so linting them reports
+    // thousands of problems that are not ours to fix.
+    ".next-preview/**",
   ]),
 ]);
 

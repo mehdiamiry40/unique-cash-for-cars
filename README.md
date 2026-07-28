@@ -24,7 +24,7 @@ visually, or the pages will be full of grey rectangles.
 npm run verify
 ```
 
-Runs four checks:
+Runs five checks:
 
 | Check | What it catches |
 |---|---|
@@ -32,10 +32,42 @@ Runs four checks:
 | `lint` | ESLint + Next.js rules |
 | `check:urls` | **Any WordPress URL that would 404 after launch** |
 | `check:duplication` | Location pages drifting back toward duplicate content |
+| `test` | What a crawler actually receives — see below |
 
 `check:urls` is the one that matters most. It reads every URL the old site had
 (`scripts/legacy-urls.json`) and asserts each one resolves to a route or has a
 permanent redirect. A missed URL is a page that dies at launch.
+
+### The test suite
+
+`npm test` builds the site and runs `tests/rendered-html.test.mjs` against a
+real `next start` server. Response headers come from `next.config.ts` and never
+appear in the prerendered HTML, so a live server is the only way to check them.
+
+It asserts, across every page in the sitemap:
+
+- Each sitemap URL returns a direct 200, and its canonical points back at itself
+- Titles and descriptions sit inside what a search result displays, and **no two
+  pages share either** — the specific failure this rebuild exists to prevent
+- One `h1` per page
+- Structured data parses, carries the right types per page (`AutomotiveBusiness`
+  and `WebSite` everywhere, `FAQPage` where FAQs render, `BreadcrumbList`,
+  `Service` on location pages), no `aggregateRating`, and **every `{"@id"}`
+  reference resolves to a node defined on the same page**
+- The 13 retired location URLs return a permanent redirect to a page that exists
+- The security headers are actually on the response, and `x-powered-by` is not
+- Images and the preserved WordPress upload paths are served immutable
+- No internal link 404s, and every referenced image exists in `public/`
+- This build is indexable — and a `VERCEL_ENV=preview` build is not
+
+That last one builds a second copy into `.next-preview` (gitignored) and checks
+it serves `Disallow: /` and `noindex`. It costs an extra build, which is worth
+it: a preview URL left indexable competes with the live site for its own
+keywords and nobody notices for months.
+
+Each assertion was checked by breaking the thing it guards and confirming the
+test failed — a dropped security header, a dangling schema `@id`, a missing
+image, and an inverted preview-indexing rule.
 
 > **On 308 vs 301:** Next emits `308 Permanent Redirect` for
 > `permanent: true`, not `301`. Google's redirect documentation lists 301 and
