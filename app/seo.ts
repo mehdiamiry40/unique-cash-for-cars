@@ -1,5 +1,4 @@
 import { localPageMetadata } from "./location-pages";
-import { temporarilyNoIndexRoutes } from "./site-config";
 
 type Metadata = {
   title: string;
@@ -12,6 +11,28 @@ const metadataByRoute: Record<string, Metadata> = {
     title: "Cash for Cars Gold Coast Up to $9,999 | Free Removal",
     description:
       "Sell an unwanted, old or damaged vehicle on the Gold Coast. Get a fast cash offer and free vehicle removal. Call 0423 476 111 for a quote.",
+    faq: [
+      {
+        question: "What vehicles do you consider?",
+        answer:
+          "We consider cars, SUVs, utes, vans, 4WDs and light commercial vehicles in many conditions, including damaged and non-running vehicles.",
+      },
+      {
+        question: "Is vehicle collection included?",
+        answer:
+          "Collection arrangements are explained with the offer. The exact location and access must be confirmed before a pickup time is agreed.",
+      },
+      {
+        question: "Which areas do you service?",
+        answer:
+          "Our service is for Gold Coast residents. Choose your suburb or contact us to confirm coverage for your exact location.",
+      },
+      {
+        question: "When can I contact you?",
+        answer:
+          "Our business hours are Monday to Friday, 9:00 am to 5:00 pm.",
+      },
+    ],
   },
   "/privacy-policy/": {
     title: "Privacy Policy | Unique Cash for Cars",
@@ -46,7 +67,7 @@ const metadataByRoute: Record<string, Metadata> = {
   "/company-info-cash-for-cars-gold-coast-and-free-car-removal/": {
     title: "About Unique Cash for Cars | Gold Coast",
     description:
-      "Learn about Unique Cash for Cars, our vehicle assessment process and removal service for unwanted, old and damaged vehicles across Queensland.",
+      "Learn about Unique Cash for Cars, our vehicle assessment process and removal service for unwanted, old and damaged vehicles on the Gold Coast.",
   },
   "/unwanted-car-buyer/": {
     title: "Unwanted Car Buyer Gold Coast | Request an Offer",
@@ -59,9 +80,9 @@ const metadataByRoute: Record<string, Metadata> = {
       "Arrange car removal on the Gold Coast for unwanted, damaged, scrap and non-running vehicles. Collection timing is confirmed with your quote.",
   },
   "/cash-for-cars/": {
-    title: "Cash for Cars Service Areas | Gold Coast & QLD",
+    title: "Cash for Cars Service Areas | Gold Coast",
     description:
-      "View Unique Cash for Cars service areas across the Gold Coast and Queensland. Choose your local area to request a vehicle quote and collection.",
+      "View Unique Cash for Cars service areas across the Gold Coast. Choose your local suburb to request a vehicle quote and planned collection.",
   },
   "/contact-us/": {
     title: "Contact Unique Cash for Cars | Free Vehicle Quote",
@@ -71,7 +92,7 @@ const metadataByRoute: Record<string, Metadata> = {
   "/blog/": {
     title: "Car Selling & Removal Advice | Gold Coast Blog",
     description:
-      "Practical articles about selling unwanted vehicles, car removal, damaged cars and responsible end-of-life vehicle options in Queensland.",
+      "Practical articles about selling unwanted vehicles, car removal, damaged cars and responsible end-of-life vehicle options on the Gold Coast.",
   },
   "/5-best-luxury-eco-friendly-cars-in-australia-2020/": {
     title: "5 Eco-Friendly Luxury Cars in Australia",
@@ -102,7 +123,7 @@ export function metadataFor(pathname: string): Metadata {
     metadataByRoute[pathname] ?? {
       title: "Unique Cash for Cars",
       description:
-        "Request a cash offer and vehicle removal for an unwanted, damaged or old car in Queensland.",
+        "Request a cash offer and vehicle removal for an unwanted, damaged or old car on the Gold Coast.",
     }
   );
 }
@@ -178,7 +199,7 @@ export function schemaFor(
       "@id": websiteId,
       url: `${origin}/`,
       name: "Unique Cash for Cars",
-      description: "Cash for cars and vehicle removal in Queensland",
+      description: "Cash for cars and vehicle removal on the Gold Coast",
       inLanguage: "en-AU",
       publisher: { "@id": organizationId },
     },
@@ -189,22 +210,19 @@ export function schemaFor(
       url: `${origin}/`,
       image: `${origin}/wp-content/uploads/2023/05/uniquecashforcars.jpg`,
       telephone: "+61423476111",
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: "20-B Bonemill Rd",
-        addressLocality: "Runcorn",
-        addressRegion: "QLD",
-        postalCode: "4113",
-        addressCountry: "AU",
+      areaServed: [{ "@type": "City", name: "Gold Coast" }],
+      openingHoursSpecification: {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+        ],
+        opens: "09:00",
+        closes: "17:00",
       },
-      areaServed: [
-        { "@type": "City", name: "Gold Coast" },
-        { "@type": "City", name: "Brisbane" },
-        { "@type": "City", name: "Ipswich" },
-        { "@type": "City", name: "Logan" },
-        { "@type": "City", name: "Toowoomba" },
-        { "@type": "AdministrativeArea", name: "Sunshine Coast" },
-      ],
       sameAs: [
         "https://www.facebook.com/uniquecashforcars10/",
         "https://twitter.com/uniquecash4cars",
@@ -230,8 +248,4 @@ export function schemaFor(
   return JSON.stringify({ "@context": "https://schema.org", "@graph": graph })
     .replaceAll("<", "\\u003c")
     .replaceAll(">", "\\u003e");
-}
-
-export function routeShouldBeNoIndex(pathname: string) {
-  return temporarilyNoIndexRoutes.has(pathname);
 }
