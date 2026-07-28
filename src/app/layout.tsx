@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { MobileCallBar } from "@/components/MobileCallBar";
 import { JsonLd } from "@/components/JsonLd";
 import { site } from "@/content/site";
+import { isSearchVisible } from "@/lib/deploy";
 import { graph, organizationSchema, websiteSchema } from "@/lib/schema";
 
 /**
@@ -39,13 +40,17 @@ export const metadata: Metadata = {
   },
   description: site.description,
   applicationName: site.legalName,
-  robots: {
-    index: true,
-    follow: true,
-    "max-image-preview": "large",
-    "max-snippet": -1,
-    "max-video-preview": -1,
-  },
+  // Preview deployments are kept out of search here as well as in robots.txt:
+  // Disallow stops crawling, noindex removes anything already discovered.
+  robots: isSearchVisible
+    ? {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      }
+    : { index: false, follow: false },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

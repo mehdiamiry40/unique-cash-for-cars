@@ -64,9 +64,33 @@ src/
   lib/
     schema.ts        JSON-LD builders (AutomotiveBusiness, FAQPage, Breadcrumb).
     seo.ts           pageMeta() — always sets a canonical.
+    deploy.ts        Keeps preview deployments out of search.
 scripts/             Asset fetch + the two pre-deploy checks.
 docs/                SEO audit that prompted this rebuild.
+public/
+  img/               The 8 images the pages currently use.
+  assets/            Hero artwork as webp, incl. an 800x1000 portrait crop.
+  wp-content/uploads/  116 original WordPress images. See below.
+.github/workflows/   CI: verify + build on push and PR.
 ```
+
+### The image library
+
+`public/wp-content/uploads` holds the full original WordPress media library,
+kept at its original paths. Two reasons: old image URLs keep resolving, so
+Google Images results and any external hotlinks survive the move; and it is a
+real photo library where this project otherwise has eight files.
+
+Worth knowing what is in there, because the pages don't use most of it yet:
+
+- **Actual photographs** — `2020/01/cash-for-cars.jpg` is a 1920x660 banner
+  shot, `2023/09/damaged-car.jpg` is 1600x1067, `2022/05/why-choose-us.jpg`,
+  `2020/01/wrecked-vehicles.jpg`, `2022/10/truck-removing-car.jpg`.
+- **15 car-brand logos** under `2020/11/` — Toyota, Mazda, Ford, Holden, BMW,
+  Audi, Mercedes, Nissan, Honda, Subaru, Suzuki, Mitsubishi, Kia, Jeep, Volvo.
+  A "brands we buy" strip is a standard trust element on competitor sites.
+- Thumbnail variants (`-300x230`, `-768x590`) that WordPress generated for
+  srcsets. Kept because they may be indexed; not useful for new work.
 
 **To change business details** — phone, address, hours, trading name — edit
 `src/content/site.ts` only. It feeds the header, footer, schema, contact page

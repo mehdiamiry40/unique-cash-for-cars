@@ -17,6 +17,10 @@ import { retiredSuburbRedirects } from "./src/content/suburbs";
 const nextConfig: NextConfig = {
   pageExtensions: ["ts", "tsx", "mdx"],
 
+  // Don't advertise the framework and version to anyone scanning for known
+  // vulnerabilities. From the parallel migration.
+  poweredByHeader: false,
+
   // There is a stray package-lock.json in the home directory, so Turbopack
   // guesses $HOME as the workspace root and tries to watch the whole home
   // folder. Pin it to this project.
@@ -66,6 +70,26 @@ const nextConfig: NextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
           },
+        ],
+      },
+
+      // Images out of public/ are served with a short default max-age, unlike
+      // hashed /_next/static assets. These files never change under a given
+      // path — a new photo gets a new name — so they can be cached hard.
+      // Pattern taken from the parallel migration.
+      {
+        source: "/:dir(img|assets)/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+
+      // The original WordPress upload paths, kept so old image URLs and any
+      // external hotlinks keep resolving after the move.
+      {
+        source: "/wp-content/uploads/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
         ],
       },
     ];
