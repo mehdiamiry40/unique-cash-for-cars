@@ -26,6 +26,66 @@ cover.
 
 ---
 
+## Status
+
+Every finding below has been actioned. Three did not end in a code change, and
+those are recorded honestly rather than quietly marked done.
+
+| # | Finding | Status |
+|---|---|---|
+| H1 | Blog `h1` renders at body size | **Fixed** — `prose-site h1` rule |
+| H2 | Archived-post blockquote unstyled | **Fixed** — `prose-site blockquote` rule |
+| H3 | Phone number misgrouped | **Fixed** — one source of truth, no hardcoded copies left |
+| H4 | JPEG served as `image/png` | **Fixed** — renamed to `.jpg`, all references updated |
+| H5 | Unsubstantiated licence claims | **Fixed by rewording** — needs the owner to supply ABN + licence number to restore the stronger copy |
+| H6 | Brand red and ink-muted fail AA | **Fixed** — `#d75253→#c14142`, `#777→#696969`, `white/90→white` |
+| M1 | Unreachable prerendered post | **Fixed** — file deleted, redirect kept |
+| M2 | `check:urls` blind to config redirects | **Fixed** — reads `next.config.ts`, and now fails on shadowed routes |
+| M3 | Rate-limiter map leaks | **Fixed** — sweep + tracked-IP ceiling |
+| M4 | Body cap was header-only | **Fixed** — bounded streaming read |
+| M5 | Honeypot named `website` | **Fixed** — renamed out of the autofill vocabulary |
+| M6 | No Article/Breadcrumb on posts | **Fixed** — `BlogPosting` + `BreadcrumbList`, asserted in tests |
+| M7 | 92 KB of fonts per page | **Fixed** — weight 300 dropped (−19 KB/page) |
+| M8 | Images below display resolution | **Partly fixed — blocked on assets.** See below |
+| M9 | No `aria-current` | **Fixed** |
+| M10 | `aria-haspopup` without menu semantics | **Fixed** — attribute removed |
+| M11 | README contradicts the code | **Fixed** — all five, plus the stale Next 15 note |
+| M12 | Privacy policy overstates collection | **Fixed** — rewritten to match reality |
+| L1-L6, L8, L9, L11, L12 | Dead code, assets, sitemap, `dynamicParams`, CSP/HSTS, title typo, `host:`, deps | **Fixed** |
+| L7 | Interstate redirects → Gold Coast hub | **Reviewed, no change.** See below |
+| L10 | Four footer `<h2>`s | **Reviewed, no change.** See below |
+| — | Input borders at 1.26:1 (found while fixing H6) | **Fixed** — new `--color-field` at 3.23:1 |
+
+### M8 — blocked on source assets
+
+The six service-card images are 460×345, and that is the largest version that
+exists anywhere in the repository: `public/wp-content/uploads/2022/09/` holds
+only those and 300×225 thumbnails. `next/image` will not invent pixels, so a
+2× phone still upscales them. What was fixable has been: the header logo now
+declares its true intrinsic size (200×87 rather than 170×74), which stops
+`next/image` advertising 256w and 384w candidates for a 200px file.
+
+**The remaining fix is new photography**, not code. Until then the cards are
+soft on high-DPI screens.
+
+### L7 — reviewed, no change
+
+`logan`, `ipswich` and `toowoomba` 301 to `/cash-for-cars`, whose copy is Gold
+Coast-only. There is no better destination — the business no longer serves
+those areas, and the alternatives are worse: a 404 throws away the inbound
+links, and `/` is no more topically relevant. Left as-is deliberately. If
+Search Console starts reporting these as soft 404s, the answer is to let them
+404 rather than to redirect them somewhere else.
+
+### L10 — reviewed, no change
+
+The four footer headings are correct HTML, and removing them from the outline
+would take away the landmarks screen-reader users rely on to navigate a footer.
+The "chrome in the outline" concern is real but minor, and the fix is worse
+than the finding.
+
+---
+
 ## High
 
 ### H1. Blog post titles render at body-text size

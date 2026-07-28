@@ -49,8 +49,11 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
     }
   }
 
+  // border-field, not border-hairline: an input border is a UI component
+  // boundary and needs 3:1 against its surroundings (WCAG 1.4.11). The
+  // hairline grey is 1.26:1 — fine for a decorative divider, not for this.
   const inputClass =
-    "w-full rounded border border-hairline bg-surface px-4 py-3 text-base text-ink placeholder:text-ink-muted focus:border-brand focus:outline-2 focus:outline-offset-0 focus:outline-brand";
+    "w-full rounded border border-field bg-surface px-4 py-3 text-base text-ink placeholder:text-ink-muted focus:border-brand focus:outline-2 focus:outline-offset-0 focus:outline-brand";
 
   if (status === "success") {
     return (
@@ -81,7 +84,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
       className="scroll-mt-28 rounded-lg border border-hairline bg-surface p-6 shadow-lg sm:p-8"
       noValidate
     >
-      <h2 className="mb-6 text-2xl font-light uppercase tracking-wide text-ink-heading">
+      <h2 className="mb-6 text-2xl font-normal uppercase tracking-wide text-ink-heading">
         Get Fast Enquiry
       </h2>
 
@@ -201,10 +204,18 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
           />
         </div>
 
-        {/* Honeypot — hidden from people, filled in by bots. */}
+        {/*
+          Honeypot — hidden from people, filled in by bots.
+
+          The name is deliberately meaningless. It used to be `website`, which
+          password managers and browser autofill will happily populate; because
+          a tripped honeypot answers 200, a real customer would have seen the
+          success panel while their enquiry went in the bin. Don't rename this
+          to anything autofill recognises.
+        */}
         <div aria-hidden="true" className="absolute -left-[9999px]">
-          <label htmlFor="q-website">Leave this field empty</label>
-          <input id="q-website" name="website" tabIndex={-1} autoComplete="off" />
+          <label htmlFor="q-contact-ref">Leave this field empty</label>
+          <input id="q-contact-ref" name="contactRef" tabIndex={-1} autoComplete="off" />
         </div>
 
         {error && (

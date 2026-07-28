@@ -259,8 +259,6 @@ export const suburbs: Suburb[] = [
   },
 ];
 
-export const suburbSlugs = suburbs.map((s) => s.slug);
-
 export function getSuburb(slug: string): Suburb | undefined {
   return suburbs.find((s) => s.slug === slug);
 }

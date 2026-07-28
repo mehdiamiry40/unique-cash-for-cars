@@ -50,7 +50,7 @@ async function collectRoutes(dir = APP, segments = []) {
 }
 
 /** Pulls the retired-suburb redirect keys straight out of the content module. */
-async function collectRedirects() {
+async function collectSuburbRedirects() {
   const source = await readFile(join(ROOT, "src", "content", "suburbs.ts"), "utf8");
   const block = source.match(
     /retiredSuburbRedirects[^=]*=\s*\{([\s\S]*?)\n\};/,
@@ -63,6 +63,36 @@ async function collectRedirects() {
       to: destination,
     }),
   );
+}
+
+/**
+ * Redirects declared directly in next.config.ts.
+ *
+ * This script used to read only retiredSuburbRedirects, which left it blind to
+ * everything in the config's own `redirects()` array. That mattered twice over:
+ * a legacy URL covered only by a config redirect looked like a launch-breaking
+ * 404, and a URL that has both a page file and a config redirect was reported
+ * as a live route when Next actually redirects it — redirects are matched
+ * before filesystem routes.
+ *
+ * Parsed rather than imported because this is a .mjs script and the config is
+ * TypeScript. Entries with `has:` (host-conditional, e.g. the www → apex rule)
+ * and pattern sources (`:path*`) are skipped: neither is a plain 1:1 mapping
+ * that a legacy URL can be checked against.
+ */
+async function collectConfigRedirects() {
+  const source = await readFile(join(ROOT, "next.config.ts"), "utf8");
+  const block = source.match(/async redirects\(\)\s*\{([\s\S]*?)\n  \},/);
+  if (!block) throw new Error("Could not find redirects() in next.config.ts");
+
+  return [...block[1].matchAll(/\{([^{}]*\bsource:[^{}]*)\}/g)]
+    .map(([, body]) => body)
+    .filter((body) => !/\bhas\s*:/.test(body))
+    .map((body) => ({
+      from: body.match(/source:\s*["']([^"']+)["']/)?.[1],
+      to: body.match(/destination:\s*["']([^"']+)["']/)?.[1],
+    }))
+    .filter((r) => r.from && r.to && !r.from.includes(":"));
 }
 
 /** Slugs served by the [suburb] dynamic route. */
@@ -81,23 +111,25 @@ function matches(url, routes, suburbSlugs) {
 }
 
 async function main() {
-  const [{ urls: legacy }, routes, redirects, suburbSlugs] = await Promise.all([
-    readFile(join(ROOT, "scripts", "legacy-urls.json"), "utf8").then(JSON.parse),
-    collectRoutes(),
-    collectRedirects(),
-    collectSuburbSlugs(),
-  ]);
+  const [{ urls: legacy }, routes, suburbRedirects, configRedirects, suburbSlugs] =
+    await Promise.all([
+      readFile(join(ROOT, "scripts", "legacy-urls.json"), "utf8").then(JSON.parse),
+      collectRoutes(),
+      collectSuburbRedirects(),
+      collectConfigRedirects(),
+      collectSuburbSlugs(),
+    ]);
+
+  const redirects = [...configRedirects, ...suburbRedirects];
 
   const missing = [];
   const summary = [];
 
   for (const url of legacy) {
-    const routeHit = matches(url, routes, suburbSlugs);
-    if (routeHit) {
-      summary.push([url, routeHit, ""]);
-      continue;
-    }
-
+    // Redirects first, deliberately. Next matches them before filesystem
+    // routes, so a URL with both a page file and a redirect is a redirect —
+    // checking routes first reported such a URL as a live page that in fact
+    // nobody can reach.
     const redirect = redirects.find((r) => r.from === url);
     if (redirect) {
       // A redirect that points at a dead end is as bad as a 404.
@@ -110,7 +142,22 @@ async function main() {
       continue;
     }
 
+    const routeHit = matches(url, routes, suburbSlugs);
+    if (routeHit) {
+      summary.push([url, routeHit, ""]);
+      continue;
+    }
+
     missing.push(`${url} (no route, no redirect)`);
+  }
+
+  // A page file that is shadowed by a redirect is built on every deploy and
+  // served to nobody. That is how the retired Brisbane post lingered.
+  const shadowed = routes.filter(
+    (r) => !r.dynamic && redirects.some((redirect) => redirect.from === r.url),
+  );
+  for (const route of shadowed) {
+    missing.push(`${route.file} is shadowed by a redirect for ${route.url} — delete it or drop the redirect`);
   }
 
   const width = Math.max(...summary.map(([u]) => u.length), 10);

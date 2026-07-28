@@ -89,6 +89,38 @@ export function faqSchema(faqs: readonly Faq[]) {
   };
 }
 
+/**
+ * Article markup for the MDX blog posts.
+ *
+ * `posts.ts` has carried `date` and `updated` fields documented as feeding
+ * "the sitemap lastmod and the Article schema" since the rebuild, but no
+ * Article schema existed — the posts shipped with only the site-wide
+ * Organization and WebSite nodes. This is that builder.
+ */
+export function articleSchema(opts: {
+  slug: string;
+  title: string;
+  description: string;
+  datePublished: string;
+  dateModified?: string;
+}) {
+  const url = `${site.url}/${opts.slug}`;
+
+  return {
+    "@type": "BlogPosting",
+    "@id": `${url}#article`,
+    mainEntityOfPage: url,
+    url,
+    headline: opts.title,
+    description: opts.description,
+    datePublished: opts.datePublished,
+    dateModified: opts.dateModified ?? opts.datePublished,
+    inLanguage: "en-AU",
+    author: { "@id": ORG_ID },
+    publisher: { "@id": ORG_ID },
+  };
+}
+
 export function serviceSchema(opts: { name: string; description: string; areaServed: string }) {
   return {
     "@type": "Service",

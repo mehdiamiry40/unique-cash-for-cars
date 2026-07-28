@@ -43,18 +43,37 @@ export function Header() {
     };
   }, []);
 
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const matches = (href: string) => {
+    // A nav item can carry a placeholder href ("#") when it exists only to open
+    // a submenu. startsWith("#") is never true for a pathname, so treating it
+    // as a path silently left the "Services" parent inactive on all three of
+    // its own child pages.
+    if (!href.startsWith("/")) return false;
+    return href === "/" ? pathname === "/" : pathname.startsWith(href);
+  };
+
+  /** A parent is current when it, or any of its children, is the open page. */
+  const isActive = (item: (typeof nav)[number]) =>
+    matches(item.href) ||
+    ("children" in item && item.children
+      ? item.children.some((child) => matches(child.href))
+      : false);
 
   return (
     <header className="sticky top-0 z-40 border-b border-hairline bg-surface/95 backdrop-blur supports-backdrop-filter:bg-surface/80">
       <Container className="flex h-20 items-center justify-between gap-4">
         <Link href="/" className="shrink-0" aria-label={`${site.name} — home`}>
+          {/*
+            width/height are the file's true intrinsic size (200x87). They said
+            170x74, which made next/image advertise 256w and 384w candidates
+            for a 200px source. Note the source is still short of a 2x render
+            at h-14 — a higher-resolution logo is the only real fix for that.
+          */}
           <Image
             src="/img/logo.jpg"
             alt={site.legalName}
-            width={170}
-            height={74}
+            width={200}
+            height={87}
             priority
             className="h-14 w-auto"
           />
@@ -69,15 +88,21 @@ export function Header() {
                 <li key={item.label} className="relative">
                   {hasChildren ? (
                     <>
+                      {/*
+                        No aria-haspopup. It maps to "menu", which promises
+                        arrow-key navigation and roving focus that this widget
+                        does not implement. aria-expanded on its own is the
+                        correct disclosure pattern for a list of links.
+                      */}
                       <button
                         type="button"
                         aria-expanded={openMenu === item.label}
-                        aria-haspopup="true"
+                        aria-current={isActive(item) ? "true" : undefined}
                         onClick={() =>
                           setOpenMenu(openMenu === item.label ? null : item.label)
                         }
                         className={`flex items-center gap-1 py-2 text-[0.95rem] uppercase tracking-wide transition-colors hover:text-brand ${
-                          isActive(item.href) ? "text-brand" : "text-ink"
+                          isActive(item) ? "text-brand" : "text-ink"
                         }`}
                       >
                         {item.label}
@@ -98,6 +123,7 @@ export function Header() {
                             <li key={child.href}>
                               <Link
                                 href={child.href}
+                                aria-current={matches(child.href) ? "page" : undefined}
                                 className="block px-4 py-2.5 text-sm hover:bg-surface-alt hover:text-brand"
                               >
                                 {child.label}
@@ -110,8 +136,9 @@ export function Header() {
                   ) : (
                     <Link
                       href={item.href}
+                      aria-current={matches(item.href) ? "page" : undefined}
                       className={`block py-2 text-[0.95rem] uppercase tracking-wide transition-colors hover:text-brand ${
-                        isActive(item.href) ? "text-brand" : "text-ink"
+                        isActive(item) ? "text-brand" : "text-ink"
                       }`}
                     >
                       {item.label}
@@ -170,7 +197,11 @@ export function Header() {
                       <ul className="pb-2 pl-3">
                         {item.children.map((child) => (
                           <li key={child.href}>
-                            <Link href={child.href} className="block py-2.5 text-sm hover:text-brand">
+                            <Link
+                              href={child.href}
+                              aria-current={matches(child.href) ? "page" : undefined}
+                              className="block py-2.5 text-sm hover:text-brand"
+                            >
                               {child.label}
                             </Link>
                           </li>
@@ -180,6 +211,7 @@ export function Header() {
                   ) : (
                     <Link
                       href={item.href}
+                      aria-current={matches(item.href) ? "page" : undefined}
                       className="block py-3 text-sm font-semibold uppercase tracking-wide hover:text-brand"
                     >
                       {item.label}

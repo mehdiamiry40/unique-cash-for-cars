@@ -18,6 +18,9 @@ export const metadata: Metadata = pageMeta({
  * storing leads in a CRM or running remarketing ads.
  */
 export default function PrivacyPolicyPage() {
+  // Hardcoded on purpose. This is the date the policy was last reviewed, not
+  // the date the site was last deployed — a build-time date would silently
+  // claim a review that never happened. Bump it when you change the text.
   const updated = "28 July 2026";
 
   return (
@@ -46,15 +49,24 @@ export default function PrivacyPolicyPage() {
           Queensland. We do not sell your information to anyone.
         </p>
 
+        {/*
+          This section previously described analytics and cookies that the site
+          does not have — no Google Analytics, GTM, Clarity or advertising
+          pixel is loaded, and no cookie is set. Overstating collection is its
+          own compliance problem. If tags are re-added (see the launch checklist
+          in README.md), rewrite this section at the same time.
+        */}
         <h2>Analytics and cookies</h2>
         <p>
-          This site uses analytics tools to understand how visitors find and use it —
-          which pages they land on, which links they click, and roughly where they
-          are. This data is aggregated and is not used to identify you personally.
+          This site sets no cookies and loads no third-party analytics,
+          advertising or tracking scripts. Nothing is shared with Google,
+          Meta or any other third party when you browse it.
         </p>
         <p>
-          You can block cookies through your browser settings. The site works without
-          them; only the analytics stop.
+          Our hosting provider keeps standard server logs — the requested page,
+          a timestamp, and the browser and network the request came from — which
+          are used to keep the site running and secure, and are not used to
+          build a profile of you.
         </p>
 
         <h2>Who we share it with</h2>

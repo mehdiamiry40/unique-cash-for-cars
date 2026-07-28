@@ -9,8 +9,15 @@ import { posts } from "@/content/posts";
  * (see next.config.ts) so existing submissions keep working.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
-
+  /*
+   * No `lastModified` on the pages that have no real content date.
+   *
+   * These entries used to be stamped with the build time, which told Google
+   * that all nine static pages and every location page had changed on every
+   * deploy — including deploys that touched none of them. An omitted lastmod
+   * is treated as "unknown"; a wrong one teaches the crawler to distrust the
+   * field. The blog posts below do have real dates, so they keep theirs.
+   */
   const staticPages: MetadataRoute.Sitemap = (
     [
       { url: `${site.url}/`, changeFrequency: "weekly", priority: 1 },
@@ -27,11 +34,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       { url: `${site.url}/blog`, changeFrequency: "weekly", priority: 0.6 },
       { url: `${site.url}/privacy-policy`, changeFrequency: "yearly", priority: 0.2 },
     ] satisfies MetadataRoute.Sitemap
-  ).map((entry) => ({ ...entry, lastModified: now }));
+  );
 
   const suburbPages: MetadataRoute.Sitemap = suburbs.map((s) => ({
     url: `${site.url}/cash-for-cars/${s.slug}`,
-    lastModified: now,
     changeFrequency: "monthly",
     priority: 0.9,
   }));

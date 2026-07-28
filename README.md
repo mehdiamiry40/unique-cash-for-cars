@@ -14,9 +14,9 @@ npm run fetch:assets   # pulls images from the live WordPress site into public/i
 npm run dev
 ```
 
-`public/img` currently holds **flat-colour placeholders** so the project builds
-without network access. Run `npm run fetch:assets` before you look at anything
-visually, or the pages will be full of grey rectangles.
+`public/img` holds the real photographs, restored from the WordPress media
+library and committed. `npm run fetch:assets` re-downloads them from the live
+site and is only needed if one goes missing.
 
 ## Verify before every deploy
 
@@ -52,13 +52,27 @@ It asserts, across every page in the sitemap:
 - One `h1` per page
 - Structured data parses, carries the right types per page (`AutomotiveBusiness`
   and `WebSite` everywhere, `FAQPage` where FAQs render, `BreadcrumbList`,
-  `Service` on location pages), no `aggregateRating`, and **every `{"@id"}`
-  reference resolves to a node defined on the same page**
-- The 13 retired location URLs return a permanent redirect to a page that exists
-- The security headers are actually on the response, and `x-powered-by` is not
+  `Service` on location pages, `BlogPosting` on posts), no `aggregateRating`,
+  and **every `{"@id"}` reference resolves to a node defined on the same page**
+- The 15 retired location URLs return a permanent redirect to a page that exists
+- The security headers are actually on the response — including HSTS and the
+  nonce-free CSP directives — and `x-powered-by` is not
 - Images and the preserved WordPress upload paths are served immutable
 - No internal link 404s, and every referenced image exists in `public/`
+- **The og:image's extension, its `Content-Type` and its actual bytes agree.**
+  It shipped as JPEG behind a `.png` name, which under `nosniff` is how a link
+  preview ends up with no picture
+- **`prose-site` styles the elements the MDX posts use.** Tailwind's preflight
+  resets heading sizes, so a missing `h1` rule silently renders every post
+  title at body-text size — which is what it was doing
+- The current page is marked with `aria-current`, not colour alone
 - This build is indexable — and a `VERCEL_ENV=preview` build is not
+
+`tests/contrast.test.mjs` runs separately and needs no server: it parses the
+design tokens out of `globals.css` and asserts each foreground/background pair
+clears WCAG AA. The brand red and the muted grey are deliberately darker than
+the WordPress originals because the sampled values failed; the test is there so
+nobody "corrects" them back.
 
 That last one builds a second copy into `.next-preview` (gitignored) and checks
 it serves `Disallow: /` and `noindex`. It costs an extra build, which is worth
@@ -83,7 +97,7 @@ image, and an inverted preview-indexing rule.
 src/
   content/
     site.ts          Business details — name, phone, address, hours. Single source of truth.
-    suburbs.ts       The 6 location pages + the 13 retired-page redirects.
+    suburbs.ts       The 4 location pages + the 15 retired-page redirects.
     services.ts      The 3 service pages.
     posts.ts         Blog index metadata.
   app/
@@ -101,7 +115,8 @@ scripts/             Asset fetch + the two pre-deploy checks.
 docs/                SEO audit that prompted this rebuild.
 public/
   img/               The 8 images the pages currently use.
-  assets/            Hero artwork as webp, incl. an 800x1000 portrait crop.
+  assets/            Hero artwork as webp (1920x800 landscape, 800x1000 portrait).
+                     Not currently rendered — the hero uses public/img.
   wp-content/uploads/  116 original WordPress images. See below.
 .github/workflows/   CI: verify + build on push and PR.
 ```
@@ -134,11 +149,11 @@ and every `tel:` link.
 
 Read `docs/seo-audit-uniquecashforcars.md` for the full reasoning. The short list:
 
-**19 location pages → 6.** The old ones were spun from a single template:
+**19 location pages → 4.** The old ones were spun from a single template:
 median 45% of sentences identical between any two pages once the suburb name
 was swapped out, worst pair 93%, and 18 of 19 pages within 140 words of the
 same length. Google treats that as doorway pages and suppresses the whole
-domain. The 13 retired pages 301 to the nearest survivor; nothing 404s.
+domain. The 15 retired pages 301 to the nearest survivor; nothing 404s.
 
 The pages that remain each lead with something only true of that place —
 basement access in Surfers and salt corrosion in Burleigh, for example.
@@ -177,15 +192,26 @@ RESEND_API_KEY=...
 QUOTE_TO_EMAIL=...
 ```
 
-**With neither set, form submissions are logged to the server console and
-otherwise discarded.** Don't ship without this.
+**With neither set, the endpoint answers 503 and tells the caller to phone
+instead.** It does not accept and drop the enquiry, and it does not report
+success it cannot deliver — but nobody can reach you through the form until one
+of these is configured. Don't ship without it.
 
 ### 2. Fill in the gaps in `src/content/site.ts`
 
-`abn` and `licenceNumber` are empty strings. The old site claimed to be "a
-trustworthy and licensed business" on nearly every page while displaying
-neither. Fill them in and they appear automatically in the footer and on the
-About page.
+`abn` and `licenceNumber` are empty strings. Fill them in and they appear
+automatically in the footer and on the About page.
+
+This one is not cosmetic. The old site called itself "a trustworthy and
+licensed business" on nearly every page while displaying neither number, and
+the rebuild inherited the claim in four places — the hero list, the homepage
+intro, a homepage FAQ and the About page's `<title>`. Those have been reworded
+to things the business can stand behind, because an unsubstantiated licensing
+representation is an Australian Consumer Law exposure, not just weak copy.
+
+Once you have the licence number, put the stronger wording back **with the
+number next to it** — "Licensed QLD vehicle buyer, licence 12345" is worth far
+more than the adjective on its own.
 
 ### 3. Replace the placeholders in `src/content/suburbs.ts`
 
@@ -195,25 +221,35 @@ Don't invent them.
 ### 4. Decide on the 2020 blog post
 
 `5-best-luxury-eco-friendly-cars-in-australia-2020` is six years out of date.
-It's currently labelled as an archive. Either rewrite it or add a redirect in
-`next.config.ts`.
+It's currently labelled as an archive — and the label is now actually visible,
+which it wasn't: the callout is a blockquote and `prose-site` had no blockquote
+rule, so it rendered as ordinary prose. Either rewrite the post or add a
+redirect in `next.config.ts`.
+
+If you redirect it, delete the `.mdx` file in the same commit. `check:urls`
+will fail if you don't — a page file shadowed by a redirect is built on every
+deploy and served to nobody, which is exactly what happened to the retired
+Brisbane post.
+
+### 5. Replace the service-card photographs
+
+The six images on the homepage are 460×345, and that is the largest copy that
+exists anywhere in `public/wp-content/uploads`. A modern phone at 2× wants
+roughly 780px across, so the cards are soft on most devices and no code change
+can fix it. Same story for the header logo at 200×87. New photography is the
+only remedy.
 
 ---
 
 ## A note on the Next version
 
-This is pinned to Next 16. The build was verified end to end — 26 static pages,
-all routes, redirects, schema and sitemap — but under **Next 15 with webpack**,
-because the machine it was built on couldn't run Next 16's arm64 native binary.
+Pinned to Next 16, and verified on it: `npm run verify` passes end to end under
+Next 16 with Turbopack — all routes, redirects, schema, sitemap and the full
+rendered-output suite. An earlier revision of this file warned that the build
+had only ever been checked under Next 15 with webpack; that is no longer true.
 
-Nothing in the code uses a Next 16-only API, so `npm run build` should work.
-If Turbopack (the default bundler in 16) gives you trouble, two escape hatches
-in order of preference:
-
-```bash
-npm run build -- --webpack     # same bundler the verification ran on
-npm i next@15 eslint-config-next@15   # verified-good combination
-```
+If Turbopack ever gives you trouble, `npm run build -- --webpack` is the
+escape hatch.
 
 ## Launch day
 
