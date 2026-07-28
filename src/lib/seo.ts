@@ -37,7 +37,21 @@ export function pageMeta(opts: {
       siteName: site.legalName,
       locale: "en_AU",
       type: "website",
-      images: [{ url: image }],
+      /*
+       * Dimensions and alt are not decoration. Several social clients reserve
+       * layout for the image before it loads and fall back to a small
+       * thumbnail card when they cannot tell its shape — width and height are
+       * what get the large card. These are the intrinsic size of the default
+       * banner; pass `image` with a different file and check its real size.
+       */
+      images: [
+        {
+          url: image,
+          width: 1920,
+          height: 800,
+          alt: `${site.legalName} — cash for cars and free removal`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",

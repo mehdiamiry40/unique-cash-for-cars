@@ -257,6 +257,221 @@ export const suburbs: Suburb[] = [
       },
     ],
   },
+  {
+    slug: "labrador",
+    name: "Labrador",
+    region: "Gold Coast",
+    postcode: "4215",
+    title: "Cash For Cars Labrador — Long-Held And Estate Cars",
+    metaDescription:
+      "Labrador's older housing means cars that have sat in one driveway for decades. We buy them as they are, work through estate paperwork, and tow free.",
+    h1: "Cash for Cars Labrador",
+    hook:
+      "The Broadwater's older, more affordable side — and where the cars we buy have usually had one owner for a very long time.",
+    pickupNote: "Driveway and kerbside collection across Labrador",
+    localAngle: {
+      heading: "Why Labrador cars have usually been there a while",
+      body: [
+        "Labrador is one of the older parts of the northern Gold Coast, and its housing shows it: post-war cottages and brick-and-tile from the 1960s and 70s along the streets running back from Marine Parade, with unit blocks and newer infill closer to Brisbane Road and Harbour Town. It has stayed more affordable than the beachfront suburbs south of it, which means a lot of long-term owners rather than short-term renters.",
+        "That changes what turns up. Where a Surfers pickup is often a car someone owned for six months, a Labrador car has frequently been in the same driveway since it was new. It is complete, it has service history somewhere in a drawer, and it stopped being driven at a specific point — a licence surrendered, a move into care, a family member who died. Completeness is the single biggest factor in what a dismantler pays, so these cars are frequently worth more than their owners assume from the dust on them.",
+        "The other consequence is paperwork. A disproportionate share of our Labrador work is estate and downsizing vehicles, where the registered owner is not the person arranging the sale. That is entirely workable, but it needs the right documents in hand before a truck is booked rather than discovered at the kerb.",
+      ],
+    },
+    coverage: [
+      "Marine Parade and the Broadwater foreshore",
+      "Brisbane Road and the Harbour Town approach",
+      "Frank Street and the older residential grid",
+      "Turpin Road and Muriel Avenue",
+      "Labrador State School precinct",
+      "Billabirra and the Biggera Creek end",
+    ],
+    nearby: ["Biggera Waters", "Southport", "Runaway Bay", "Arundel", "Parkwood"],
+    faqs: [
+      {
+        question: "The car belonged to a relative who has died. Can I sell it?",
+        answer:
+          "Yes, with the right documentation — normally the death certificate plus evidence you are the executor or administrator, along with your own photo ID. Requirements vary with how the estate is structured. Ring us before booking a collection and we will tell you exactly what to have ready.",
+      },
+      {
+        question: "It hasn't been driven in eight years. Is it worth anything?",
+        answer:
+          "Almost certainly. Time off the road affects tyres, fluids and the battery, none of which drive the value much. What matters is whether the engine, transmission, panels and catalytic converter are still on it. A complete car that has sat is worth considerably more than a running car that has been stripped.",
+      },
+      {
+        question: "Do you collect from the older streets near the Broadwater?",
+        answer:
+          "Yes. The residential grid running back from Marine Parade is straightforward for a tilt tray — narrower than the newer estates, but with room to work. If your car is on a tight corner block or boxed in behind another vehicle, mention it when you book so we bring skates.",
+      },
+      {
+        question: "Can you take a car that is registered to someone else?",
+        answer:
+          "Not as it stands. If a previous owner never completed the transfer, the registration record still points at them and there is nothing for you to sign. It is usually fixable, but it has to be sorted before collection day rather than at the roadside.",
+      },
+    ],
+    // testimonial: NEEDS OWNER INPUT
+  },
+
+  {
+    slug: "nerang",
+    name: "Nerang",
+    region: "Gold Coast",
+    postcode: "4211",
+    title: "Cash For Cars Nerang — Acreage And Yard Pickups",
+    metaDescription:
+      "Nerang runs from light industry to hinterland acreage. We collect from unsealed driveways, sheds and work yards, pay cash on the spot and tow it free.",
+    h1: "Cash for Cars Nerang",
+    hook:
+      "Inland and industrial — the part of the Gold Coast where the car is more often behind a shed than in a driveway.",
+    pickupNote: "Acreage and unsealed access is routine in Nerang",
+    localAngle: {
+      heading: "Off the coast strip, the job changes",
+      body: [
+        "Nerang sits inland at the M1 interchange, and it is the point where the Gold Coast stops being a beach city. East of the highway it is established residential; west of it the blocks get larger and run up toward the hinterland at Advancetown and Beechmont. In between are the light industrial estates along Nerang-Southport Road and Lawrence Drive.",
+        "Each of those produces a different kind of vehicle. The industrial estates give us trade utes, vans and fleet vehicles at end of life, often unregistered and parked behind a workshop for a year. The acreage blocks give us project cars, second and third vehicles, farm-use utes and the occasional trailer, usually on grass or gravel rather than concrete. Neither is a problem, but both need the right truck.",
+        "Access is the thing worth mentioning when you call. A loaded tilt tray is heavy, and a long unsealed driveway that has just had rain will not always hold one — we would rather winch from the road than sink a truck on your property. Nerang also has genuine flood history along the river, so if a car has been through water, say so up front: it changes what is recoverable and we would rather price it accurately than revise on arrival.",
+      ],
+    },
+    coverage: [
+      "Nerang-Southport Road and the industrial estates",
+      "Lawrence Drive and Spencer Road",
+      "Nerang town centre and the railway station",
+      "Highland Park and Pacific Pines side",
+      "Acreage toward Advancetown and the hinterland",
+      "Carrara and the Nerang River flats",
+    ],
+    nearby: ["Carrara", "Highland Park", "Pacific Pines", "Ashmore", "Molendinar"],
+    faqs: [
+      {
+        question: "The car is on acreage down a dirt track. Can you still get it?",
+        answer:
+          "Usually, yes — it is routine out this way. What we need to know is the length and surface of the track and whether it has been wet, because a loaded truck can bog where an empty one drives out fine. If in doubt we winch from the sealed road instead, which costs you nothing extra.",
+      },
+      {
+        question: "Do you buy work utes and vans from a business?",
+        answer:
+          "Yes. End-of-life trade vehicles and light commercials are a steady part of what we collect around the Nerang industrial estates. If the vehicle is owned by a company rather than an individual, tell us when you call — the paperwork differs slightly and we will confirm what is needed.",
+      },
+      {
+        question: "My car went through the flood. Is it a write-off to you?",
+        answer:
+          "Not automatically, but water changes the maths. Depth and duration matter more than anything: a car that took water through the interior and electrics is worth less than one that had a wet floor pan. Tell us honestly how deep it got and we will price it on that rather than guessing.",
+      },
+      {
+        question: "Can you take a half-finished project car and its parts?",
+        answer:
+          "The car, yes — including one that has been apart for years. Loose parts we will discuss when you call, because a shed full of components is a different job from a rolling shell. Be aware that a stripped car is worth substantially less than a complete one, which is worth knowing before you sell anything off it separately.",
+      },
+    ],
+    // testimonial: NEEDS OWNER INPUT
+  },
+
+  {
+    slug: "helensvale",
+    name: "Helensvale",
+    region: "Gold Coast",
+    postcode: "4212",
+    title: "Cash For Cars Helensvale — Free Pickup, Cash Paid",
+    metaDescription:
+      "Helensvale is the northern transport interchange, and a household's second car goes redundant fast once the commute moves to rail. We buy it and tow free.",
+    h1: "Cash for Cars Helensvale",
+    hook:
+      "Where the heavy rail and the light rail meet — and where a second car quietly stops earning its keep.",
+    pickupNote: "Estate and body-corporate access arranged in Helensvale",
+    localAngle: {
+      heading: "The suburb where a second car stops being necessary",
+      body: [
+        "Helensvale is the northern Gold Coast's transport hub. The heavy rail line to Brisbane, the northern terminus of the G:link light rail and a large park-and-ride all meet here, alongside Westfield Helensvale and the corridor running out to the theme parks at Oxenford and Coomera.",
+        "That produces a specific kind of sale. Households here often ran two cars because both adults drove to work; once one of them switches to the train, the second car does progressively less until it is doing nothing but depreciating and costing registration. It is usually mechanically fine and cosmetically tidy, which is exactly the case where we will tell you to sell privately if you have the patience for it — you will get more. Where we are the better answer is when you want it gone this month without listings and no-shows.",
+        "Practically, Helensvale is mostly 1990s and 2000s estate housing, which means wide streets and real driveways — easy collections. The wrinkle is that a fair number of those estates are gated or under body corporate management, and visitor access is not always automatic. If your street has a boom gate or a resident code, tell us when you book and we will sort access before the truck is on its way rather than sitting outside it.",
+      ],
+    },
+    coverage: [
+      "Helensvale station and the park-and-ride precinct",
+      "Westfield Helensvale and Hope Island Road",
+      "Lindfield Road and the surrounding estates",
+      "Monterey Keys and Sanctuary Cove approach",
+      "Gated estates off Discovery Drive",
+      "Oxenford and the theme park corridor",
+    ],
+    nearby: ["Oxenford", "Coomera", "Hope Island", "Pacific Pines", "Upper Coomera"],
+    faqs: [
+      {
+        question: "My estate has a security gate. How does that work?",
+        answer:
+          "Tell us the estate name and how visitors normally get in when you book. Some need a resident to call the truck through, others need the body corporate notified in advance. It takes one phone call to arrange and it saves a wasted trip, which is the whole reason we ask.",
+      },
+      {
+        question: "The car runs fine, we just don't need two any more. Should I sell it to you?",
+        answer:
+          "Honestly, maybe not. A registered, roadworthy, reasonably modern car will fetch more in a private sale if you are willing to photograph it, list it and deal with buyers for a few weeks. We are the better option when you want certainty and speed instead — a firm number now and the car gone on a date you choose.",
+      },
+      {
+        question: "Do you collect from the theme park corridor and Oxenford?",
+        answer:
+          "Yes, that whole northern corridor is on our regular run, along with Coomera and Upper Coomera. If you are just outside Helensvale it makes no difference to the price and the removal is still free.",
+      },
+      {
+        question: "Can I sell a car registered in another state?",
+        answer:
+          "Yes. Interstate registration is common in this part of the coast and it does not stop the sale. We need the registration certificate and photo ID matching the registered owner, and we will walk you through the transfer paperwork at collection.",
+      },
+    ],
+    // testimonial: NEEDS OWNER INPUT
+  },
+
+  {
+    slug: "mermaid-waters",
+    name: "Mermaid Waters",
+    region: "Gold Coast",
+    postcode: "4218",
+    title: "Cash For Cars Mermaid Waters — Canal Estate Pickup",
+    metaDescription:
+      "Canal cul-de-sacs, narrow frontages and a boat trailer in the way. We size the truck to the street in Mermaid Waters, and the removal is always free.",
+    h1: "Cash for Cars Mermaid Waters",
+    hook:
+      "Canal estates where getting the truck to the car is more of a puzzle than the car itself.",
+    pickupNote: "We match the truck to the street in Mermaid Waters",
+    localAngle: {
+      heading: "In the canal streets, access is the whole job",
+      body: [
+        "Mermaid Waters was cut and filled as canal estate through the 1970s and 80s, and the street pattern still reflects it: long fingers of waterfront blocks ending in cul-de-sacs, with narrow frontages and not much room to turn anything large around. It sits between the Gold Coast Highway and Nerang Road, close to Q Super Centre and a short run from Mermaid Beach and Nobby Beach.",
+        "For us that means the constraint here is rarely the vehicle. It is the approach. A full-size tilt tray needs somewhere to stop, load and get out again, and a waterfront cul-de-sac with cars parked both sides does not always offer that. It is solvable — a smaller truck, or winching the car out to a wider street — but only if we know before we set off.",
+        "The other Mermaid Waters constant is that driveways here are busy. Boats, trailers, caravans and jet skis occupy a lot of the off-street space, and the car we are collecting is frequently the thing parked behind all of them. If yours needs something moved first, or has not turned a wheel in long enough that the brakes have seized, mention it — we bring skates for exactly that and it is a five-minute problem rather than a wasted booking.",
+      ],
+    },
+    coverage: [
+      "The canal cul-de-sacs off Sunshine Boulevard",
+      "Markeri Street and Bermuda Street",
+      "Q Super Centre and Hooker Boulevard",
+      "Clear Island Waters border",
+      "Mermaid Beach and Nobby Beach side",
+      "Nerang Road and the Gold Coast Highway approach",
+    ],
+    nearby: ["Broadbeach Waters", "Clear Island Waters", "Mermaid Beach", "Miami", "Robina"],
+    faqs: [
+      {
+        question: "My street is a narrow cul-de-sac. Can a tow truck actually get in?",
+        answer:
+          "Usually yes, but tell us the street when you book. Some of the canal fingers here have no room to turn a full-size tilt tray, particularly with cars parked both sides. We either send something smaller or winch the car out to a wider road — either way it is free and it is our problem, not yours.",
+      },
+      {
+        question: "The car is blocked in behind a boat and a trailer. Is that a problem?",
+        answer:
+          "Only if we find out on arrival. If the boat can be moved on the day, say so and we will time it. If it cannot, we will usually still get the car out with skates, but we need to bring them. It is a two-minute conversation when you book and it saves a repeat visit.",
+      },
+      {
+        question: "Do you buy boat trailers or camper trailers as well?",
+        answer:
+          "Trailers, yes. Boats and jet skis we assess case by case rather than quoting blind — send a photo and tell us roughly what condition it is in, and we will give you a straight answer about whether it is worth us collecting.",
+      },
+      {
+        question: "The brakes have seized and it will not roll. Now what?",
+        answer:
+          "Completely routine, particularly for a car that has sat on a driveway for a few years. We use skates to get a non-rolling car onto the truck. It does not need to start, steer or roll, and there is no extra charge for any of that.",
+      },
+    ],
+    // testimonial: NEEDS OWNER INPUT
+  },
 ];
 
 export function getSuburb(slug: string): Suburb | undefined {
@@ -266,21 +481,23 @@ export function getSuburb(slug: string): Suburb | undefined {
 /**
  * Retired location pages → where each one now redirects.
  *
- * These 13 URLs existed on WordPress and were near-duplicates of the pages
- * above. Every one gets a 301 to the nearest surviving page (see next.config.ts)
- * so the little link equity they had is preserved rather than 404'd.
+ * These URLs existed on WordPress and were near-duplicates of the pages above.
+ * Each gets a 301 to the nearest surviving page (see next.config.ts) so the
+ * little link equity they had is preserved rather than 404'd.
+ *
+ * Removing an entry here is how a retired suburb is promoted back to a real
+ * page: write it into `suburbs` above, delete its redirect, and check:urls
+ * will confirm the URL now resolves instead of bouncing. Leaving both in place
+ * builds a page nobody can reach — the redirect wins — and check:urls fails on
+ * exactly that.
  */
 export const retiredSuburbRedirects: Record<string, string> = {
   ashmore: "/cash-for-cars/southport",
-  labrador: "/cash-for-cars/southport",
   "pacific-pines": "/cash-for-cars/southport",
   "upper-coomera": "/cash-for-cars/southport",
-  helensvale: "/cash-for-cars/southport",
   carrara: "/cash-for-cars/robina",
-  nerang: "/cash-for-cars/robina",
   mudgeeraba: "/cash-for-cars/robina",
   "varsity-lakes": "/cash-for-cars/robina",
-  "mermaid-waters": "/cash-for-cars/burleigh-heads",
   "palm-beach": "/cash-for-cars/burleigh-heads",
   logan: "/cash-for-cars",
   ipswich: "/cash-for-cars",

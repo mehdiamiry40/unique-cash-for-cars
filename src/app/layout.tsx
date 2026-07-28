@@ -39,7 +39,7 @@ const openSans = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.legalName} Up to ${site.maxPayout} - Free Car Removal`,
+    default: `Cash For Cars Gold Coast — Up to ${site.maxPayout}, Free Removal`,
     // Pages set their own full title — no suffix appended.
     template: "%s",
   },

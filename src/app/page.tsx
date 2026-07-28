@@ -19,7 +19,7 @@ import {
 } from "@/components/ui";
 
 export const metadata: Metadata = pageMeta({
-  title: `${site.legalName} Up to ${site.maxPayout} - Free Car Removal`,
+  title: `Cash For Cars Gold Coast — Up to ${site.maxPayout}, Free Removal`,
   description: site.description,
   path: "/",
 });
@@ -44,31 +44,37 @@ const services = [
   {
     title: "Cash for Old Cars",
     image: "/img/old-car-gold-coast.jpg",
+    alt: "An old sedan parked in a Gold Coast driveway, ready for removal",
     body: "An old car sitting in the driveway that nobody drives any more. It doesn't need to be roadworthy and it doesn't need to start — we pay a fair price and tow it away.",
   },
   {
     title: "Cash for Unwanted Cars",
     image: "/img/unwanted-car-gold-coast.jpg",
+    alt: "An unwanted car left on a Gold Coast property",
     body: "Cars, utes, vans, buses, 4WDs, hatchbacks, hybrids and EVs. If it has four wheels and you want it gone, we'll quote on it, usually within a day.",
   },
   {
     title: "Cash for Scrap Cars",
     image: "/img/car-abandoned.jpg",
+    alt: "An abandoned scrap car with flat tyres awaiting collection",
     body: "Past the point of repair is not the same as worthless. We recover the drivetrain, panels, glass and catalytic converter, and dispose of the rest properly.",
   },
   {
     title: "Cash for Accident-Damaged Cars",
     image: "/img/accident-damaged-car.jpg",
+    alt: "A car with accident damage to the front quarter panel",
     body: "Written off, still at the smash repairer, or sitting where it stopped. Wherever your damaged car is, we come to it and the removal costs you nothing.",
   },
   {
     title: "Cash for Used Cars",
     image: "/img/used-car-gold-coast.jpg",
+    alt: "A used hatchback of the kind we buy across the Gold Coast",
     body: "When the repair quote is higher than the car is worth, selling it whole is usually the better outcome. We buy any used car regardless of make, model or year.",
   },
   {
     title: "Cash for Damaged Cars",
     image: "/img/car-front-damaged.jpg",
+    alt: "A car with a crumpled front end after a collision",
     body: "Body damage, missing parts, electrical faults, mechanical failure, flood or hail damage. Tell us what's wrong up front and we'll price it honestly.",
   },
 ] as const;
@@ -223,7 +229,7 @@ export default function HomePage() {
               <div className="relative aspect-4/3 bg-surface-alt">
                 <Image
                   src={service.image}
-                  alt={service.title}
+                  alt={service.alt}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 24rem"
                   className="object-cover"
@@ -244,8 +250,9 @@ export default function HomePage() {
       <Section>
         <SectionHeading>Areas we serve</SectionHeading>
         <p className="mx-auto mb-8 max-w-2xl text-center text-lg">
-          We collect vehicles across the Gold Coast, including Southport, Surfers
-          Paradise, Robina and Burleigh Heads.
+          We collect across the Gold Coast — from Helensvale and Labrador in the
+          north down to Burleigh Heads, and inland through Nerang. Each area page
+          covers the access, paperwork and vehicles we actually see there.
         </p>
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {suburbs.map((suburb) => (

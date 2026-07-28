@@ -45,6 +45,10 @@ export const site = {
     "Surfers Paradise",
     "Robina",
     "Burleigh Heads",
+    "Labrador",
+    "Nerang",
+    "Helensvale",
+    "Mermaid Waters",
   ],
 
   openingHours: [

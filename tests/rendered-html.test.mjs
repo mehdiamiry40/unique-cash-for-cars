@@ -54,6 +54,13 @@ const suburbRoutes = [
   "/cash-for-cars/surfers-paradise",
   "/cash-for-cars/robina",
   "/cash-for-cars/burleigh-heads",
+  // Promoted out of retiredSuburbRedirects — these URLs existed on WordPress
+  // and had been 301'ing to a neighbour. Listing them here is what subjects
+  // them to the Service/FAQPage/breadcrumb assertions below.
+  "/cash-for-cars/labrador",
+  "/cash-for-cars/nerang",
+  "/cash-for-cars/helensvale",
+  "/cash-for-cars/mermaid-waters",
 ];
 const serviceRoutes = [
   "/sell-my-car-gold-coast",
@@ -64,6 +71,10 @@ const postRoutes = [
   "/what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide",
   "/where-do-old-junk-cars-go-in-gold-coast-car-selling-options-in-gold-coast-qld",
   "/5-best-luxury-eco-friendly-cars-in-australia-2020",
+  "/how-much-is-my-scrap-car-worth-gold-coast",
+  "/statutory-vs-repairable-write-off-queensland",
+  "/selling-a-car-with-finance-owing-queensland",
+  "/transferring-car-registration-in-queensland",
 ];
 /** Pages that render an FAQ block, and so must carry FAQPage. */
 const faqRoutes = ["/", ...serviceRoutes, ...suburbRoutes];
@@ -264,7 +275,21 @@ test("structured data is valid, typed per page, and every @id reference resolves
     assert.equal(business.geo, undefined, `${path}: public coordinates must not be emitted`);
     assert.deepEqual(
       business.areaServed.map((area) => area.name),
-      ["Gold Coast", "Southport", "Surfers Paradise", "Robina", "Burleigh Heads"],
+      [
+        "Gold Coast",
+        "Southport",
+        "Surfers Paradise",
+        "Robina",
+        "Burleigh Heads",
+        "Labrador",
+        "Nerang",
+        "Helensvale",
+        "Mermaid Waters",
+      ],
+      // Widened as location pages were added, but the point is unchanged: every
+      // entry is a Gold Coast suburb. The old site claimed Adelaide, Ipswich,
+      // Logan and Toowoomba while operating from one place, and this is what
+      // stops that creeping back.
       `${path}: business must remain Gold Coast only`,
     );
     assert.equal(business.openingHoursSpecification.length, 1, `${path}: opening hours`);
@@ -337,16 +362,38 @@ test("structured data is valid, typed per page, and every @id reference resolves
   }
 });
 
-test("retired location URLs redirect permanently to a page that exists", async () => {
-  const retired = JSON.parse(
+test("every legacy location URL either serves a page or redirects permanently", async () => {
+  const legacyLocationUrls = JSON.parse(
     readFileSync(join(projectPath, "scripts", "legacy-urls.json"), "utf8"),
-  ).urls.filter(
-    (url) => url.startsWith("/cash-for-cars/") && !suburbRoutes.includes(url),
-  );
-  assert.ok(retired.length >= 13, `expected the retired suburb URLs, found ${retired.length}`);
+  ).urls.filter((url) => url.startsWith("/cash-for-cars/"));
 
-  for (const path of retired) {
+  /*
+   * This used to assert a fixed count of *retired* URLs, which quietly went
+   * stale: a suburb promoted out of retiredSuburbRedirects into a real page
+   * moves between the two groups, so the number shrinks and the test fails on
+   * a correct change. The floor below guards the filter — that the selector
+   * still matches anything at all — and the loop asserts the invariant that
+   * actually matters, which holds either way.
+   */
+  assert.ok(
+    legacyLocationUrls.length >= 15,
+    `found only ${legacyLocationUrls.length} legacy location URLs — filter likely broken`,
+  );
+
+  for (const path of legacyLocationUrls) {
     const response = await get(path);
+
+    if (suburbRoutes.includes(path)) {
+      // Promoted back to a real page: it has to serve its own content now,
+      // not bounce to a neighbour.
+      assert.equal(
+        response.status,
+        200,
+        `${path} is a live location page but returned ${response.status}`,
+      );
+      continue;
+    }
+
     // 308 is Next's permanent redirect. Google treats 301 and 308 the same for
     // consolidating signals; a 302 would not pass them on.
     assert.ok(

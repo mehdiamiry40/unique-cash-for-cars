@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { site } from "@/content/site";
 import { pageMeta } from "@/lib/seo";
-import { breadcrumbSchema, graph } from "@/lib/schema";
+import { breadcrumbSchema, contactPageSchema, graph } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
 import { QuoteForm } from "@/components/QuoteForm";
 import { Card, Section, SectionHeading } from "@/components/ui";
@@ -32,6 +32,7 @@ export default function ContactPage() {
             { name: "Home", path: "/" },
             { name: "Contact Us", path: "/contact-us" },
           ]),
+          contactPageSchema(),
         )}
       />
 

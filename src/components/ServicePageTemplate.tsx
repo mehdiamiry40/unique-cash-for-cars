@@ -1,10 +1,11 @@
 import type { ServicePage } from "@/content/services";
 import { site } from "@/content/site";
-import { breadcrumbSchema, faqSchema, graph } from "@/lib/schema";
+import { breadcrumbSchema, faqSchema, graph, serviceSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
 import { QuoteForm } from "@/components/QuoteForm";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { HowItWorks } from "@/components/HowItWorks";
+import { FurtherReading } from "@/components/FurtherReading";
 import { CallButton, Container, Section, SectionHeading } from "@/components/ui";
 
 export function ServicePageTemplate({ page }: { page: ServicePage }) {
@@ -16,6 +17,14 @@ export function ServicePageTemplate({ page }: { page: ServicePage }) {
             { name: "Home", path: "/" },
             { name: page.h1, path: `/${page.slug}` },
           ]),
+          // These pages describe services and had no Service node — the
+          // location pages have carried one since the rebuild, so the markup
+          // was inconsistent about what the site actually sells.
+          serviceSchema({
+            name: page.h1,
+            description: page.metaDescription,
+            areaServed: "Gold Coast",
+          }),
           faqSchema(page.faqs),
         )}
       />
@@ -65,6 +74,8 @@ export function ServicePageTemplate({ page }: { page: ServicePage }) {
           <FaqAccordion faqs={page.faqs} />
         </div>
       </Section>
+
+      {page.related && <FurtherReading slugs={page.related} />}
 
       <section className="bg-brand py-14 text-white">
         <Container className="text-center">

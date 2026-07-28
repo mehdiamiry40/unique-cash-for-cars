@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 
 import { posts } from "@/content/posts";
 import { pageMeta } from "@/lib/seo";
-import { breadcrumbSchema, graph } from "@/lib/schema";
+import { blogSchema, breadcrumbSchema, graph } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
 import { Section } from "@/components/ui";
 
@@ -29,6 +29,7 @@ export default function BlogIndex() {
             { name: "Home", path: "/" },
             { name: "Blog", path: "/blog" },
           ]),
+          blogSchema(posts),
         )}
       />
 
