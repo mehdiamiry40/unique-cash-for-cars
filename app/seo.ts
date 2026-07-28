@@ -11,28 +11,6 @@ const metadataByRoute: Record<string, Metadata> = {
     title: "Cash for Cars Gold Coast Up to $9,999 | Free Removal",
     description:
       "Sell an unwanted, old or damaged vehicle on the Gold Coast. Get a fast cash offer and free vehicle removal. Call 0423 476 111 for a quote.",
-    faq: [
-      {
-        question: "What vehicles do you consider?",
-        answer:
-          "We consider cars, SUVs, utes, vans, 4WDs and light commercial vehicles in many conditions, including damaged and non-running vehicles.",
-      },
-      {
-        question: "Is vehicle collection included?",
-        answer:
-          "Collection arrangements are explained with the offer. The exact location and access must be confirmed before a pickup time is agreed.",
-      },
-      {
-        question: "Which areas do you service?",
-        answer:
-          "Our service is for Gold Coast residents. Choose your suburb or contact us to confirm coverage for your exact location.",
-      },
-      {
-        question: "When can I contact you?",
-        answer:
-          "Our business hours are Monday to Friday, 9:00 am to 5:00 pm.",
-      },
-    ],
   },
   "/privacy-policy/": {
     title: "Privacy Policy | Unique Cash for Cars",

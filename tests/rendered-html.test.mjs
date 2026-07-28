@@ -253,7 +253,7 @@ test("makes the Gold Coast suburb pages materially distinct", async () => {
   );
 });
 
-test("publishes a Gold Coast-only customer journey and confirmed business hours", async () => {
+test("keeps the original design while publishing Gold Coast-only details and hours", async () => {
   for (const route of activeRoutes) {
     const html = await (await render(route)).text();
     const visibleText = stripHtml(html);
@@ -270,18 +270,23 @@ test("publishes a Gold Coast-only customer journey and confirmed business hours"
   }
 
   const home = await (await render("/")).text();
-  assert.match(home, /Sell your car on the Gold Coast without the runaround/);
-  assert.match(home, /class="trust-strip"/);
-  assert.equal((home.match(/class="area-card"/g) ?? []).length, 15);
-  assert.match(home, /id="free-quote"/);
+  assert.match(home, /id="section_710941960"/);
+  assert.match(home, /id="content" role="main" class="content-area"/);
+  assert.doesNotMatch(home, /marketing-page|trust-strip|area-card/);
 
   const serviceAreas = await (await render("/cash-for-cars/")).text();
-  assert.match(serviceAreas, /Gold Coast residents only/);
-  assert.equal((serviceAreas.match(/class="area-card"/g) ?? []).length, 15);
+  assert.match(serviceAreas, /id="section_1057586010"/);
+  assert.doesNotMatch(serviceAreas, /service-areas-page|area-card/);
 
   const contact = await (await render("/contact-us/")).text();
-  assert.match(contact, /class="marketing-section contact-grid"/);
-  assert.match(contact, /Gold Coast residents only/);
+  assert.match(contact, /id="section_137570897"/);
+  assert.doesNotMatch(contact, /contact-page|contact-grid/);
+
+  const stylesheet = await readFile(
+    new URL("../public/site-enhancements.css", import.meta.url),
+    "utf8",
+  );
+  assert.doesNotMatch(stylesheet, /Gold Coast-focused marketing experience/);
 });
 
 test("repairs legacy WordPress archive links and search URLs", async () => {
