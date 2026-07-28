@@ -1,13 +1,20 @@
 /**
  * Blog index.
  *
- * The four posts below kept their original root-level URLs from WordPress —
+ * The posts carried over from WordPress kept their original root-level URLs —
  * changing them would throw away whatever links and rankings they have.
- * Each lives at src/app/(posts)/<slug>/page.mdx.
+ * Each post lives at src/app/(posts)/<slug>/page.mdx.
  *
  * Note: the 2020 eco-cars post is badly dated. Options are to refresh it with
  * current models or to 301 it to a relevant page. Leaving a six-year-old
  * "best of 2020" list live is the worst of the three.
+ *
+ * REVIEW ANNUALLY — the write-off, registration-transfer and finance guides
+ * describe Queensland regulatory processes. Those change. Each post carries a
+ * caveat pointing readers at TMR or the PPSR as the authority, but a guide
+ * that has quietly gone stale is worse for trust than no guide, and Google
+ * treats obviously outdated advice content accordingly. When you revise one,
+ * set `updated` — it feeds dateModified in the BlogPosting schema.
  */
 
 export type Post = {
@@ -22,6 +29,38 @@ export type Post = {
 };
 
 export const posts: Post[] = [
+  {
+    slug: "how-much-is-my-scrap-car-worth-gold-coast",
+    title: "How much is my scrap car worth on the Gold Coast?",
+    description:
+      "What a dismantler is actually paying for, the five things that move the number, and when scrapping is the wrong answer.",
+    date: "2026-07-28",
+    readingMinutes: 6,
+  },
+  {
+    slug: "statutory-vs-repairable-write-off-queensland",
+    title: "Statutory vs repairable write-off in Queensland",
+    description:
+      "Which classification you have decides whether the car can ever be driven again — and it changes the value less than most owners expect.",
+    date: "2026-07-28",
+    readingMinutes: 7,
+  },
+  {
+    slug: "selling-a-car-with-finance-owing-queensland",
+    title: "Selling a car with finance owing in Queensland",
+    description:
+      "You can sell an encumbered car. How the payout figure, the PPSR and negative equity actually work, and what delays a sale.",
+    date: "2026-07-28",
+    readingMinutes: 6,
+  },
+  {
+    slug: "transferring-car-registration-in-queensland",
+    title: "Transferring car registration in Queensland",
+    description:
+      "Who lodges what, when a safety certificate is required, and the three ownership situations that hold up a collection.",
+    date: "2026-07-28",
+    readingMinutes: 6,
+  },
   {
     slug: "what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide",
     title: "What to do with a damaged car on the Gold Coast",

@@ -5,6 +5,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { QuoteForm } from "@/components/QuoteForm";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { HowItWorks } from "@/components/HowItWorks";
+import { FurtherReading } from "@/components/FurtherReading";
 import { CallButton, Container, Section, SectionHeading } from "@/components/ui";
 
 export function ServicePageTemplate({ page }: { page: ServicePage }) {
@@ -65,6 +66,8 @@ export function ServicePageTemplate({ page }: { page: ServicePage }) {
           <FaqAccordion faqs={page.faqs} />
         </div>
       </Section>
+
+      {page.related && <FurtherReading slugs={page.related} />}
 
       <section className="bg-brand py-14 text-white">
         <Container className="text-center">

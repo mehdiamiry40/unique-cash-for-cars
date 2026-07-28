@@ -16,6 +16,15 @@ export type ServicePage = {
   intro: string;
   sections: { heading: string; body: string[]; list?: string[] }[];
   faqs: Faq[];
+  /**
+   * Slugs from posts.ts to link at the foot of the page.
+   *
+   * Pick guides that answer a question this page raises but does not have room
+   * to settle — the finance and paperwork detail, for instance. It is a real
+   * internal-linking path for the blog, not a related-posts widget: without it
+   * each guide hangs off /blog alone.
+   */
+  related?: string[];
 };
 
 export const servicePages: ServicePage[] = [
@@ -87,6 +96,11 @@ export const servicePages: ServicePage[] = [
           "We recover parts from Korean, Japanese, Australian, European and American vehicles. Call with the make, model and year and we'll check what's on the shelf.",
       },
     ],
+    related: [
+      "how-much-is-my-scrap-car-worth-gold-coast",
+      "selling-a-car-with-finance-owing-queensland",
+      "transferring-car-registration-in-queensland",
+    ],
   },
 
   {
@@ -146,6 +160,10 @@ export const servicePages: ServicePage[] = [
         answer:
           "Not much. Same-day is often possible on the Gold Coast if you call in the morning. We will confirm timing when you request your quote.",
       },
+    ],
+    related: [
+      "transferring-car-registration-in-queensland",
+      "where-do-old-junk-cars-go-in-gold-coast-car-selling-options-in-gold-coast-qld",
     ],
   },
 
@@ -209,6 +227,11 @@ export const servicePages: ServicePage[] = [
         answer:
           "Trailers and light commercial vehicles, yes. Motorbikes and machinery we assess case by case — send a photo and we'll tell you straight away.",
       },
+    ],
+    related: [
+      "statutory-vs-repairable-write-off-queensland",
+      "what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide",
+      "transferring-car-registration-in-queensland",
     ],
   },
 ];
