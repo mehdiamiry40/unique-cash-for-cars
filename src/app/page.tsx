@@ -113,31 +113,71 @@ export default function HomePage() {
       />
 
       {/* Hero */}
-      <Section>
-        <div className="grid items-start gap-10 lg:grid-cols-[1fr_26rem]">
-          <div>
-            <p className="mb-2 text-xl text-brand">Sell your car fast with</p>
-            <h1 className="heading-xl mb-6">Get Cash For Cars Gold Coast</h1>
+      <section className="relative isolate overflow-hidden bg-surface">
+        {/*
+          The hero art is a 1920x800 banner: a pale Gold Coast skyline with
+          cars and cash. It needs two different treatments, because
+          object-cover cropping a 2.4:1 image into a tall column turns it into
+          a flat wash with no cars in frame.
 
-            <CheckList items={heroPoints} />
+          Narrow screens get it as a band across the top at close to its own
+          aspect ratio, so the whole artwork stays visible. Wide screens, where
+          the hero is roughly square, get it full-bleed behind the copy.
 
-            <p className="mt-6 mb-5 text-lg">
-              <span className="font-bold text-ink-heading">Call now</span> and get a
-              firm number in about a minute.
-            </p>
-
-            <CallButton className="text-xl" />
-          </div>
-
-          <QuoteForm id="quote" />
+          Decorative in both cases — the h1 carries the message — hence the
+          empty alt. Preloaded rather than lazy since it is above the fold.
+        */}
+        <div className="relative aspect-[1920/620] w-full lg:absolute lg:inset-0 lg:-z-20 lg:aspect-auto">
+          <Image
+            src="/img/Best-Cash-for-Cars-Gold-Coast.png"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-bottom"
+          />
         </div>
-      </Section>
+
+        {/*
+          Unusually, this artwork is a pale wash built to sit behind dark text,
+          so it gets a white scrim instead of the usual dark one.
+
+          It runs top-to-bottom, not left-to-right: the copy occupies the upper
+          two thirds of the hero and needs the cover, while the cars and cash
+          sit along the bottom edge where nothing overlaps them. Fading out
+          downwards protects the text and still lets the artwork read.
+        */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 hidden lg:block lg:bg-linear-to-b lg:from-white/95 lg:via-white/90 lg:via-60% lg:to-transparent"
+        />
+
+        <Container className="pt-10 pb-14 sm:pb-16 lg:pt-14 lg:pb-14 xl:pt-16">
+          <div className="grid items-start gap-10 lg:grid-cols-[1fr_26rem]">
+            <div>
+              <p className="mb-2 text-xl text-brand">Sell your car fast with</p>
+              <h1 className="heading-xl mb-6">Get Cash For Cars Gold Coast</h1>
+
+              <CheckList items={heroPoints} />
+
+              <p className="mt-6 mb-5 text-lg">
+                <span className="font-bold text-ink-heading">Call now</span> and get a
+                firm number in about a minute.
+              </p>
+
+              <CallButton className="text-xl" />
+            </div>
+
+            <QuoteForm id="quote" />
+          </div>
+        </Container>
+      </section>
 
       {/* Intro */}
       <Section tone="alt">
-        <div className="grid items-center gap-10 lg:grid-cols-2">
+        <div className="mx-auto max-w-3xl">
           <div>
-            <SectionHeading align="left">Get Cash For Scrap Cars Gold Coast</SectionHeading>
+            <SectionHeading>Get Cash For Scrap Cars Gold Coast</SectionHeading>
             <p className="mb-4 text-lg">
               <strong>Unique Cash For Cars</strong> is a licensed Queensland business
               buying vehicles across the Gold Coast, Logan and Ipswich. We give people
@@ -160,15 +200,6 @@ export default function HomePage() {
               </a>
               .
             </p>
-          </div>
-          <div className="relative aspect-video overflow-hidden rounded border border-hairline bg-surface">
-            <Image
-              src="/img/Best-Cash-for-Cars-Gold-Coast.png"
-              alt="Unique Cash For Cars tow truck collecting a vehicle on the Gold Coast"
-              fill
-              sizes="(max-width: 1024px) 100vw, 36rem"
-              className="object-cover"
-            />
           </div>
         </div>
       </Section>
