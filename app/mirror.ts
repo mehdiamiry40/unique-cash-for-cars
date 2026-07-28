@@ -1,11 +1,8 @@
 import pages from "./mirror-pages.json";
 import { renderLocalMain } from "./location-pages";
-import {
-  metadataFor,
-  routeShouldBeNoIndex,
-  schemaFor,
-} from "./seo";
-import { isPreviewHostname } from "./site-config";
+import { renderMarketingMain } from "./marketing-pages";
+import { metadataFor, schemaFor } from "./seo";
+import { isPreviewHostname, retiredRouteRedirects } from "./site-config";
 
 const mirroredPages = pages as Record<string, string>;
 
@@ -94,7 +91,10 @@ function removeElementById(html: string, id: string) {
 }
 
 function optimizeStaticMarkup(html: string) {
-  let optimized = removeElementById(html, "pum-469")
+  let optimized = removeElementById(
+    removeElementById(html, "pum-469"),
+    "text-3",
+  )
     .replace(
       /<style\b[^>]*\bid=(["'])kirki-inline-styles\1[^>]*>[\s\S]*?<\/style>/gi,
       "",
@@ -158,7 +158,35 @@ function readableLabel(href: string) {
 }
 
 function repairLinksAndMarkup(html: string) {
-  return html
+  let repaired = html;
+
+  for (const [retiredRoute, destination] of retiredRouteRedirects) {
+    const escaped = retiredRoute.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    repaired = repaired
+      .replace(
+        new RegExp(
+          `<li\\b(?:(?!<li\\b)[\\s\\S])*?href=(["'])(?:https?:\\/\\/(?:www\\.)?uniquecashforcars\\.com\\.au)?${escaped}\\1(?:(?!<li\\b)[\\s\\S])*?<\\/li>`,
+          "gi",
+        ),
+        "",
+      )
+      .replace(
+        new RegExp(
+          `<a\\b(?=[^>]*href=(["'])(?:https?:\\/\\/(?:www\\.)?uniquecashforcars\\.com\\.au)?${escaped}\\1)[^>]*>[\\s\\S]*?<\\/a>`,
+          "gi",
+        ),
+        "",
+      )
+      .replace(
+        new RegExp(
+          `href=(["'])(?:https?:\\/\\/(?:www\\.)?uniquecashforcars\\.com\\.au)?${escaped}\\1`,
+          "gi",
+        ),
+        `href="${destination}"`,
+      );
+  }
+
+  return repaired
     .replace(
       /href=(["'])(https?:\/\/(?:www\.)?uniquecashforcars\.com\.au)?\/(?:author|category|tag)\/[^"']*\1/gi,
       'href="/blog/"',
@@ -182,7 +210,16 @@ function repairLinksAndMarkup(html: string) {
       '<img width="100" height="101"$1>',
     )
     .replace(/<h4\b/gi, "<h3")
-    .replace(/<\/h4>/gi, "</h3>");
+    .replace(/<\/h4>/gi, "</h3>")
+    .replace(/<li>\s*(?:Ipswich|Toowoomba|Logan|Adelaide)\s*<\/li>/gi, "")
+    .replace(
+      /<p><strong>Address:<\/strong>[\s\S]*?Runcorn QLD 4113[\s\S]*?<\/p>/gi,
+      "<p><strong>Service area:</strong> Gold Coast residents only</p>",
+    )
+    .replace(
+      /Gold Coast\s*\|\s*Brisbane\s*\|\s*Ipswich\s*\|\s*Logan\s*\|\s*Toowoomba\s*\|\s*Sunshine Coast/gi,
+      "Gold Coast",
+    );
 }
 
 function replaceYouTubeEmbeds(html: string) {
@@ -293,6 +330,19 @@ function addConsentBanner(html: string) {
   );
 }
 
+function addBusinessDetails(html: string) {
+  if (html.includes('class="business-details-band"')) return html;
+  return html.replace(
+    /<footer\b/i,
+    `<section class="business-details-band" aria-label="Business details">
+  <div><span>Service area</span><strong>Gold Coast residents only</strong></div>
+  <div><span>Business hours</span><strong>Monday–Friday, 9:00 am–5:00 pm</strong></div>
+  <div><span>Phone</span><a href="tel:0423476111">0423 476 111</a></div>
+</section>
+<footer`,
+  );
+}
+
 function prepareHtml(
   originalHtml: string,
   pathname: string,
@@ -304,12 +354,14 @@ function prepareHtml(
   html = removeLegacyDiscoveryLinks(html);
   html = repairLinksAndMarkup(html);
   html = replaceYouTubeEmbeds(html);
-  const localMain = renderLocalMain(pathname, html);
-  if (localMain) {
-    html = html.replace(/<main\b[\s\S]*?<\/main>/i, localMain);
+  const replacementMain =
+    renderMarketingMain(pathname, html) ?? renderLocalMain(pathname, html);
+  if (replacementMain) {
+    html = html.replace(/<main\b[\s\S]*?<\/main>/i, replacementMain);
   }
   html = addBlogHeading(html, pathname);
   html = addPrivacyDetails(html, pathname);
+  html = addBusinessDetails(html);
   html = enhanceSeo(html, pathname, origin, noIndex);
   html = addConsentBanner(html);
   return rewriteRequestOrigin(html, origin);
@@ -333,10 +385,13 @@ export function serveMirroredPage(
   if (legacyBlogPaths.some((prefix) => normalized.startsWith(prefix))) {
     return Response.redirect(`${origin}/blog/`, 301);
   }
+  const retiredDestination = retiredRouteRedirects.get(normalized);
+  if (retiredDestination) {
+    return Response.redirect(`${origin}${retiredDestination}`, 301);
+  }
 
   const storedHtml = mirroredPages[normalized];
-  const noIndex =
-    isPreviewHostname(hostname) || routeShouldBeNoIndex(normalized);
+  const noIndex = isPreviewHostname(hostname);
 
   if (!storedHtml) {
     const fallback = mirroredPages["/"];

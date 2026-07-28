@@ -1,17 +1,19 @@
 export const postRoutes = [
   "/blog/",
   "/5-best-luxury-eco-friendly-cars-in-australia-2020/",
-  "/top-5-reasons-to-sell-your-car-for-cash-in-brisbane/",
   "/what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide/",
   "/where-do-old-junk-cars-go-in-gold-coast-car-selling-options-in-gold-coast-qld/",
 ] as const;
 
-// The main site describes a Queensland service area. Keep the legacy Adelaide
-// page available to visitors, but do not ask search engines to index it until
-// the business confirms that Adelaide is an active service area.
-export const temporarilyNoIndexRoutes = new Set([
-  "/cash-for-cars/cash-for-cars-adelaide/",
+export const retiredRouteRedirects = new Map<string, string>([
+  ["/cash-for-cars/cash-for-cars-adelaide/", "/cash-for-cars/"],
+  ["/cash-for-cars/ipswich/", "/cash-for-cars/"],
+  ["/cash-for-cars/logan/", "/cash-for-cars/"],
+  ["/cash-for-cars/toowoomba/", "/cash-for-cars/"],
+  ["/top-5-reasons-to-sell-your-car-for-cash-in-brisbane/", "/blog/"],
 ]);
+
+export const retiredRoutes = new Set(retiredRouteRedirects.keys());
 
 export function isPreviewHostname(hostname: string) {
   return (

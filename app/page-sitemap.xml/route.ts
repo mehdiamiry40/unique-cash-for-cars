@@ -4,7 +4,7 @@ import {
   escapeXml,
   postRoutes,
   requestOrigin,
-  temporarilyNoIndexRoutes,
+  retiredRoutes,
 } from "../site-config";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export function GET(request: NextRequest) {
   const postSet = new Set<string>(postRoutes);
   const routes = Object.keys(pages).filter(
-    (route) => !postSet.has(route) && !temporarilyNoIndexRoutes.has(route),
+    (route) => !postSet.has(route) && !retiredRoutes.has(route),
   );
   const origin = requestOrigin(request);
   const urls = routes

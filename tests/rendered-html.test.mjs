@@ -35,6 +35,16 @@ const localRoutes = [
   "/cash-for-cars/burleigh-heads/",
   "/cash-for-cars/labrador/",
 ];
+const retiredRouteRedirects = new Map([
+  ["/cash-for-cars/cash-for-cars-adelaide/", "/cash-for-cars/"],
+  ["/cash-for-cars/ipswich/", "/cash-for-cars/"],
+  ["/cash-for-cars/logan/", "/cash-for-cars/"],
+  ["/cash-for-cars/toowoomba/", "/cash-for-cars/"],
+  ["/top-5-reasons-to-sell-your-car-for-cash-in-brisbane/", "/blog/"],
+]);
+const activeRoutes = Object.keys(pages).filter(
+  (route) => !retiredRouteRedirects.has(route),
+);
 
 before(async () => {
   server = spawn(
@@ -124,16 +134,26 @@ function jaccard(left, right) {
   return intersection / (left.size + right.size - intersection);
 }
 
-test("keeps all 32 intended routes available", async () => {
+test("keeps the 27 Gold Coast routes available and permanently redirects retired pages", async () => {
   assert.equal(Object.keys(pages).length, 32);
-  for (const route of Object.keys(pages)) {
+  assert.equal(activeRoutes.length, 27);
+  for (const route of activeRoutes) {
     const response = await render(route);
     assert.equal(response.status, 200, route);
+  }
+  for (const [route, destination] of retiredRouteRedirects) {
+    const response = await render(route, { redirect: "manual" });
+    assert.equal(response.status, 301, route);
+    assert.equal(
+      response.headers.get("location"),
+      `${publicOrigin}${destination}`,
+      route,
+    );
   }
 });
 
 test("publishes clean metadata and valid structured data on every page", async () => {
-  for (const route of Object.keys(pages)) {
+  for (const route of activeRoutes) {
     const response = await render(route);
     const html = await response.text();
     const title = html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] ?? "";
@@ -161,6 +181,13 @@ test("publishes clean metadata and valid structured data on every page", async (
     assert.doesNotMatch(schemas[0][1], /SearchAction/, route);
     assert.match(schemas[0][1], /LocalBusiness/, route);
     assert.match(schemas[0][1], /https:\\?\/\\?\/uniquecashforcars\.com\.au/, route);
+    assert.match(schemas[0][1], /openingHoursSpecification/, route);
+    assert.match(schemas[0][1], /Gold Coast/, route);
+    assert.doesNotMatch(
+      schemas[0][1],
+      /"name":"(?:Adelaide|Brisbane|Ipswich|Logan|Toowoomba|Sunshine Coast)"/,
+      route,
+    );
   }
 });
 
@@ -175,8 +202,6 @@ test("keeps preview hosts out of search without blocking the future domain", asy
   assert.equal(publicResponse.headers.get("x-robots-tag"), null);
   assert.match(metaContent(publicHtml, "robots"), /^index, follow/);
 
-  const adelaide = await render("/cash-for-cars/cash-for-cars-adelaide/");
-  assert.equal(adelaide.headers.get("x-robots-tag"), "noindex, nofollow");
 });
 
 test("removes eager trackers and uses consent-based analytics and video", async () => {
@@ -228,6 +253,37 @@ test("makes the Gold Coast suburb pages materially distinct", async () => {
   );
 });
 
+test("publishes a Gold Coast-only customer journey and confirmed business hours", async () => {
+  for (const route of activeRoutes) {
+    const html = await (await render(route)).text();
+    const visibleText = stripHtml(html);
+    assert.match(
+      visibleText,
+      /Monday.{0,20}Friday.{0,35}9:00 am.{0,15}5:00 pm/i,
+      route,
+    );
+    assert.doesNotMatch(
+      visibleText,
+      /\b(?:Adelaide|Brisbane|Ipswich|Logan|Toowoomba|Sunshine Coast)\b/i,
+      route,
+    );
+  }
+
+  const home = await (await render("/")).text();
+  assert.match(home, /Sell your car on the Gold Coast without the runaround/);
+  assert.match(home, /class="trust-strip"/);
+  assert.equal((home.match(/class="area-card"/g) ?? []).length, 15);
+  assert.match(home, /id="free-quote"/);
+
+  const serviceAreas = await (await render("/cash-for-cars/")).text();
+  assert.match(serviceAreas, /Gold Coast residents only/);
+  assert.equal((serviceAreas.match(/class="area-card"/g) ?? []).length, 15);
+
+  const contact = await (await render("/contact-us/")).text();
+  assert.match(contact, /class="marketing-section contact-grid"/);
+  assert.match(contact, /Gold Coast residents only/);
+});
+
 test("repairs legacy WordPress archive links and search URLs", async () => {
   for (const path of [
     "/author/uniquecashforcars/",
@@ -246,7 +302,7 @@ test("repairs legacy WordPress archive links and search URLs", async () => {
 
 test("contains no broken user-facing internal links", async () => {
   const links = new Set();
-  for (const route of Object.keys(pages)) {
+  for (const route of activeRoutes) {
     const html = await (await render(route)).text();
     for (const match of html.matchAll(/<a\b[^>]*href=["']([^"']+)["']/gi)) {
       try {
@@ -261,6 +317,10 @@ test("contains no broken user-facing internal links", async () => {
         }
       } catch {}
     }
+  }
+
+  for (const retiredRoute of retiredRouteRedirects.keys()) {
+    assert.ok(!links.has(retiredRoute), `active page links to ${retiredRoute}`);
   }
 
   for (const pathname of links) {
@@ -287,9 +347,12 @@ test("serves host-correct robots and XML sitemaps", async () => {
 
   const pageSitemap = await (await render("/page-sitemap.xml")).text();
   const postSitemap = await (await render("/post-sitemap.xml")).text();
-  assert.equal((pageSitemap.match(/<url>/g) ?? []).length, 26);
-  assert.equal((postSitemap.match(/<url>/g) ?? []).length, 5);
-  assert.doesNotMatch(pageSitemap, /cash-for-cars-adelaide/);
+  assert.equal((pageSitemap.match(/<url>/g) ?? []).length, 23);
+  assert.equal((postSitemap.match(/<url>/g) ?? []).length, 4);
+  assert.doesNotMatch(
+    pageSitemap + postSitemap,
+    /cash-for-cars-adelaide|\/ipswich\/|\/logan\/|\/toowoomba\/|cash-in-brisbane/,
+  );
   assert.doesNotMatch(pageSitemap + postSitemap, /\.vercel\.app/);
 });
 
