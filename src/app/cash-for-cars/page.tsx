@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { site } from "@/content/site";
 import { suburbs } from "@/content/suburbs";
 import { pageMeta } from "@/lib/seo";
-import { breadcrumbSchema, graph } from "@/lib/schema";
+import { breadcrumbSchema, graph, itemListSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
 import { HowItWorks } from "@/components/HowItWorks";
 import { QuoteForm } from "@/components/QuoteForm";
@@ -13,7 +13,7 @@ import { CallButton, Section, SectionHeading } from "@/components/ui";
 export const metadata: Metadata = pageMeta({
   title: "Cash For Cars Gold Coast | Free Vehicle Removal",
   description:
-    "We buy cars across Southport, Surfers Paradise, Robina and Burleigh Heads. Get cash on collection, free towing and a fast quote.",
+    "We buy cars across the Gold Coast — Southport, Surfers Paradise, Robina, Burleigh Heads, Labrador, Nerang, Helensvale and Mermaid Waters. Free towing.",
   path: "/cash-for-cars",
 });
 
@@ -26,6 +26,12 @@ export default function CashForCarsHub() {
             { name: "Home", path: "/" },
             { name: "Cash For Cars", path: "/cash-for-cars" },
           ]),
+          itemListSchema(
+            suburbs.map((s) => ({
+              name: `Cash for Cars ${s.name}`,
+              path: `/cash-for-cars/${s.slug}`,
+            })),
+          ),
         )}
       />
 
@@ -34,9 +40,10 @@ export default function CashForCarsHub() {
           <div>
             <h1 className="heading-xl mb-4">Where we buy cars</h1>
             <p className="mb-4 text-xl">
-              We collect across the Gold Coast. Each service area is
-              worth a look — the access, the paperwork and the kinds of cars we see
-              differ more than you&apos;d expect from suburb to suburb.
+              We collect across the Gold Coast, from the northern corridor to the
+              southern beaches and inland to Nerang. Each service area is worth a
+              look — the access, the paperwork and the kinds of cars we see differ
+              more than you&apos;d expect from suburb to suburb.
             </p>
             <p className="mb-7 text-lg">
               Not on the list? Call anyway. If you&apos;re near one of these areas

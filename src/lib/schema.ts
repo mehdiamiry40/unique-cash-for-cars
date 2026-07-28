@@ -132,6 +132,62 @@ export function serviceSchema(opts: { name: string; description: string; areaSer
   };
 }
 
+/**
+ * The contact page, typed so search engines can lift the phone number and
+ * hours rather than inferring them from body copy.
+ */
+export function contactPageSchema() {
+  return {
+    "@type": "ContactPage",
+    "@id": `${site.url}/contact-us#webpage`,
+    url: `${site.url}/contact-us`,
+    name: `Contact ${site.legalName}`,
+    about: { "@id": ORG_ID },
+    mainEntity: { "@id": ORG_ID },
+    inLanguage: "en-AU",
+  };
+}
+
+/**
+ * The blog index as a collection, with its posts listed.
+ *
+ * Each entry is a full BlogPosting reference rather than a bare @id, because
+ * the posts themselves are defined on their own pages, not this one — a bare
+ * {"@id"} here would dangle.
+ */
+export function blogSchema(posts: readonly { slug: string; title: string; date: string }[]) {
+  return {
+    "@type": "Blog",
+    "@id": `${site.url}/blog#blog`,
+    url: `${site.url}/blog`,
+    name: `${site.legalName} — guides`,
+    publisher: { "@id": ORG_ID },
+    inLanguage: "en-AU",
+    blogPost: posts.map((post) => ({
+      "@type": "BlogPosting",
+      headline: post.title,
+      url: `${site.url}/${post.slug}`,
+      datePublished: post.date,
+    })),
+  };
+}
+
+/**
+ * An ordered list of pages, for hub pages whose job is to point at children.
+ * Gives a crawler the set explicitly rather than leaving it to link discovery.
+ */
+export function itemListSchema(items: readonly { name: string; path: string }[]) {
+  return {
+    "@type": "ItemList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      url: `${site.url}${item.path}`,
+    })),
+  };
+}
+
 /** Wraps nodes in a single @graph so each page emits exactly one script tag. */
 export function graph(...nodes: object[]) {
   return {

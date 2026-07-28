@@ -1,6 +1,6 @@
 import type { ServicePage } from "@/content/services";
 import { site } from "@/content/site";
-import { breadcrumbSchema, faqSchema, graph } from "@/lib/schema";
+import { breadcrumbSchema, faqSchema, graph, serviceSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
 import { QuoteForm } from "@/components/QuoteForm";
 import { FaqAccordion } from "@/components/FaqAccordion";
@@ -17,6 +17,14 @@ export function ServicePageTemplate({ page }: { page: ServicePage }) {
             { name: "Home", path: "/" },
             { name: page.h1, path: `/${page.slug}` },
           ]),
+          // These pages describe services and had no Service node — the
+          // location pages have carried one since the rebuild, so the markup
+          // was inconsistent about what the site actually sells.
+          serviceSchema({
+            name: page.h1,
+            description: page.metaDescription,
+            areaServed: "Gold Coast",
+          }),
           faqSchema(page.faqs),
         )}
       />
