@@ -122,3 +122,19 @@ test("ships the original theme, scripts, fonts, and key media locally", async ()
     requiredAssets.map((path) => access(new URL(path, projectRoot))),
   );
 });
+
+test("submits quote forms through the original Contact Form 7 delivery endpoint", async () => {
+  const enhancement = await readFile(
+    new URL("../public/mirror-enhancements.js", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(
+    enhancement,
+    /https:\/\/uniquecashforcars\.com\.au\/wp-json\/contact-form-7\/v1\/contact-forms\/5\/feedback/,
+  );
+  assert.match(enhancement, /new FormData\(form\)/);
+  assert.match(enhancement, /wpcf7mailsent/);
+  assert.match(enhancement, /wpcf7invalid/);
+  assert.doesNotMatch(enhancement, /window\.location\.href\s*=\s*["']sms:/);
+});
