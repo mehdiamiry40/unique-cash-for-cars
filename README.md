@@ -1,6 +1,6 @@
 # Unique Cash for Cars — Next.js mirror
 
-This project is a self-contained Next.js/Vinext migration of
+This project is a self-contained Next.js migration of
 `uniquecashforcars.com.au`.
 
 The application serves a static snapshot of every URL in the WordPress page and
@@ -16,6 +16,12 @@ npm run dev
 npm test
 npm run lint
 ```
+
+## Deployment
+
+The project uses standard Next.js and is ready for Vercel. Import the GitHub
+repository in Vercel or deploy it with the Vercel CLI; no framework override,
+build-command override, or output-directory override is required.
 
 ## Refreshing the WordPress snapshot
 
@@ -36,5 +42,6 @@ with the current host. This lets links and assets work in local and private
 previews while remaining unchanged when the custom domain is connected.
 
 Contact Form 7 markup is preserved exactly. The local enhancement script
-intercepts submissions and prepares a text message to the public business
-number so enquiries are not sent to an unavailable WordPress endpoint.
+submits enquiries to the original Contact Form 7 mail handler through
+`mail.uniquecashforcars.com.au`, allowing the public website domain to move
+without changing the visible form or its validation behaviour.
