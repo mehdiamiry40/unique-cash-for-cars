@@ -3,6 +3,123 @@
 
   var feedbackEndpoint =
     "https://mail.uniquecashforcars.com.au/wp-json/contact-form-7/v1/contact-forms/5/feedback";
+  var analyticsStorageKey = "ucfc-analytics-consent";
+  var gtmId = "GTM-KKH55J9";
+
+  function loadAnalytics() {
+    if (window.__ucfcAnalyticsLoaded) return;
+    window.__ucfcAnalyticsLoaded = true;
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      "gtm.start": new Date().getTime(),
+      event: "gtm.js",
+    });
+    var script = document.createElement("script");
+    script.async = true;
+    script.src = "https://www.googletagmanager.com/gtm.js?id=" + gtmId;
+    document.head.appendChild(script);
+  }
+
+  function initializePrivacyChoices() {
+    var banner = document.getElementById("privacy-consent");
+    if (!banner) return;
+
+    var storedChoice = null;
+    try {
+      storedChoice = window.localStorage.getItem(analyticsStorageKey);
+    } catch {}
+
+    if (storedChoice === "accepted") {
+      loadAnalytics();
+      return;
+    }
+    if (storedChoice === "declined") return;
+
+    banner.hidden = false;
+    banner.querySelectorAll("[data-consent]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var accepted = button.dataset.consent === "accept";
+        try {
+          window.localStorage.setItem(
+            analyticsStorageKey,
+            accepted ? "accepted" : "declined",
+          );
+        } catch {}
+        banner.hidden = true;
+        if (accepted) loadAnalytics();
+      });
+    });
+  }
+
+  function initializeVideoPlayers() {
+    document.querySelectorAll(".video-lite[data-youtube-id]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var videoId = button.dataset.youtubeId;
+        if (!videoId) return;
+        var iframe = document.createElement("iframe");
+        iframe.src =
+          "https://www.youtube-nocookie.com/embed/" +
+          encodeURIComponent(videoId) +
+          "?autoplay=1";
+        iframe.title = "Unique Cash for Cars video";
+        iframe.allow =
+          "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+        iframe.allowFullscreen = true;
+        button.replaceChildren(iframe);
+      });
+    });
+  }
+
+  function enhanceForms() {
+    var labels = {
+      Name: "Your name",
+      Phone: "Phone number",
+      Email: "Email address",
+      address: "Vehicle location",
+      MakeModel: "Vehicle make, model and year",
+      Price: "Expected price",
+      details: "Vehicle condition",
+    };
+    var autocomplete = {
+      Name: "name",
+      Phone: "tel",
+      Email: "email",
+      address: "street-address",
+    };
+
+    document.querySelectorAll(".wpcf7-form").forEach(function (form) {
+      Object.keys(labels).forEach(function (name) {
+        var field = form.querySelector('[name="' + name + '"]');
+        if (!field) return;
+        if (!field.getAttribute("aria-label")) {
+          field.setAttribute("aria-label", labels[name]);
+        }
+        if (autocomplete[name]) {
+          field.setAttribute("autocomplete", autocomplete[name]);
+        }
+      });
+    });
+  }
+
+  function initializeQuoteLinks() {
+    document.addEventListener("click", function (event) {
+      var trigger =
+        event.target instanceof Element
+          ? event.target.closest(".get-quote-popup")
+          : null;
+      if (!trigger) return;
+      var form = document.querySelector(".wpcf7-form");
+      if (!form) return;
+      event.preventDefault();
+      form.scrollIntoView({ behavior: "smooth", block: "center" });
+      var firstField = form.querySelector("input:not([type=hidden]), textarea, select");
+      if (firstField) {
+        window.setTimeout(function () {
+          firstField.focus();
+        }, 450);
+      }
+    });
+  }
 
   function setStatus(form, status) {
     [
@@ -125,6 +242,9 @@
           status = "sent";
           eventName = "wpcf7mailsent";
           form.reset();
+          if (window.dataLayer) {
+            window.dataLayer.push({ event: "quote_form_submitted" });
+          }
         } else if (response.status === "validation_failed") {
           status = "invalid";
           eventName = "wpcf7invalid";
@@ -163,4 +283,18 @@
     },
     true,
   );
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () {
+      initializePrivacyChoices();
+      initializeVideoPlayers();
+      initializeQuoteLinks();
+      enhanceForms();
+    });
+  } else {
+    initializePrivacyChoices();
+    initializeVideoPlayers();
+    initializeQuoteLinks();
+    enhanceForms();
+  }
 })();

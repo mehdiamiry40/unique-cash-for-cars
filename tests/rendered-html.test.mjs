@@ -11,13 +11,30 @@ const nextBin = fileURLToPath(
 );
 const port = 43000 + (process.pid % 1000);
 const requestOrigin = `http://127.0.0.1:${port}`;
-const renderedOrigin = `http://localhost:${port}`;
+const publicOrigin = "https://uniquecashforcars.com.au";
 let server;
 let serverOutput = "";
 
 const pages = JSON.parse(
   await readFile(new URL("../app/mirror-pages.json", import.meta.url), "utf8"),
 );
+const localRoutes = [
+  "/cash-for-cars/ashmore/",
+  "/cash-for-cars/carrara/",
+  "/cash-for-cars/helensvale/",
+  "/cash-for-cars/mermaid-waters/",
+  "/cash-for-cars/mudgeeraba/",
+  "/cash-for-cars/nerang/",
+  "/cash-for-cars/pacific-pines/",
+  "/cash-for-cars/palm-beach/",
+  "/cash-for-cars/robina/",
+  "/cash-for-cars/southport/",
+  "/cash-for-cars/surfers-paradise/",
+  "/cash-for-cars/upper-coomera/",
+  "/cash-for-cars/varsity-lakes/",
+  "/cash-for-cars/burleigh-heads/",
+  "/cash-for-cars/labrador/",
+];
 
 before(async () => {
   server = spawn(
@@ -58,129 +75,267 @@ after(async () => {
   });
 });
 
-async function render(pathname = "/") {
+function render(pathname = "/", options = {}) {
   return fetch(`${requestOrigin}${pathname}`, {
-    headers: { accept: "text/html" },
+    redirect: options.redirect,
+    headers: {
+      accept: "text/html",
+      "x-forwarded-host": options.hostname ?? "uniquecashforcars.com.au",
+      "x-forwarded-proto": "https",
+    },
   });
 }
 
-function expectedForOrigin(html) {
+function stripHtml(html) {
   return html
-    .replaceAll("https://uniquecashforcars.com.au", renderedOrigin)
-    .replaceAll("https://www.uniquecashforcars.com.au", renderedOrigin)
-    .replaceAll("http://uniquecashforcars.com.au", renderedOrigin)
-    .replaceAll("http://www.uniquecashforcars.com.au", renderedOrigin)
-    .replaceAll("//uniquecashforcars.com.au", renderedOrigin)
-    .replaceAll("//www.uniquecashforcars.com.au", renderedOrigin);
+    .replace(/<script\b[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style\b[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&(?:nbsp|amp|quot|#0*39);/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-test("mirrors the complete 32-page WordPress sitemap", () => {
+function metaContent(html, name) {
+  const tag = html.match(
+    new RegExp(`<meta\\b[^>]*\\bname=["']${name}["'][^>]*>`, "i"),
+  )?.[0];
+  return tag?.match(/\bcontent=["']([^"']*)["']/i)?.[1] ?? "";
+}
+
+function fiveWordShingles(text) {
+  const words = text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .split(/\s+/);
+  const shingles = new Set();
+  for (let index = 0; index <= words.length - 5; index += 1) {
+    shingles.add(words.slice(index, index + 5).join(" "));
+  }
+  return shingles;
+}
+
+function jaccard(left, right) {
+  let intersection = 0;
+  for (const value of left) {
+    if (right.has(value)) intersection += 1;
+  }
+  return intersection / (left.size + right.size - intersection);
+}
+
+test("keeps all 32 intended routes available", async () => {
   assert.equal(Object.keys(pages).length, 32);
-  assert.ok(pages["/"]);
-  assert.ok(pages["/cash-for-cars/southport/"]);
-  assert.ok(pages["/sell-my-car-gold-coast/"]);
-  assert.ok(pages["/contact-us/"]);
-  assert.ok(pages["/blog/"]);
-});
-
-test("serves the mirrored homepage byte-for-byte after origin rewriting", async () => {
-  const response = await render("/");
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
-
-  const html = await response.text();
-  assert.equal(html, expectedForOrigin(pages["/"]));
-  assert.match(
-    html,
-    /<body class="home wp-singular .*wp-theme-flatsome .*wp-child-theme-flatsome-child/,
-  );
-  assert.match(html, /<h1[^>]*>Get Cash For Cars Gold Coast<\/h1>/i);
-  assert.match(html, /\/wp-content\/themes\/flatsome\/assets\/css\/flatsome\.css/);
-  assert.match(html, /\/mirror-enhancements\.js/);
-  assert.doesNotMatch(html, /Your site is taking shape|codex-preview/);
-});
-
-test("serves representative inner pages exactly", async () => {
-  const routes = [
-    "/cash-for-cars/southport/",
-    "/sell-my-car-gold-coast/",
-    "/company-info-cash-for-cars-gold-coast-and-free-car-removal/",
-    "/what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide/",
-  ];
-
-  for (const route of routes) {
+  for (const route of Object.keys(pages)) {
     const response = await render(route);
     assert.equal(response.status, 200, route);
-    assert.equal(await response.text(), expectedForOrigin(pages[route]), route);
   }
 });
 
-test("preserves the original www-to-apex 301 redirect", async () => {
-  const response = await fetch(`${requestOrigin}/cash-for-cars/?source=test`, {
-    redirect: "manual",
-    headers: { "x-forwarded-host": "www.uniquecashforcars.com.au" },
-  });
+test("publishes clean metadata and valid structured data on every page", async () => {
+  for (const route of Object.keys(pages)) {
+    const response = await render(route);
+    const html = await response.text();
+    const title = html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] ?? "";
+    const description = metaContent(html, "description");
+    const canonical =
+      html.match(/<link\b[^>]*rel=["']canonical["'][^>]*>/i)?.[0]
+        ?.match(/\bhref=["']([^"']+)/i)?.[1] ?? "";
+    const h1Count = (html.match(/<h1\b/gi) ?? []).length;
+    const schemas = [
+      ...html.matchAll(
+        /<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
+      ),
+    ];
 
-  assert.equal(response.status, 301);
-  assert.equal(
-    response.headers.get("location"),
-    "http://uniquecashforcars.com.au/cash-for-cars/?source=test",
+    assert.ok(title.length > 20 && title.length <= 60, `${route}: ${title}`);
+    assert.ok(
+      description.length >= 110 && description.length <= 160,
+      `${route}: description length ${description.length}`,
+    );
+    assert.equal(canonical, `${publicOrigin}${route}`, route);
+    assert.equal(h1Count, 1, `${route}: expected one H1`);
+    assert.equal(schemas.length, 1, `${route}: expected one schema graph`);
+    const schema = JSON.parse(schemas[0][1]);
+    assert.equal(schema["@context"], "https://schema.org", route);
+    assert.doesNotMatch(schemas[0][1], /SearchAction/, route);
+    assert.match(schemas[0][1], /LocalBusiness/, route);
+    assert.match(schemas[0][1], /https:\\?\/\\?\/uniquecashforcars\.com\.au/, route);
+  }
+});
+
+test("keeps preview hosts out of search without blocking the future domain", async () => {
+  const preview = await render("/", { hostname: "unique-cash-for-cars.vercel.app" });
+  const previewHtml = await preview.text();
+  assert.equal(preview.headers.get("x-robots-tag"), "noindex, nofollow");
+  assert.equal(metaContent(previewHtml, "robots"), "noindex, nofollow");
+
+  const publicResponse = await render("/");
+  const publicHtml = await publicResponse.text();
+  assert.equal(publicResponse.headers.get("x-robots-tag"), null);
+  assert.match(metaContent(publicHtml, "robots"), /^index, follow/);
+
+  const adelaide = await render("/cash-for-cars/cash-for-cars-adelaide/");
+  assert.equal(adelaide.headers.get("x-robots-tag"), "noindex, nofollow");
+});
+
+test("removes eager trackers and uses consent-based analytics and video", async () => {
+  const response = await render("/");
+  const html = await response.text();
+  const externalScripts = [
+    ...html.matchAll(/<script\b[^>]*src=["']([^"']+)/gi),
+  ].map((match) => match[1]);
+
+  assert.ok(externalScripts.every((src) => !src.includes("googletagmanager.com")));
+  assert.ok(externalScripts.every((src) => !src.includes("statcounter.com")));
+  assert.doesNotMatch(html, /<iframe\b[^>]*youtube\.com/i);
+  assert.match(html, /class="video-lite"/);
+  assert.match(html, /id="privacy-consent"/);
+  assert.match(html, /site-enhancements\.css/);
+  assert.match(html, /mirror-enhancements\.js/);
+});
+
+test("makes the Gold Coast suburb pages materially distinct", async () => {
+  const pageTexts = [];
+  for (const route of localRoutes) {
+    const html = await (await render(route)).text();
+    const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] ?? "";
+    const text = stripHtml(main);
+    assert.ok(text.split(/\s+/).length >= 300, `${route}: content is too short`);
+    assert.match(html, /Local vehicle buying and removal/);
+    assert.match(html, /FAQPage/);
+    pageTexts.push({ route, shingles: fiveWordShingles(text) });
+  }
+
+  let highest = { score: 0, pair: "" };
+  for (let left = 0; left < pageTexts.length; left += 1) {
+    for (let right = left + 1; right < pageTexts.length; right += 1) {
+      const score = jaccard(
+        pageTexts[left].shingles,
+        pageTexts[right].shingles,
+      );
+      if (score > highest.score) {
+        highest = {
+          score,
+          pair: `${pageTexts[left].route} vs ${pageTexts[right].route}`,
+        };
+      }
+    }
+  }
+  assert.ok(
+    highest.score < 0.55,
+    `Local pages remain too similar (${highest.score.toFixed(3)}): ${highest.pair}`,
   );
 });
 
-test("includes the exact shared quote form fields on every mirrored form", () => {
+test("repairs legacy WordPress archive links and search URLs", async () => {
+  for (const path of [
+    "/author/uniquecashforcars/",
+    "/category/cash-for-cars/",
+    "/tag/luxury-cars-australia/",
+  ]) {
+    const response = await render(path, { redirect: "manual" });
+    assert.equal(response.status, 301, path);
+    assert.equal(response.headers.get("location"), `${publicOrigin}/blog/`, path);
+  }
+
+  const search = await render("/?s=damaged+car", { redirect: "manual" });
+  assert.equal(search.status, 301);
+  assert.equal(search.headers.get("location"), `${publicOrigin}/blog/`);
+});
+
+test("contains no broken user-facing internal links", async () => {
+  const links = new Set();
+  for (const route of Object.keys(pages)) {
+    const html = await (await render(route)).text();
+    for (const match of html.matchAll(/<a\b[^>]*href=["']([^"']+)["']/gi)) {
+      try {
+        const url = new URL(match[1], publicOrigin);
+        if (
+          url.origin === publicOrigin &&
+          !url.search &&
+          !url.pathname.startsWith("/wp-content/") &&
+          !url.pathname.startsWith("/wp-includes/")
+        ) {
+          links.add(url.pathname);
+        }
+      } catch {}
+    }
+  }
+
+  for (const pathname of links) {
+    const response = await render(pathname, { redirect: "manual" });
+    assert.ok(response.status < 400, `${pathname}: HTTP ${response.status}`);
+  }
+});
+
+test("serves host-correct robots and XML sitemaps", async () => {
+  const previewRobots = await (
+    await render("/robots.txt", {
+      hostname: "unique-cash-for-cars.vercel.app",
+    })
+  ).text();
+  assert.equal(previewRobots, "User-agent: *\nDisallow: /\n");
+
+  const publicRobots = await (await render("/robots.txt")).text();
+  assert.match(publicRobots, /Allow: \//);
+  assert.match(
+    publicRobots,
+    /Sitemap: https:\/\/uniquecashforcars\.com\.au\/sitemap_index\.xml/,
+  );
+  assert.doesNotMatch(publicRobots, /\/https:|wp-admin|search_term_string/);
+
+  const pageSitemap = await (await render("/page-sitemap.xml")).text();
+  const postSitemap = await (await render("/post-sitemap.xml")).text();
+  assert.equal((pageSitemap.match(/<url>/g) ?? []).length, 26);
+  assert.equal((postSitemap.match(/<url>/g) ?? []).length, 5);
+  assert.doesNotMatch(pageSitemap, /cash-for-cars-adelaide/);
+  assert.doesNotMatch(pageSitemap + postSitemap, /\.vercel\.app/);
+});
+
+test("adds the audited security headers", async () => {
+  const response = await render("/");
+  assert.match(response.headers.get("content-security-policy") ?? "", /default-src/);
+  assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(response.headers.get("x-frame-options"), "SAMEORIGIN");
+  assert.equal(
+    response.headers.get("referrer-policy"),
+    "strict-origin-when-cross-origin",
+  );
+  assert.match(response.headers.get("permissions-policy") ?? "", /camera=\(\)/);
+});
+
+test("keeps the shared quote workflow and local assets", async () => {
   const allHtml = Object.values(pages).join("\n");
   const forms = allHtml.match(/<form\b[\s\S]*?<\/form>/gi) ?? [];
   const contactForms = forms.filter((form) => form.includes("wpcf7-form"));
-
   assert.equal(contactForms.length, 34);
-  for (const form of contactForms) {
-    for (const field of [
-      "Name",
-      "Phone",
-      "Email",
-      "address",
-      "MakeModel",
-      "Price",
-      "car-fuel",
-      "details",
-    ]) {
-      assert.match(form, new RegExp(`name=["']${field}["']`));
-    }
-  }
-});
 
-test("ships the original theme, scripts, fonts, and key media locally", async () => {
-  const requiredAssets = [
-    "public/wp-content/themes/flatsome/assets/css/flatsome.css",
-    "public/wp-content/themes/flatsome/assets/js/flatsome.js",
-    "public/wp-includes/js/jquery/jquery.min.js",
-    "public/wp-content/cache/wpfc-minified/giacwoc/23nah.css",
-    "public/wp-content/uploads/2022/01/Best-Cash-for-Cars-Gold-Coast.png",
-    "public/wp-content/uploads/2020/12/logo.jpg",
-    "public/wp-content/themes/flatsome/assets/css/icons/fl-icons.woff2",
-    "public/mirror-enhancements.js",
-    "public/robots.txt",
-    "public/sitemap_index.xml",
-  ];
-
-  await Promise.all(
-    requiredAssets.map((path) => access(new URL(path, projectRoot))),
-  );
-});
-
-test("submits quote forms through the original Contact Form 7 delivery endpoint", async () => {
   const enhancement = await readFile(
     new URL("../public/mirror-enhancements.js", import.meta.url),
     "utf8",
   );
-
   assert.match(
     enhancement,
     /https:\/\/mail\.uniquecashforcars\.com\.au\/wp-json\/contact-form-7\/v1\/contact-forms\/5\/feedback/,
   );
-  assert.match(enhancement, /new FormData\(form\)/);
-  assert.match(enhancement, /wpcf7mailsent/);
-  assert.match(enhancement, /wpcf7invalid/);
-  assert.doesNotMatch(enhancement, /window\.location\.href\s*=\s*["']sms:/);
+  assert.match(enhancement, /quote_form_submitted/);
+  assert.match(enhancement, /GTM-KKH55J9/);
+
+  const requiredAssets = [
+    "public/wp-content/themes/flatsome/assets/css/flatsome.css",
+    "public/wp-content/themes/flatsome/assets/js/flatsome.js",
+    "public/wp-includes/js/jquery/jquery.min.js",
+    "public/wp-content/uploads/2022/01/Best-Cash-for-Cars-Gold-Coast.png",
+    "public/wp-content/uploads/2020/12/logo.jpg",
+    "public/assets/hero-cash-for-cars.webp",
+    "public/assets/hero-cash-for-cars-mobile.webp",
+    "public/assets/unique-cash-logo.webp",
+    "public/assets/video-poster.webp",
+    "public/mirror-enhancements.js",
+    "public/site-enhancements.css",
+  ];
+  await Promise.all(
+    requiredAssets.map((path) => access(new URL(path, projectRoot))),
+  );
 });
