@@ -48,6 +48,13 @@ const nextConfig: NextConfig = {
     );
 
     return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.uniquecashforcars.com.au" }],
+        destination: "https://uniquecashforcars.com.au/:path*",
+        permanent: true,
+      },
+
       ...suburbRedirects,
 
       // WordPress internals that were indexed or linked. Send them somewhere useful.
