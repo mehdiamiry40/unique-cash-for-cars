@@ -115,6 +115,19 @@ test("serves representative inner pages exactly", async () => {
   }
 });
 
+test("preserves the original www-to-apex 301 redirect", async () => {
+  const response = await fetch(`${requestOrigin}/cash-for-cars/?source=test`, {
+    redirect: "manual",
+    headers: { "x-forwarded-host": "www.uniquecashforcars.com.au" },
+  });
+
+  assert.equal(response.status, 301);
+  assert.equal(
+    response.headers.get("location"),
+    "http://uniquecashforcars.com.au/cash-for-cars/?source=test",
+  );
+});
+
 test("includes the exact shared quote form fields on every mirrored form", () => {
   const allHtml = Object.values(pages).join("\n");
   const forms = allHtml.match(/<form\b[\s\S]*?<\/form>/gi) ?? [];
