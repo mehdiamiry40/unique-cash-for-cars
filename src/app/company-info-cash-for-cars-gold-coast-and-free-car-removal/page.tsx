@@ -82,11 +82,10 @@ export default function CompanyPage() {
         </div>
       </Section>
 
-      <Section>
-        <div className="mx-auto max-w-3xl">
-          <SectionHeading align="left">Licensing and credentials</SectionHeading>
-
-          {site.abn || site.licenceNumber ? (
+      {(site.abn || site.licenceNumber) && (
+        <Section>
+          <div className="mx-auto max-w-3xl">
+            <SectionHeading align="left">Licensing and credentials</SectionHeading>
             <Card>
               <dl className="space-y-3">
                 {site.abn && (
@@ -103,30 +102,9 @@ export default function CompanyPage() {
                 )}
               </dl>
             </Card>
-          ) : (
-            /*
-             * DEV NOTE — remove this block once site.abn and site.licenceNumber
-             * are filled in. The old site claimed to be "a trustworthy and
-             * licensed business" on nearly every page while displaying no ABN,
-             * no licence number and no named staff. Unverifiable claims are
-             * worth less than nothing on a page where the reader is deciding
-             * whether to hand a stranger their car.
-             */
-            <Card className="border-brand bg-brand/5">
-              <p className="font-bold text-brand-dark">Owner action required</p>
-              <p className="mt-2">
-                Add your ABN and QLD licence number to{" "}
-                <code className="rounded bg-surface-alt px-1.5 py-0.5 text-sm">
-                  src/content/site.ts
-                </code>{" "}
-                and this section fills itself in, here and in the footer. Photos of
-                the yard and the name of whoever answers the phone belong here too —
-                they do more for conversion than another paragraph of copy.
-              </p>
-            </Card>
-          )}
-        </div>
-      </Section>
+          </div>
+        </Section>
+      )}
 
       <Section tone="alt">
         <div className="mx-auto max-w-3xl text-center">

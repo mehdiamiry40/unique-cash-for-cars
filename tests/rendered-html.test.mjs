@@ -22,6 +22,7 @@
 import assert from "node:assert/strict";
 import { spawn, execFile } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { request } from "node:http";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
@@ -114,7 +115,26 @@ after(async () => {
 function get(pathname, options = {}) {
   return fetch(`${origin}${pathname}`, {
     redirect: options.redirect ?? "manual",
-    headers: { accept: options.accept ?? "text/html" },
+    headers: {
+      accept: options.accept ?? "text/html",
+      ...options.headers,
+    },
+  });
+}
+
+function getWithHost(pathname, host) {
+  const url = new URL(pathname, origin);
+  return new Promise((resolve, reject) => {
+    const req = request(
+      url,
+      { method: "GET", headers: { accept: "text/html", host } },
+      (response) => {
+        response.resume();
+        resolve(response);
+      },
+    );
+    req.on("error", reject);
+    req.end();
   });
 }
 
@@ -324,6 +344,18 @@ test("the retired Brisbane article redirects to the Gold Coast blog", async () =
   assert.equal(
     new URL(response.headers.get("location"), origin).pathname,
     "/blog",
+  );
+});
+
+test("www URLs redirect permanently to the canonical non-www domain", async () => {
+  const response = await getWithHost(
+    "/cash-for-cars",
+    "www.uniquecashforcars.com.au",
+  );
+  assert.ok([301, 308].includes(response.statusCode));
+  assert.equal(
+    response.headers.location,
+    "https://uniquecashforcars.com.au/cash-for-cars",
   );
 });
 
