@@ -1,0 +1,9 @@
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html lang="en-AU">
+      <body>{children}</body>
+    </html>
+  );
+}
