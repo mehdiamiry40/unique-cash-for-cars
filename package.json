@@ -13,6 +13,8 @@
     "lint": "eslint . --ignore-pattern .next --ignore-pattern dist --ignore-pattern public/wp-content --ignore-pattern public/wp-includes"
   },
   "dependencies": {
+    "@emnapi/core": "1.11.3",
+    "@emnapi/runtime": "1.11.3",
     "next": "^16.2.12",
     "postcss": "^8.5.23",
     "react": "^19.2.8",
