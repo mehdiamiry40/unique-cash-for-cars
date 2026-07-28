@@ -67,8 +67,15 @@ const postRoutes = [
 ];
 /** Pages that render an FAQ block, and so must carry FAQPage. */
 const faqRoutes = ["/", ...serviceRoutes, ...suburbRoutes];
-/** Everything except the posts and the privacy policy shows a breadcrumb trail. */
-const noBreadcrumbRoutes = new Set([...postRoutes, "/privacy-policy"]);
+/**
+ * Everything except the privacy policy shows a breadcrumb trail.
+ *
+ * The posts used to be exempt here, which quietly encoded a bug: the post
+ * layout renders a visible Home / Blog breadcrumb and emitted no markup behind
+ * it. They now carry BreadcrumbList and BlogPosting, so they are held to the
+ * same rule as every other page.
+ */
+const noBreadcrumbRoutes = new Set(["/privacy-policy"]);
 
 before(async () => {
   server = spawn(process.execPath, [nextBin, "start", "--hostname", "127.0.0.1", "--port", String(port)], {
@@ -303,6 +310,19 @@ test("structured data is valid, typed per page, and every @id reference resolves
       assert.ok(types.includes("Service"), `${path}: location page emits no Service node`);
     }
 
+    if (postRoutes.includes(path)) {
+      const article = nodes.find((node) => node["@type"] === "BlogPosting");
+      assert.ok(article, `${path}: blog post emits no BlogPosting node`);
+      for (const field of ["headline", "datePublished", "dateModified", "author", "publisher"]) {
+        assert.ok(article[field], `${path}: BlogPosting is missing ${field}`);
+      }
+      assert.equal(
+        article.mainEntityOfPage,
+        `${publicOrigin}${path}`,
+        `${path}: BlogPosting mainEntityOfPage must be the page's own canonical`,
+      );
+    }
+
     // Reference-only objects — {"@id": "..."} with nothing else — must point at
     // a node defined on the same page. A dangling provider or publisher
     // reference makes the whole graph unusable to a consumer.
@@ -372,6 +392,22 @@ test("the audited security headers are present on HTML responses", async () => {
     assert.equal(response.headers.get(header), value, `${header} header`);
   }
   assert.match(response.headers.get("permissions-policy") ?? "", /camera=\(\)/);
+  assert.match(
+    response.headers.get("strict-transport-security") ?? "",
+    /max-age=63072000/,
+    "HSTS must not depend on the host supplying it",
+  );
+  // No script-src here on purpose — see the note in next.config.ts. These four
+  // directives need no nonce, so they must actually be present.
+  const csp = response.headers.get("content-security-policy") ?? "";
+  for (const directive of [
+    "frame-ancestors 'self'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "object-src 'none'",
+  ]) {
+    assert.ok(csp.includes(directive), `CSP is missing ${directive} — got: ${csp}`);
+  }
   // poweredByHeader: false — don't name the framework for vulnerability scanners.
   assert.equal(response.headers.get("x-powered-by"), null, "x-powered-by must not be sent");
 });
@@ -456,6 +492,86 @@ test("every image the pages reference exists and is served", async () => {
     const response = await get(source, { accept: "image/*" });
     assert.equal(response.status, 200, `${source} returned ${response.status}`);
   }
+});
+
+test("MDX prose styles the elements the posts actually use", async () => {
+  // Tailwind's preflight resets every heading to `font-size: inherit`, so a
+  // prose-site rule set that omits h1 renders each post's title at body-text
+  // size. It did exactly that. Same story for blockquote, whose margin
+  // preflight zeroes — which made the archived-post callout read as prose.
+  const home = await html("/");
+  const href = home.match(/href="(\/_next\/static\/[^"]+\.css)"/)?.[1];
+  assert.ok(href, "could not find the stylesheet link");
+
+  const response = await get(href, { accept: "text/css" });
+  assert.equal(response.status, 200, `${href} returned ${response.status}`);
+  const css = await response.text();
+
+  for (const selector of [".prose-site h1", ".prose-site blockquote"]) {
+    assert.ok(css.includes(selector), `stylesheet has no ${selector} rule`);
+  }
+
+  // And the posts must still be the thing that needs them.
+  const post = await html(postRoutes[0]);
+  assert.match(post, /<article class="[^"]*prose-site/, "post is not wrapped in prose-site");
+  assert.match(post, /<h1[^>]*>/, "post has no h1");
+});
+
+test("the social image is served as the type its extension claims", async () => {
+  // This file was JPEG bytes behind a .png extension. Social crawlers fetch it
+  // straight from public/, and this site sends nosniff — the combination that
+  // makes a strict client refuse to render the image.
+  const source = await html("/");
+  const image = source.match(/<meta property="og:image" content="([^"]+)"/)?.[1];
+  assert.ok(image, "no og:image on the homepage");
+
+  const path = image.replace(publicOrigin, "");
+  const response = await get(path, { accept: "image/*" });
+  assert.equal(response.status, 200, `${path} returned ${response.status}`);
+
+  const declared = response.headers.get("content-type") ?? "";
+  const expected = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp" };
+  const extension = path.slice(path.lastIndexOf("."));
+  assert.equal(declared.split(";")[0], expected[extension], `${path} extension vs Content-Type`);
+
+  // And the bytes have to agree with both.
+  const magic = new Uint8Array(await response.arrayBuffer()).subarray(0, 4);
+  const isJpeg = magic[0] === 0xff && magic[1] === 0xd8;
+  const isPng = magic[0] === 0x89 && magic[1] === 0x50;
+  assert.equal(
+    isJpeg ? "image/jpeg" : isPng ? "image/png" : "unknown",
+    expected[extension],
+    `${path} is not actually ${expected[extension]}`,
+  );
+});
+
+test("the current page is marked for assistive tech, not just coloured", async () => {
+  // The active nav item used to be signalled with brand colour alone, which is
+  // WCAG 1.4.1 — colour as the only means of conveying information.
+  //
+  // Two different values are correct here, so both are checked. A nav entry
+  // that is a real link to the open page takes aria-current="page". A parent
+  // that is a disclosure button — it opens a submenu and navigates nowhere —
+  // takes the generic aria-current="true", because "page" would claim the
+  // button is the page.
+  const blog = await html("/blog");
+  assert.match(
+    blog,
+    /<a[^>]*href="\/blog"[^>]*aria-current="page"|<a[^>]*aria-current="page"[^>]*href="\/blog"/,
+    "the Blog nav link must be marked as the current page",
+  );
+
+  // The regression this really guards: the Services parent has href "#", so the
+  // old startsWith() check could never match a pathname and the parent stayed
+  // inactive on every one of its own child pages.
+  const service = await html("/sell-my-car-gold-coast");
+  const servicesButton = service.match(/<button[^>]*>Services/);
+  assert.ok(servicesButton, "could not find the Services nav button");
+  assert.match(
+    servicesButton[0],
+    /aria-current="true"/,
+    "the Services parent must be current on its own child pages",
+  );
 });
 
 test("this build is indexable", async () => {

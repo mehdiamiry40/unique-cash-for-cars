@@ -17,7 +17,14 @@ export function pageMeta(opts: {
   noIndex?: boolean;
 }): Metadata {
   const url = opts.path === "/" ? site.url : `${site.url}${opts.path}`;
-  const image = opts.image ?? "/img/Best-Cash-for-Cars-Gold-Coast.png";
+  /*
+   * Social crawlers fetch this path directly, not through /_next/image, so the
+   * extension has to match the bytes. It was served as `.png` while containing
+   * JPEG — and this site sets X-Content-Type-Options: nosniff, which is
+   * precisely when a strict client refuses to render the mismatch. Keep the
+   * extension honest if you swap the file.
+   */
+  const image = opts.image ?? "/img/Best-Cash-for-Cars-Gold-Coast.jpg";
 
   return {
     title: opts.title,

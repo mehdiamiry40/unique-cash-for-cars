@@ -23,7 +23,8 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/"],
       },
     ],
+    // No `host:` directive. It is a Yandex extension that Google ignores, and
+    // the apex/www question is already settled by the 301 in next.config.ts.
     sitemap: `${site.url}/sitemap.xml`,
-    host: site.url,
   };
 }

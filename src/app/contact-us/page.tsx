@@ -9,8 +9,7 @@ import { Card, Section, SectionHeading } from "@/components/ui";
 
 export const metadata: Metadata = pageMeta({
   title: "Contact Unique Cash For Cars Gold Coast",
-  description:
-    "Call 042 347 6111 for a free Gold Coast car quote, or send your vehicle details and we will call you back during business hours.",
+  description: `Call ${site.phone.display} for a free Gold Coast car quote, or send your vehicle details and we will call you back during business hours.`,
   path: "/contact-us",
 });
 

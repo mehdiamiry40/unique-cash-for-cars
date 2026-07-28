@@ -17,9 +17,17 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "public", "img");
 const BASE = "https://uniquecashforcars.com.au/wp-content/uploads";
 
+/**
+ * Source path on WordPress → filename to save under public/img.
+ *
+ * The hero banner is stored on WordPress as `.png` but its bytes are JPEG.
+ * It is saved here with the extension that matches the bytes, because it is
+ * served straight from public/ as the og:image and this site sends
+ * X-Content-Type-Options: nosniff.
+ */
 const ASSETS = [
   "2020/12/logo.jpg",
-  "2022/01/Best-Cash-for-Cars-Gold-Coast.png",
+  ["2022/01/Best-Cash-for-Cars-Gold-Coast.png", "Best-Cash-for-Cars-Gold-Coast.jpg"],
   "2022/09/old-car-gold-coast.jpg",
   "2022/09/unwanted-car-gold-coast.jpg",
   "2022/09/car-abandoned.jpg",
@@ -43,8 +51,9 @@ async function main() {
   let ok = 0;
   let failed = 0;
 
-  for (const asset of ASSETS) {
-    const name = asset.split("/").pop();
+  for (const entry of ASSETS) {
+    const [asset, override] = Array.isArray(entry) ? entry : [entry, null];
+    const name = override ?? asset.split("/").pop();
     const dest = join(OUT, name);
 
     if (await exists(dest)) {

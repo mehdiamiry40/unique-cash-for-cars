@@ -24,6 +24,14 @@ export function generateStaticParams() {
   return suburbs.map((s) => ({ suburb: s.slug }));
 }
 
+/**
+ * The four slugs above are the only ones that exist. Without this, an unknown
+ * slug is rendered on demand just to reach notFound() — so every crawler
+ * probing /cash-for-cars/<anything> costs a server invocation. Retired suburbs
+ * are handled earlier, by the 301s in next.config.ts.
+ */
+export const dynamicParams = false;
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { suburb: slug } = await params;
   const suburb = getSuburb(slug);
@@ -203,7 +211,7 @@ export default async function SuburbPage({ params }: Props) {
           <h2 className="mb-3 text-3xl font-extrabold">
             Get a quote for your {suburb.name} car
           </h2>
-          <p className="mx-auto mb-7 max-w-2xl text-lg text-white/90">
+          <p className="mx-auto mb-7 max-w-2xl text-lg text-white">
             One phone call, a firm number in about a minute, and free removal.{" "}
             {suburb.pickupNote}.
           </p>

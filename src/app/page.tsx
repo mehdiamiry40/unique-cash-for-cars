@@ -19,13 +19,20 @@ import {
 } from "@/components/ui";
 
 export const metadata: Metadata = pageMeta({
-  title: `${site.legalName} Upto $9999 - Free Car Removal`,
+  title: `${site.legalName} Up to ${site.maxPayout} - Free Car Removal`,
   description: site.description,
   path: "/",
 });
 
+/*
+ * No licensing or insurance claim appears in this list. site.licenceNumber is
+ * still empty, and an unsubstantiated "licensed and insured" line is a
+ * representation the business cannot currently back up. Fill in
+ * site.licenceNumber and site.abn, then put the claim back — with the number
+ * next to it, which is worth far more than the adjective on its own.
+ */
 const heroPoints = [
-  "A licensed, insured Queensland business",
+  "A Gold Coast business — we quote it and we pay for it, in person",
   `Top cash for cars Gold Coast — up to ${site.maxPayout} for old and new cars`,
   "Free towing, always included in the price",
   "We handle the paperwork",
@@ -96,7 +103,7 @@ const faqs = [
   {
     question: "Do I need a roadworthy certificate to sell you my car?",
     answer:
-      "No. A roadworthy certificate is required for a private sale of a registered vehicle in Queensland, but not when you sell to a licensed buyer who is removing the car from the road.",
+      "Generally no. A safety certificate is required to sell a registered vehicle privately in Queensland, but not for an unregistered one, and not where the vehicle is being removed from the road rather than resold to a driver. Tell us the registration status when you call and we'll confirm what's needed for your car.",
   },
   {
     question: "What paperwork do I need?",
@@ -129,7 +136,7 @@ export default function HomePage() {
         */}
         <div className="relative aspect-[1920/620] w-full lg:absolute lg:inset-0 lg:-z-20 lg:aspect-auto">
           <Image
-            src="/img/Best-Cash-for-Cars-Gold-Coast.png"
+            src="/img/Best-Cash-for-Cars-Gold-Coast.jpg"
             alt=""
             fill
             priority
@@ -179,8 +186,8 @@ export default function HomePage() {
           <div>
             <SectionHeading>Get Cash For Scrap Cars Gold Coast</SectionHeading>
             <p className="mb-4 text-lg">
-              <strong>Unique Cash For Cars</strong> is a licensed Queensland business
-              buying vehicles across the Gold Coast. We give local residents
+              <strong>Unique Cash For Cars</strong> is a Queensland business buying
+              vehicles across the Gold Coast. We give local residents
               a quick, straightforward way to get rid of a car they no longer want — a
               firm quote on the phone, cash on collection, and free towing built in.
             </p>
@@ -296,7 +303,7 @@ export default function HomePage() {
           <h2 className="mb-3 text-3xl font-extrabold">
             Find out what your car is worth
           </h2>
-          <p className="mx-auto mb-7 max-w-2xl text-lg text-white/90">
+          <p className="mx-auto mb-7 max-w-2xl text-lg text-white">
             No obligation, no callout fee, and the number we quote is the number you
             get paid.
           </p>

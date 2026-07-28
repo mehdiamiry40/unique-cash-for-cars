@@ -16,8 +16,13 @@ export const site = {
     "We pay Cash for Cars Gold Coast up to $9,999. Earn fast cash for any vehicle, whether unwanted, old, or damaged, and receive free removal.",
 
   phone: {
-    /** Human-readable. */
-    display: "042 347 6111",
+    /**
+     * Human-readable. Australian mobiles group 4-3-3, so +61423476111 is
+     * "0423 476 111". It was written "042 347 6111" here, which reads as a
+     * landline and is awkward to dictate — and it disagreed with the number
+     * printed in the quote endpoint's own error copy.
+     */
+    display: "0423 476 111",
     /** E.164 for tel: links and schema. */
     e164: "+61423476111",
     href: "tel:+61423476111",
@@ -51,9 +56,14 @@ export const site = {
   },
 
   /**
-   * TODO — fill these in and they render automatically in the footer and
-   * on the About page. Both are trust signals worth real money in this
-   * industry, and you currently claim to be licensed without proving it.
+   * TODO — fill these in and they render automatically in the footer and on
+   * the About page. Both are trust signals worth real money in this industry.
+   *
+   * The site used to assert "a licensed, insured Queensland business" in four
+   * places while these were empty, which is an unsubstantiated representation
+   * under Australian Consumer Law. That copy has been reworded to claims the
+   * business can actually stand behind. Once you have the licence number,
+   * `git log --grep="Substantiate"` shows exactly which sentences to restore.
    */
   abn: "" as string,
   licenceNumber: "" as string,

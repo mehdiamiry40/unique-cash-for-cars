@@ -88,6 +88,30 @@ const nextConfig: NextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
           },
+          {
+            // Two years, subdomains included, preload-eligible. Vercel normally
+            // sets this for custom domains, but relying on the host to supply a
+            // security header means it silently disappears if the host changes.
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+          {
+            /*
+             * Deliberately no script-src or style-src.
+             *
+             * Locking those down properly needs per-request nonces, which means
+             * middleware, which means every page renders dynamically — a real
+             * cost for a site that is otherwise entirely static, and
+             * 'unsafe-inline' would buy nothing. The four directives below need
+             * no nonce and still close the openings that matter here:
+             * clickjacking (backing up X-Frame-Options with the modern
+             * equivalent), <base> injection, form exfiltration to a third-party
+             * host, and legacy plugin embedding.
+             */
+            key: "Content-Security-Policy",
+            value:
+              "frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'",
+          },
         ],
       },
 

@@ -69,7 +69,7 @@ export function ServicePageTemplate({ page }: { page: ServicePage }) {
       <section className="bg-brand py-14 text-white">
         <Container className="text-center">
           <h2 className="mb-3 text-3xl font-extrabold">Get a quote in about a minute</h2>
-          <p className="mx-auto mb-7 max-w-2xl text-lg text-white/90">
+          <p className="mx-auto mb-7 max-w-2xl text-lg text-white">
             Tell us the make, model, year and rough condition. We&apos;ll give you a
             firm number and stick to it.
           </p>

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { site } from "@/content/site";
 
@@ -25,14 +24,13 @@ export function Section({
   id,
 }: {
   children: ReactNode;
-  tone?: "default" | "alt" | "brand";
+  tone?: "default" | "alt";
   className?: string;
   id?: string;
 }) {
   const tones = {
     default: "bg-surface",
     alt: "bg-surface-alt",
-    brand: "bg-brand text-white",
   } as const;
 
   return (
@@ -58,35 +56,6 @@ export function SectionHeading({
     >
       {children}
     </Tag>
-  );
-}
-
-type ButtonProps = {
-  children: ReactNode;
-  href: string;
-  variant?: "solid" | "outline";
-  className?: string;
-};
-
-export function Button({ children, href, variant = "solid", className = "" }: ButtonProps) {
-  const base =
-    "inline-flex items-center justify-center gap-2 rounded px-7 py-3.5 text-base font-bold tracking-wide transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
-  const variants = {
-    solid: "bg-brand text-white hover:bg-brand-dark",
-    outline: "border-2 border-brand text-brand hover:bg-brand hover:text-white",
-  } as const;
-
-  const isInternal = href.startsWith("/");
-  const cls = `${base} ${variants[variant]} ${className}`;
-
-  return isInternal ? (
-    <Link href={href} className={cls}>
-      {children}
-    </Link>
-  ) : (
-    <a href={href} className={cls}>
-      {children}
-    </a>
   );
 }
 

@@ -3,23 +3,41 @@
 /**
  * Design tokens sampled from the live WordPress site's computed styles
  * (uniquecashforcars.com.au, 28 July 2026) so the rebuild matches it closely.
+ *
+ * Two of those sampled values could not be kept as they were, because they
+ * failed WCAG AA and the site uses them for body text and for button fills:
+ *
+ *   brand      #d75253 → 4.02:1 on white. Fails as link text, and fails under
+ *                        white button labels — the CTAs are 16-18px bold,
+ *                        below the 18.66px where the 3:1 large-text allowance
+ *                        starts. Now #c14142: 5.12:1 on white, 4.53:1 on
+ *                        surface-alt, so it clears AA on both surfaces the
+ *                        site actually paints it on.
+ *   ink-muted #777777 → 4.48:1 on white and 3.96:1 on surface-alt (the footer
+ *                        copyright). Now #696969: 5.49:1 and 4.86:1.
+ *
+ * Both are darker than the WordPress originals by design. If you re-sample the
+ * old site and "fix" these back, you reintroduce the failure.
  */
 @theme {
   /* Brand */
-  --color-brand: #d75253;
-  --color-brand-dark: #b83f40;
-  --color-brand-darker: #8f2f30;
+  --color-brand: #c14142;
+  --color-brand-dark: #a63839;
   --color-navy: #334862;
 
   /* Text */
   --color-ink: #4a4a4a;
   --color-ink-heading: #555555;
-  --color-ink-muted: #777777;
+  --color-ink-muted: #696969;
 
   /* Surfaces */
   --color-surface: #ffffff;
   --color-surface-alt: #f1f1f1;
   --color-hairline: #e5e5e5;
+  /* Form control borders. `hairline` is a decorative divider at 1.26:1 and is
+     fine for that, but an input border is a UI component boundary and needs
+     3:1 under WCAG 1.4.11. This is 3.23:1. */
+  --color-field: #8f8f8f;
 
   /* Type — Open Sans, loaded via next/font in layout.tsx */
   --font-sans: var(--font-open-sans), ui-sans-serif, system-ui, sans-serif;
@@ -64,8 +82,34 @@ body {
   line-height: 1.45;
 }
 
-/* Body copy authored in MDX. */
+/* Body copy authored in MDX.
+ *
+ * h1 and blockquote are not optional here. Tailwind's preflight resets every
+ * heading to `font-size: inherit; font-weight: inherit`, and MDX posts open
+ * with `# Title`, so without an h1 rule the article title renders at body-text
+ * size — which is exactly what it was doing before. Same for blockquote:
+ * preflight zeroes its margin, so the archived-post callout read as ordinary
+ * prose. */
 @utility prose-site {
+  & h1 {
+    color: var(--color-ink-heading);
+    font-weight: 800;
+    font-size: clamp(1.75rem, 1.35rem + 1.6vw, 2.25rem);
+    line-height: 1.3;
+    margin-block: 0 1.25rem;
+  }
+  & blockquote {
+    margin-block: 1.5rem;
+    border-inline-start: 4px solid var(--color-brand);
+    background: var(--color-surface-alt);
+    padding: 1rem 1.25rem;
+  }
+  & blockquote > p:first-child {
+    margin-block-start: 0;
+  }
+  & blockquote > p:last-child {
+    margin-block-end: 0;
+  }
   & p {
     margin-block: 1rem;
   }

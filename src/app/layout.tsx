@@ -17,10 +17,15 @@ import { graph, organizationSchema, websiteSchema } from "@/lib/schema";
  * load — an extra third-party connection before text could render, and a
  * request to Google on behalf of every visitor. Serving it from our own
  * origin is faster and avoids the privacy question entirely.
+ *
+ * Every weight declared here gets its own `<link rel="preload">` on every
+ * page, so the list is a per-page bandwidth cost, not a menu. Weight 300 was
+ * dropped because exactly one heading used it — ~19 KB of render-priority
+ * traffic on every page load for one line of text. Before adding a weight
+ * back, check it earns the download.
  */
 const openSans = localFont({
   src: [
-    { path: "../../node_modules/@fontsource/open-sans/files/open-sans-latin-300-normal.woff2", weight: "300", style: "normal" },
     { path: "../../node_modules/@fontsource/open-sans/files/open-sans-latin-400-normal.woff2", weight: "400", style: "normal" },
     { path: "../../node_modules/@fontsource/open-sans/files/open-sans-latin-600-normal.woff2", weight: "600", style: "normal" },
     { path: "../../node_modules/@fontsource/open-sans/files/open-sans-latin-700-normal.woff2", weight: "700", style: "normal" },
@@ -34,7 +39,7 @@ const openSans = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.legalName} Upto $9999 - Free Car Removal`,
+    default: `${site.legalName} Up to ${site.maxPayout} - Free Car Removal`,
     // Pages set their own full title — no suffix appended.
     template: "%s",
   },
