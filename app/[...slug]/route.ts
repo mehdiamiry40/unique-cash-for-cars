@@ -1,15 +1,14 @@
 import type { NextRequest } from "next/server";
 import { serveMirroredPage } from "../mirror";
+import { normalizedHostname, requestOrigin } from "../site-config";
 
 export const dynamic = "force-dynamic";
 
 export function GET(request: NextRequest) {
-  const hostname = (
-    request.headers.get("x-forwarded-host") ?? request.nextUrl.hostname
-  )
-    .split(",")[0]
-    .trim()
-    .split(":")[0];
+  const hostname = normalizedHostname(
+    request.headers.get("x-forwarded-host"),
+    request.nextUrl.hostname,
+  );
 
   if (hostname === "www.uniquecashforcars.com.au") {
     const destination = request.nextUrl.clone();
@@ -18,5 +17,9 @@ export function GET(request: NextRequest) {
     return Response.redirect(destination, 301);
   }
 
-  return serveMirroredPage(request.nextUrl.pathname, request.nextUrl.origin);
+  return serveMirroredPage(
+    request.nextUrl.pathname,
+    requestOrigin(request),
+    hostname,
+  );
 }
