@@ -17,6 +17,9 @@ const eslintConfig = defineConfig([
     // ts-ignore directives and unused bindings, so linting them reports
     // thousands of problems that are not ours to fix.
     ".next-preview/**",
+    "dist/**",
+    ".vinext/**",
+    ".wrangler/**",
   ]),
 ]);
 

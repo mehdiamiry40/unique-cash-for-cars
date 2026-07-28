@@ -8,9 +8,9 @@ import { QuoteForm } from "@/components/QuoteForm";
 import { Card, Container, Section, SectionHeading } from "@/components/ui";
 
 export const metadata: Metadata = pageMeta({
-  title: "Contact Unique Cash For Cars — Gold Coast, Logan & Ipswich",
+  title: "Contact Unique Cash For Cars Gold Coast",
   description:
-    "Call 042 347 6111 for a free car quote, or send us your details and we'll ring you back. Depot in Runcorn, servicing the Gold Coast, Logan and Ipswich.",
+    "Call 042 347 6111 for a free Gold Coast car quote, or send your vehicle details and we will call you back during business hours.",
   path: "/contact-us",
 });
 
@@ -115,10 +115,10 @@ export default function ContactPage() {
       </Section>
 
       <Section tone="alt">
-        <SectionHeading>Where we come from</SectionHeading>
+        <SectionHeading>Gold Coast service area</SectionHeading>
         <p className="mx-auto mb-8 max-w-2xl text-center text-lg">
-          Our yard is in Runcorn on Brisbane&apos;s southside, which puts Logan
-          minutes away and the Gold Coast a straight run down the M1.
+          We provide quotes and vehicle collection for Gold Coast residents.
+          Call us to confirm availability in your suburb.
         </p>
         <Container>
           <div className="overflow-hidden rounded border border-hairline">
