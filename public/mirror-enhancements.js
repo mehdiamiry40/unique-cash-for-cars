@@ -2,7 +2,7 @@
   "use strict";
 
   var feedbackEndpoint =
-    "https://uniquecashforcars.com.au/wp-json/contact-form-7/v1/contact-forms/5/feedback";
+    "https://mail.uniquecashforcars.com.au/wp-json/contact-form-7/v1/contact-forms/5/feedback";
 
   function setStatus(form, status) {
     [

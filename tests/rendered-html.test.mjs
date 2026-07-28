@@ -131,7 +131,7 @@ test("submits quote forms through the original Contact Form 7 delivery endpoint"
 
   assert.match(
     enhancement,
-    /https:\/\/uniquecashforcars\.com\.au\/wp-json\/contact-form-7\/v1\/contact-forms\/5\/feedback/,
+    /https:\/\/mail\.uniquecashforcars\.com\.au\/wp-json\/contact-form-7\/v1\/contact-forms\/5\/feedback/,
   );
   assert.match(enhancement, /new FormData\(form\)/);
   assert.match(enhancement, /wpcf7mailsent/);
