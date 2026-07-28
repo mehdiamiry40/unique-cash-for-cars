@@ -27,7 +27,7 @@ export function Footer() {
             <h2 className="mb-4 text-sm font-extrabold uppercase tracking-widest text-ink-heading">
               About Us
             </h2>
-            <address className="space-y-2 not-italic">
+            <div className="space-y-2">
               <p>
                 <span className="font-semibold">Phone: </span>
                 <a href={site.phone.href} className="hover:text-brand">
@@ -40,12 +40,7 @@ export function Footer() {
                   {site.email}
                 </a>
               </p>
-              <p>
-                <span className="font-semibold">Address: </span>
-                {site.address.street}, {site.address.suburb} {site.address.state}{" "}
-                {site.address.postcode}
-              </p>
-            </address>
+            </div>
 
             {/* These render only once filled in — see src/content/site.ts */}
             {site.abn && (

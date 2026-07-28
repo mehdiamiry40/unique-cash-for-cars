@@ -1,9 +1,9 @@
 /**
  * Single source of truth for business details.
  *
- * NAP (name / address / phone) consistency is a local-SEO ranking factor:
- * these exact strings must match your Google Business Profile and every
- * directory listing character for character. Change them here only.
+ * Keep these public contact details aligned with the Google Business Profile
+ * and directory listings. This is a service-area business, so no street
+ * address is published on the website.
  */
 
 export const site = {
@@ -29,16 +29,6 @@ export const site = {
   },
 
   email: "info@uniquecashforcars.com.au",
-
-  address: {
-    street: "20-B Bonemill Rd",
-    suburb: "Runcorn",
-    state: "QLD",
-    postcode: "4113",
-    country: "AU",
-    /** Approximate depot coordinates — verify against your Google Business Profile pin. */
-    geo: { lat: -27.5936, lng: 153.0741 },
-  },
 
   /**
    * Registered as a service-area business: we travel to the customer.

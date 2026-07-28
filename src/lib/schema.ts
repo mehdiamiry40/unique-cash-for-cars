@@ -3,10 +3,9 @@ import { site } from "@/content/site";
 /**
  * Structured data builders.
  *
- * The old WordPress site emitted a bare `Organization` node with only name,
- * url and logo — no address, geo, hours or service area. `AutomotiveBusiness`
- * with a full NAP is the correct type for a vehicle buyer and is one of the
- * cheapest local-SEO wins available here.
+ * `AutomotiveBusiness` is used for the service-area business. A street address
+ * and coordinates are deliberately omitted because customers are served at
+ * their location and the business does not publish a single public address.
  *
  * Deliberately NOT included: `aggregateRating`. Since 2019 Google does not
  * display review snippets for self-serving reviews on LocalBusiness or
@@ -36,19 +35,6 @@ export function organizationSchema() {
     priceRange: "$$",
     currenciesAccepted: "AUD",
     paymentAccepted: "Cash, Bank Transfer, Cheque",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: site.address.street,
-      addressLocality: site.address.suburb,
-      addressRegion: site.address.state,
-      postalCode: site.address.postcode,
-      addressCountry: site.address.country,
-    },
-    geo: {
-      "@type": "GeoCoordinates",
-      latitude: site.address.geo.lat,
-      longitude: site.address.geo.lng,
-    },
     areaServed: site.areaServed.map((name) => ({
       "@type": "City",
       name,

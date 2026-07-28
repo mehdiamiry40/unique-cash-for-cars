@@ -91,9 +91,6 @@ export default function PrivacyPolicyPage() {
         <p>
           {site.legalName}
           <br />
-          {site.address.street}, {site.address.suburb} {site.address.state}{" "}
-          {site.address.postcode}
-          <br />
           <a href={site.phone.href}>{site.phone.display}</a> ·{" "}
           <a href={`mailto:${site.email}`}>{site.email}</a>
         </p>

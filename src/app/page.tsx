@@ -252,7 +252,7 @@ export default function HomePage() {
                 </span>
                 <span className="mt-2 text-ink">{suburb.hook}</span>
                 <span className="mt-3 text-sm font-semibold text-brand">
-                  {suburb.driveTime}
+                  {suburb.pickupNote}
                 </span>
               </Link>
             </li>

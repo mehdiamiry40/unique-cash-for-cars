@@ -91,8 +91,10 @@ export default async function SuburbPage({ params }: Props) {
 
             <Card className="mb-8 bg-surface-alt">
               <p className="text-base">
-                <span className="font-bold text-ink-heading">Pickup time:</span>{" "}
-                {suburb.driveTime}. Removal is free and we pay cash on collection —
+                <span className="font-bold text-ink-heading">
+                  Pickup availability:
+                </span>{" "}
+                {suburb.pickupNote}. Removal is free and we pay cash on collection —
                 up to {site.maxPayout} depending on the vehicle.
               </p>
             </Card>
@@ -202,9 +204,8 @@ export default async function SuburbPage({ params }: Props) {
             Get a quote for your {suburb.name} car
           </h2>
           <p className="mx-auto mb-7 max-w-2xl text-lg text-white/90">
-            One phone call, a firm number in about a minute, and free removal
-            {suburb.driveTime.startsWith("usually") ? " " : " — "}
-            {suburb.driveTime}.
+            One phone call, a firm number in about a minute, and free removal.{" "}
+            {suburb.pickupNote}.
           </p>
           <a
             href={site.phone.href}

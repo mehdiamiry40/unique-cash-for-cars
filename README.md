@@ -124,7 +124,7 @@ Worth knowing what is in there, because the pages don't use most of it yet:
 - Thumbnail variants (`-300x230`, `-768x590`) that WordPress generated for
   srcsets. Kept because they may be indexed; not useful for new work.
 
-**To change business details** — phone, address, hours, trading name — edit
+**To change business details** — phone, hours, trading name — edit
 `src/content/site.ts` only. It feeds the header, footer, schema, contact page
 and every `tel:` link.
 
@@ -140,16 +140,16 @@ was swapped out, worst pair 93%, and 18 of 19 pages within 140 words of the
 same length. Google treats that as doorway pages and suppresses the whole
 domain. The 13 retired pages 301 to the nearest survivor; nothing 404s.
 
-The six that remain each lead with something only true of that place —
-basement access in Surfers, salt corrosion in Burleigh, flood write-offs in
-Ipswich, proximity to the Runcorn depot in Logan. `check:duplication` enforces
-this: current overlap is 0%, and the build fails above 15% mean.
+The pages that remain each lead with something only true of that place —
+basement access in Surfers and salt corrosion in Burleigh, for example.
+`check:duplication` enforces this: current overlap is 0%, and the build fails
+above 15% mean.
 
 **`Organization` → `AutomotiveBusiness` schema.** The old markup had a name, a
-URL and a logo. This one has the full address, geo coordinates, opening hours
-and service area. Deliberately no `aggregateRating` — Google hasn't shown
-review snippets for self-serving LocalBusiness markup since 2019. Stars come
-from Google Business Profile.
+URL and a logo. This one has opening hours and a Gold Coast service area, while
+deliberately omitting a public street address and coordinates. Deliberately no
+`aggregateRating` — Google hasn't shown review snippets for self-serving
+LocalBusiness markup since 2019. Stars come from Google Business Profile.
 
 **Placeholder text removed.** `/sell-my-car-gold-coast` was live and indexed
 with `"Website name" will pay you anywhere from $50 to $9,999` in its FAQ.
@@ -192,12 +192,7 @@ About page.
 Search for `NEEDS OWNER INPUT`. Real testimonials with a first name and suburb.
 Don't invent them.
 
-### 4. Check the drive times
-
-Each suburb has a `driveTime` string that becomes a promise to customers.
-Verify them against reality before launch.
-
-### 5. Decide on the 2020 blog post
+### 4. Decide on the 2020 blog post
 
 `5-best-luxury-eco-friendly-cars-in-australia-2020` is six years out of date.
 It's currently labelled as an archive. Either rewrite it or add a redirect in

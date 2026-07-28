@@ -250,9 +250,11 @@ test("structured data is valid, typed per page, and every @id reference resolves
 
     const business = nodes.find((node) => node["@type"] === "AutomotiveBusiness");
     assert.equal(business["@id"], `${publicOrigin}/#organization`, `${path}: organization @id`);
-    for (const field of ["name", "telephone", "address", "geo", "openingHoursSpecification"]) {
+    for (const field of ["name", "telephone", "areaServed", "openingHoursSpecification"]) {
       assert.ok(business[field], `${path}: AutomotiveBusiness is missing ${field}`);
     }
+    assert.equal(business.address, undefined, `${path}: public address must not be emitted`);
+    assert.equal(business.geo, undefined, `${path}: public coordinates must not be emitted`);
     assert.deepEqual(
       business.areaServed.map((area) => area.name),
       ["Gold Coast", "Southport", "Surfers Paradise", "Robina", "Burleigh Heads"],

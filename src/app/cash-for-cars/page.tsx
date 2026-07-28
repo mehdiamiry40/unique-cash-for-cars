@@ -66,7 +66,7 @@ export default function CashForCarsHub() {
                 </span>
                 <span className="mt-2 flex-1 text-ink">{suburb.hook}</span>
                 <span className="mt-4 text-sm font-semibold text-brand">
-                  Pickup {suburb.driveTime}
+                  Free removal · {suburb.pickupNote}
                 </span>
               </Link>
             </li>

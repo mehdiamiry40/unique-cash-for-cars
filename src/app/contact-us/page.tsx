@@ -5,7 +5,7 @@ import { pageMeta } from "@/lib/seo";
 import { breadcrumbSchema, graph } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
 import { QuoteForm } from "@/components/QuoteForm";
-import { Card, Container, Section, SectionHeading } from "@/components/ui";
+import { Card, Section, SectionHeading } from "@/components/ui";
 
 export const metadata: Metadata = pageMeta({
   title: "Contact Unique Cash For Cars Gold Coast",
@@ -79,18 +79,6 @@ export default function ContactPage() {
               </Card>
 
               <Card>
-                <h2 className="heading-md mb-3">Depot</h2>
-                <address className="not-italic">
-                  {site.address.street}
-                  <br />
-                  {site.address.suburb} {site.address.state} {site.address.postcode}
-                </address>
-                <p className="mt-3 text-sm text-ink-muted">
-                  We come to you — you don&apos;t need to bring the car here.
-                </p>
-              </Card>
-
-              <Card>
                 <h2 className="heading-md mb-3">Hours</h2>
                 <ul className="space-y-1 text-sm">
                   {site.openingHours.map((slot) => (
@@ -120,21 +108,13 @@ export default function ContactPage() {
           We provide quotes and vehicle collection for Gold Coast residents.
           Call us to confirm availability in your suburb.
         </p>
-        <Container>
-          <div className="overflow-hidden rounded border border-hairline">
-            <iframe
-              title="Map showing our depot in Runcorn, Queensland"
-              src={`https://www.google.com/maps?q=${encodeURIComponent(
-                `${site.address.street}, ${site.address.suburb} ${site.address.state} ${site.address.postcode}`,
-              )}&output=embed`}
-              width="100%"
-              height="420"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="block border-0"
-            />
-          </div>
-        </Container>
+        <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {site.areaServed.slice(1).map((area) => (
+            <Card key={area} className="text-center font-bold text-ink-heading">
+              {area}
+            </Card>
+          ))}
+        </div>
       </Section>
     </>
   );

@@ -30,8 +30,8 @@ export type Suburb = {
   h1: string;
   /** One-sentence hook shown under the H1. Must be location-specific. */
   hook: string;
-  /** Approximate drive time from the Runcorn depot — VERIFY before launch. */
-  driveTime: string;
+  /** Public pickup-availability note; do not imply a fixed depot location. */
+  pickupNote: string;
   /** The genuinely local angle. This is what stops the page being a duplicate. */
   localAngle: { heading: string; body: string[] };
   /** Streets and landmarks we actually cover. Signals real local knowledge. */
@@ -56,7 +56,7 @@ export const suburbs: Suburb[] = [
     h1: "Cash for Cars Southport",
     hook:
       "The Gold Coast's busiest suburb, and the one where we do the most high-rise and rental-property pickups.",
-    driveTime: "about 40 minutes from our Runcorn depot",
+    pickupNote: "Same-day pickup is often available in Southport",
     localAngle: {
       heading: "Why Southport pickups are different",
       body: [
@@ -110,7 +110,7 @@ export const suburbs: Suburb[] = [
     h1: "Cash for Cars Surfers Paradise",
     hook:
       "Where most of our sellers are on a deadline — a flight, a lease ending, or a car they can't take with them.",
-    driveTime: "about 45 minutes from our Runcorn depot",
+    pickupNote: "Timed pickup can be arranged around your move or flight",
     localAngle: {
       heading: "Selling a car when you're on a deadline",
       body: [
@@ -163,7 +163,7 @@ export const suburbs: Suburb[] = [
     h1: "Cash for Cars Robina",
     hook:
       "A newer, planned suburb — which means most of our Robina pickups are straightforward driveway jobs.",
-    driveTime: "about 50 minutes from our Runcorn depot",
+    pickupNote: "Driveway pickups are often available the same day",
     localAngle: {
       heading: "The easiest pickups on the Gold Coast",
       body: [
@@ -216,7 +216,7 @@ export const suburbs: Suburb[] = [
     h1: "Cash for Cars Burleigh Heads",
     hook:
       "Where the salt air does more damage than the odometer — and where most owners don't realise until the roadworthy fails.",
-    driveTime: "about 50 minutes from our Runcorn depot",
+    pickupNote: "Same-day pickup is often available when you call early",
     localAngle: {
       heading: "What living near the beach does to a car",
       body: [
