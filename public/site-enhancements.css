@@ -108,6 +108,16 @@ summary:focus-visible {
   color: #333 !important;
 }
 
+.header-nav .current-menu-item > a,
+.header-nav .current_page_item > a {
+  color: var(--ucfc-red-dark) !important;
+}
+
+.home .banner .text-inner h3 a,
+.home .banner .text-inner h3 a strong {
+  color: #fff !important;
+}
+
 .video-lite {
   background: #111;
   border: 0;
