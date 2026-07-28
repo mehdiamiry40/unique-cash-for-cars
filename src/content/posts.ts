@@ -39,14 +39,6 @@ export const posts: Post[] = [
     readingMinutes: 6,
   },
   {
-    slug: "top-5-reasons-to-sell-your-car-for-cash-in-brisbane",
-    title: "Five reasons to sell your car for cash in Brisbane",
-    description:
-      "When a cash sale beats a private listing, and when it doesn't. An honest comparison.",
-    date: "2023-08-02",
-    readingMinutes: 5,
-  },
-  {
     slug: "5-best-luxury-eco-friendly-cars-in-australia-2020",
     title: "5 best luxury eco-friendly cars in Australia (2020)",
     description:

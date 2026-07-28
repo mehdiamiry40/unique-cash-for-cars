@@ -53,8 +53,6 @@ const suburbRoutes = [
   "/cash-for-cars/surfers-paradise",
   "/cash-for-cars/robina",
   "/cash-for-cars/burleigh-heads",
-  "/cash-for-cars/logan",
-  "/cash-for-cars/ipswich",
 ];
 const serviceRoutes = [
   "/sell-my-car-gold-coast",
@@ -64,7 +62,6 @@ const serviceRoutes = [
 const postRoutes = [
   "/what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide",
   "/where-do-old-junk-cars-go-in-gold-coast-car-selling-options-in-gold-coast-qld",
-  "/top-5-reasons-to-sell-your-car-for-cash-in-brisbane",
   "/5-best-luxury-eco-friendly-cars-in-australia-2020",
 ];
 /** Pages that render an FAQ block, and so must carry FAQPage. */
@@ -77,7 +74,14 @@ before(async () => {
     cwd: projectPath,
     // NEXT_DIST_DIR must not leak in: it would point the server at the
     // preview build produced further down this file.
-    env: { ...process.env, NODE_ENV: "production", NEXT_DIST_DIR: "" },
+    env: {
+      ...process.env,
+      NODE_ENV: "production",
+      NEXT_DIST_DIR: "",
+      QUOTE_WEBHOOK_URL: "",
+      RESEND_API_KEY: "",
+      QUOTE_TO_EMAIL: "",
+    },
     stdio: ["ignore", "pipe", "pipe"],
   });
   server.stdout.on("data", (c) => (serverOutput += c));
@@ -156,7 +160,7 @@ function schemaNodes(source) {
 async function sitemapPaths() {
   const xml = await html("/sitemap.xml");
   const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, url]) => url);
-  assert.ok(urls.length >= 19, `sitemap listed only ${urls.length} URLs`);
+  assert.ok(urls.length >= 16, `sitemap listed only ${urls.length} URLs`);
   return urls.map((url) => {
     assert.ok(url.startsWith(publicOrigin), `sitemap URL not on canonical origin: ${url}`);
     const path = url.slice(publicOrigin.length);
@@ -229,6 +233,19 @@ test("structured data is valid, typed per page, and every @id reference resolves
     for (const field of ["name", "telephone", "address", "geo", "openingHoursSpecification"]) {
       assert.ok(business[field], `${path}: AutomotiveBusiness is missing ${field}`);
     }
+    assert.deepEqual(
+      business.areaServed.map((area) => area.name),
+      ["Gold Coast", "Southport", "Surfers Paradise", "Robina", "Burleigh Heads"],
+      `${path}: business must remain Gold Coast only`,
+    );
+    assert.equal(business.openingHoursSpecification.length, 1, `${path}: opening hours`);
+    assert.deepEqual(
+      business.openingHoursSpecification[0].dayOfWeek,
+      ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      `${path}: business days`,
+    );
+    assert.equal(business.openingHoursSpecification[0].opens, "09:00", `${path}: opening time`);
+    assert.equal(business.openingHoursSpecification[0].closes, "17:00", `${path}: closing time`);
     // Self-serving review markup earns no rich result on LocalBusiness types
     // and risks a manual action. See the note in src/lib/schema.ts.
     assert.equal(business.aggregateRating, undefined, `${path}: aggregateRating must not be emitted`);
@@ -299,6 +316,15 @@ test("retired location URLs redirect permanently to a page that exists", async (
     const followed = await get(destination);
     assert.equal(followed.status, 200, `${path} redirects to ${destination}, which returned ${followed.status}`);
   }
+});
+
+test("the retired Brisbane article redirects to the Gold Coast blog", async () => {
+  const response = await get("/top-5-reasons-to-sell-your-car-for-cash-in-brisbane");
+  assert.ok([301, 308].includes(response.status));
+  assert.equal(
+    new URL(response.headers.get("location"), origin).pathname,
+    "/blog",
+  );
 });
 
 test("the audited security headers are present on HTML responses", async () => {
@@ -407,6 +433,50 @@ test("this build is indexable", async () => {
   const home = await html("/");
   assert.match(metaOf(home, "robots"), /index/);
   assert.doesNotMatch(metaOf(home, "robots"), /noindex/);
+});
+
+test("the quote endpoint validates contact details", async () => {
+  const response = await fetch(`${origin}/api/quote`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-forwarded-for": "192.0.2.10",
+    },
+    body: JSON.stringify({
+      name: "Jamie Example",
+      phone: "123",
+      email: "not-an-email",
+    }),
+  });
+  const result = await response.json();
+
+  assert.equal(response.status, 400);
+  assert.match(result.error, /valid phone number/i);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+});
+
+test("the quote endpoint never reports success without a delivery service", async () => {
+  const response = await fetch(`${origin}/api/quote`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-forwarded-for": "192.0.2.11",
+    },
+    body: JSON.stringify({
+      name: "Jamie Example",
+      phone: "0400 000 000",
+      email: "jamie@example.com",
+      suburb: "Southport",
+      vehicle: "2016 Toyota Corolla",
+      expectedPrice: "$5,000",
+      fuel: "Petrol",
+      condition: "Running",
+    }),
+  });
+  const result = await response.json();
+
+  assert.equal(response.status, 503);
+  assert.match(result.error, /0423 476 111/);
 });
 
 // Builds a second copy of the site as Vercel would build a preview deployment.

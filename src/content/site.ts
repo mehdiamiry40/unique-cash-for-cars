@@ -50,15 +50,10 @@ export const site = {
     "Surfers Paradise",
     "Robina",
     "Burleigh Heads",
-    "Logan",
-    "Ipswich",
-    "Brisbane South",
   ],
 
   openingHours: [
-    { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], opens: "07:00", closes: "18:00" },
-    { days: ["Saturday"], opens: "08:00", closes: "16:00" },
-    { days: ["Sunday"], opens: "09:00", closes: "15:00" },
+    { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], opens: "09:00", closes: "17:00" },
   ],
 
   social: {
@@ -87,8 +82,6 @@ export const nav = [
       { label: "Cash for Cars Surfers Paradise", href: "/cash-for-cars/surfers-paradise" },
       { label: "Cash for Cars Robina", href: "/cash-for-cars/robina" },
       { label: "Cash for Cars Burleigh Heads", href: "/cash-for-cars/burleigh-heads" },
-      { label: "Cash for Cars Logan", href: "/cash-for-cars/logan" },
-      { label: "Cash for Cars Ipswich", href: "/cash-for-cars/ipswich" },
     ],
   },
   { label: "Company", href: "/company-info-cash-for-cars-gold-coast-and-free-car-removal" },

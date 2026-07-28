@@ -180,7 +180,7 @@ export default function HomePage() {
             <SectionHeading>Get Cash For Scrap Cars Gold Coast</SectionHeading>
             <p className="mb-4 text-lg">
               <strong>Unique Cash For Cars</strong> is a licensed Queensland business
-              buying vehicles across the Gold Coast, Logan and Ipswich. We give people
+              buying vehicles across the Gold Coast. We give local residents
               a quick, straightforward way to get rid of a car they no longer want — a
               firm quote on the phone, cash on collection, and free towing built in.
             </p>
@@ -237,8 +237,8 @@ export default function HomePage() {
       <Section>
         <SectionHeading>Areas we serve</SectionHeading>
         <p className="mx-auto mb-8 max-w-2xl text-center text-lg">
-          Our yard is in Runcorn, which makes Logan our fastest service area. We run
-          down the M1 to the Gold Coast daily and out to Ipswich several times a week.
+          We collect vehicles across the Gold Coast, including Southport, Surfers
+          Paradise, Robina and Burleigh Heads.
         </p>
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {suburbs.map((suburb) => (

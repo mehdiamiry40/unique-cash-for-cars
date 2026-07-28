@@ -11,9 +11,9 @@ import { QuoteForm } from "@/components/QuoteForm";
 import { CallButton, Section, SectionHeading } from "@/components/ui";
 
 export const metadata: Metadata = pageMeta({
-  title: "Cash For Cars — Gold Coast, Logan & Ipswich | Free Removal",
+  title: "Cash For Cars Gold Coast | Free Vehicle Removal",
   description:
-    "Where we buy cars: Southport, Surfers Paradise, Robina, Burleigh Heads, Logan and Ipswich. Cash on collection, free towing, quotes in about a minute.",
+    "We buy cars across Southport, Surfers Paradise, Robina and Burleigh Heads. Get cash on collection, free towing and a fast quote.",
   path: "/cash-for-cars",
 });
 
@@ -34,7 +34,7 @@ export default function CashForCarsHub() {
           <div>
             <h1 className="heading-xl mb-4">Where we buy cars</h1>
             <p className="mb-4 text-xl">
-              We collect from six areas across South East Queensland. Each one is
+              We collect across the Gold Coast. Each service area is
               worth a look — the access, the paperwork and the kinds of cars we see
               differ more than you&apos;d expect from suburb to suburb.
             </p>
@@ -80,10 +80,9 @@ export default function CashForCarsHub() {
         <div className="mx-auto max-w-3xl text-center">
           <SectionHeading>Outside these areas?</SectionHeading>
           <p className="mb-7 text-lg">
-            We&apos;re based in Runcorn and run regularly through Logan, down the M1
-            to the Gold Coast, and west to Ipswich. If you&apos;re anywhere in that
-            corridor, ring us on {site.phone.display} and we&apos;ll tell you straight
-            away whether we can get to you.
+            If your Gold Coast suburb is not listed above, ring us on{" "}
+            {site.phone.display}. We service Gold Coast residents and will tell you
+            straight away when we can collect your vehicle.
           </p>
           <CallButton className="text-xl" />
         </div>

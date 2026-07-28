@@ -69,7 +69,7 @@ export const servicePages: ServicePage[] = [
       {
         question: "Can you buy my car the same day?",
         answer:
-          "Often, yes — particularly in Logan and across the Gold Coast if you call in the morning. Tell us your deadline when you ring and we'll tell you honestly whether we can meet it.",
+          "Often, yes — particularly across the Gold Coast if you call in the morning. Tell us your deadline when you ring and we'll tell you honestly whether we can meet it.",
       },
       {
         question: "Can I sell a car that still has finance owing on it?",
@@ -93,7 +93,7 @@ export const servicePages: ServicePage[] = [
     slug: "car-removal-gold-coast",
     title: "Car Removal Gold Coast — Free Towing, Same Day",
     metaDescription:
-      "Free car removal across the Gold Coast, Logan and Ipswich. Basements, driveways, roadsides and acreage. No callout fee and we pay you for the car.",
+      "Free car removal across the Gold Coast. Basements, driveways and roadsides are covered. No callout fee and we pay you for the car.",
     h1: "Car Removal Gold Coast",
     intro:
       "Towing charges are why so many dead cars sit in driveways for years. Ours is free, and we pay you for the car on top of it.",
@@ -144,7 +144,7 @@ export const servicePages: ServicePage[] = [
       {
         question: "How much notice do you need?",
         answer:
-          "Not much. Same-day is common in Logan and often possible on the Gold Coast if you call in the morning. Next-day is close to guaranteed anywhere we service.",
+          "Not much. Same-day is often possible on the Gold Coast if you call in the morning. We will confirm timing when you request your quote.",
       },
     ],
   },

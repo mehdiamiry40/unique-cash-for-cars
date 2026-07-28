@@ -61,6 +61,11 @@ const nextConfig: NextConfig = {
       { source: "/sitemap_index.xml", destination: "/sitemap.xml", permanent: true },
       { source: "/page-sitemap.xml", destination: "/sitemap.xml", permanent: true },
       { source: "/post-sitemap.xml", destination: "/sitemap.xml", permanent: true },
+      {
+        source: "/top-5-reasons-to-sell-your-car-for-cash-in-brisbane",
+        destination: "/blog",
+        permanent: true,
+      },
     ];
   },
 

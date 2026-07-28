@@ -32,14 +32,19 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         body: JSON.stringify(data),
       });
 
-      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      const result = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) {
+        throw new Error(result.error || `Request failed (${res.status})`);
+      }
 
       setStatus("success");
       form.reset();
-    } catch {
+    } catch (caught) {
       setStatus("error");
       setError(
-        `Something went wrong sending your enquiry. Please call us on ${site.phone.display}.`,
+        caught instanceof Error
+          ? caught.message
+          : `Something went wrong sending your enquiry. Please call us on ${site.phone.display}.`,
       );
     }
   }

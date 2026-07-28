@@ -257,111 +257,6 @@ export const suburbs: Suburb[] = [
       },
     ],
   },
-
-  {
-    slug: "logan",
-    name: "Logan",
-    region: "Logan City",
-    postcode: "4114",
-    title: "Cash For Cars Logan — Fastest Pickup, We're Local",
-    metaDescription:
-      "Our yard is in Runcorn, minutes from Logan. Fastest pickups we offer anywhere — cash paid on the spot, free removal across Woodridge, Springwood and Beenleigh.",
-    h1: "Cash for Cars Logan",
-    hook: "Our closest service area — our depot is in Runcorn, right on the Logan boundary.",
-    driveTime: "usually within the hour — we're 10 to 20 minutes away",
-    localAngle: {
-      heading: "This is our home ground",
-      body: [
-        "Our yard is at Runcorn, which sits directly on the northern edge of Logan City. Woodridge, Springwood, Underwood, Slacks Creek and Kingston are all a short run down the M1 or the Logan Motorway, which makes Logan the fastest service area we have. Where a Gold Coast job might be booked for tomorrow, a Logan job can often be done within the hour.",
-        "Logan is also where we buy the widest range of vehicles. It's a large, spread-out city with a lot of older housing and a lot of driveways with a project car in them, so alongside the usual unwanted runabouts we regularly take utes, vans, 4WDs, trailers and the occasional truck. If you're not sure whether we'll take something, ask — the answer is usually yes.",
-        "Being local also means we know the pickup constraints. Plenty of Logan properties are on acreage or have long unsealed driveways, and some of the older estates have narrow verges with drainage swales that a loaded tilt tray shouldn't cross. Mention the driveway when you book and we'll plan for it.",
-      ],
-    },
-    coverage: [
-      "Woodridge, Kingston and Logan Central",
-      "Springwood, Underwood and Slacks Creek",
-      "Browns Plains and Regents Park",
-      "Beenleigh and Eagleby",
-      "Loganholme and Shailer Park",
-      "Marsden, Crestmead and Berrinba",
-    ],
-    nearby: ["Runcorn", "Sunnybank", "Rochedale", "Daisy Hill", "Park Ridge"],
-    faqs: [
-      {
-        question: "How quickly can you get here?",
-        answer:
-          "Faster than anywhere else we service. Our depot is in Runcorn, minutes from the Logan boundary, so same-day is standard and within-the-hour is often possible if you call early. No suburb in Logan is more than a short run for us.",
-      },
-      {
-        question: "Do you take utes, vans, 4WDs and trailers as well as cars?",
-        answer:
-          "Yes, all of them. Logan is where we see the most light commercial vehicles and we're set up for them. Larger trucks and machinery we'll quote case by case — send a photo and we'll tell you straight away.",
-      },
-      {
-        question: "I've got two or three cars on the property. Can you take them all?",
-        answer:
-          "Yes, and multiple vehicles from one address is usually worth more per car to you because we only make one trip. Tell us how many and roughly what they are and we'll quote the lot together.",
-      },
-      {
-        question: "My driveway is long, unsealed and soft after rain. Is that an issue?",
-        answer:
-          "Tell us when you book. A loaded tilt tray can bog or damage a soft driveway, so we'd rather winch from a firm surface than risk it. It doesn't cost you anything extra either way.",
-      },
-    ],
-  },
-
-  {
-    slug: "ipswich",
-    name: "Ipswich",
-    region: "Ipswich",
-    postcode: "4305",
-    title: "Cash For Cars Ipswich — Flood-Damaged Vehicles Bought",
-    metaDescription:
-      "Cash for cars in Ipswich including flood-damaged and written-off vehicles. Free removal across Booval, Goodna and Springfield. Honest quotes over the phone.",
-    h1: "Cash for Cars Ipswich",
-    hook:
-      "Queensland's oldest provincial city — and the area where we buy the most water-damaged cars.",
-    driveTime: "about 40 minutes from our Runcorn depot",
-    localAngle: {
-      heading: "Flood-damaged cars: what they're actually worth",
-      body: [
-        "Ipswich and the Bremer River corridor have flooded repeatedly, most severely in 2011 and again in 2022, and the suburbs along the river and through Goodna have taken the worst of it. Water-damaged cars are a recurring part of what we buy here, and they're the vehicles owners most often assume are worth nothing.",
-        "They're usually wrong. Insurers write flood cars off because the electrical system, interior and airbag modules can't be trusted afterwards — not because the whole car is scrap. The engine block, gearbox casing, panels, glass, wheels and catalytic converter are frequently unaffected, and that's where most of the recoverable value sits. If yours has been written off and the insurer let you keep it, call us before you pay someone to dispose of it.",
-        "Outside of flood work, Ipswich is a big, old city with a lot of long-term residents and a lot of long-parked cars. We cover the older suburbs around Booval, Bundamba and Blackstone as readily as the newer estates out through Springfield and Redbank Plains.",
-      ],
-    },
-    coverage: [
-      "Ipswich CBD and Brassall",
-      "Booval, Bundamba and Blackstone",
-      "Goodna and Redbank",
-      "Springfield and Springfield Lakes",
-      "Redbank Plains and Collingwood Park",
-      "Karalee and Barellan Point",
-    ],
-    nearby: ["Springfield", "Goodna", "Redbank Plains", "Karalee", "Rosewood"],
-    faqs: [
-      {
-        question: "My car was flood-damaged and written off. Will you still buy it?",
-        answer:
-          "Yes, and it's worth more than most people expect. Insurers write flood cars off over electrical and safety-system risk, but the engine, transmission, panels, glass and catalytic converter are often fine. Bring the written-off notification and we'll quote on it.",
-      },
-      {
-        question: "Do I need to tell you the car has been in a flood?",
-        answer:
-          "Please do. It changes what we can recover, so it changes the quote — and we'd rather price it correctly on the phone than revise the number when the truck arrives. Being told up front is what lets us give you a figure we'll actually honour.",
-      },
-      {
-        question: "Is Ipswich far enough out that you charge for towing?",
-        answer:
-          "No. Removal is free everywhere we service, Ipswich included. We're about 40 minutes away via the Logan and Ipswich motorways and the tow is built into the price we quote you.",
-      },
-      {
-        question: "Can you buy a car that's on a written-off vehicle register?",
-        answer:
-          "Yes. A statutory or repairable write-off on the WOVR doesn't stop us buying it — we're buying it for parts and materials, not to put it back on the road. You'll need the write-off paperwork and ID.",
-      },
-    ],
-  },
 ];
 
 export const suburbSlugs = suburbs.map((s) => s.slug);
@@ -389,6 +284,8 @@ export const retiredSuburbRedirects: Record<string, string> = {
   "varsity-lakes": "/cash-for-cars/robina",
   "mermaid-waters": "/cash-for-cars/burleigh-heads",
   "palm-beach": "/cash-for-cars/burleigh-heads",
+  logan: "/cash-for-cars",
+  ipswich: "/cash-for-cars",
   toowoomba: "/cash-for-cars",
   "cash-for-cars-adelaide": "/",
 };

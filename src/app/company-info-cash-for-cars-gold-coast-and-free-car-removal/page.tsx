@@ -13,7 +13,7 @@ import { CallButton, Card, Section, SectionHeading } from "@/components/ui";
 export const metadata: Metadata = pageMeta({
   title: "About Unique Cash For Cars — Licensed QLD Vehicle Buyer",
   description:
-    "Who we are: a licensed Queensland car buyer based in Runcorn, servicing the Gold Coast, Logan and Ipswich with free removal and cash on collection.",
+    "Unique Cash For Cars buys unwanted vehicles from Gold Coast residents with free removal, straightforward quotes and cash on collection.",
   path: "/company-info-cash-for-cars-gold-coast-and-free-car-removal",
 });
 
@@ -43,11 +43,8 @@ export default function CompanyPage() {
               left properly.
             </p>
             <p>
-              Our yard is at {site.address.street}, {site.address.suburb}, on
-              Brisbane&apos;s southside. That location shapes how we work: Logan is on
-              our doorstep and gets the fastest response we offer, the Gold Coast is a
-              straight run down the M1, and we&apos;re out through Ipswich several
-              times a week.
+              We service Gold Coast residents and arrange collection directly from
+              homes, workplaces and other accessible locations across the city.
             </p>
             <p>
               We&apos;re a small operation, which we think works in your favour. The

@@ -7,8 +7,8 @@ import { NextResponse } from "next/server";
  *   RESEND_API_KEY + QUOTE_TO_EMAIL   → email via Resend
  *   QUOTE_WEBHOOK_URL                 → POST to Zapier / Make / your CRM
  *
- * With neither set, submissions are logged to the server console only. That's
- * fine in development and a lost lead in production, so don't ship without it.
+ * With neither set, the endpoint returns an error instead of pretending that
+ * the enquiry was delivered.
  */
 
 export const runtime = "nodejs";
@@ -30,6 +30,40 @@ type QuotePayload = {
 const recent = new Map<string, number[]>();
 const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 5;
+const MAX_BODY_BYTES = 32_000;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const ALLOWED_FUEL_TYPES = new Set(["Petrol", "Diesel", "Hybrid"]);
+
+function json(body: Record<string, unknown>, status = 200) {
+  return NextResponse.json(body, {
+    status,
+    headers: {
+      "Cache-Control": "no-store",
+      "X-Content-Type-Options": "nosniff",
+    },
+  });
+}
+
+function sameOrigin(request: Request) {
+  const origin = request.headers.get("origin");
+  if (!origin) return true;
+
+  const host =
+    request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  if (!host) return false;
+
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
+}
+
+function text(value: unknown, maxLength: number) {
+  return typeof value === "string"
+    ? value.trim().replace(/\s+/g, " ").slice(0, maxLength)
+    : "";
+}
 
 function rateLimited(ip: string) {
   const now = Date.now();
@@ -40,50 +74,85 @@ function rateLimited(ip: string) {
 }
 
 export async function POST(request: Request) {
+  if (!sameOrigin(request)) {
+    return json(
+      { error: "This enquiry could not be verified. Please refresh and try again." },
+      403,
+    );
+  }
+
+  const contentLength = Number(request.headers.get("content-length") ?? "0");
+  if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
+    return json({ error: "This enquiry is too large." }, 413);
+  }
+
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
 
   if (rateLimited(ip)) {
-    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    return json(
+      { error: "Too many enquiries were sent. Please wait a minute and try again." },
+      429,
+    );
   }
 
   let body: QuotePayload;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return json({ error: "The enquiry could not be read." }, 400);
   }
 
   // Honeypot tripped — accept silently so the bot doesn't learn.
-  if (body.website) return NextResponse.json({ ok: true });
+  if (body.website) return json({ ok: true });
 
-  const name = body.name?.trim();
-  const phone = body.phone?.trim();
-  const email = body.email?.trim();
+  const name = text(body.name, 100);
+  const phone = text(body.phone, 40);
+  const email = text(body.email, 254);
 
   if (!name || !phone || !email) {
-    return NextResponse.json(
-      { error: "Name, phone and email are required" },
-      { status: 400 },
+    return json(
+      { error: "Name, phone and email are required." },
+      400,
     );
+  }
+  if (phone.replace(/\D/g, "").length < 8) {
+    return json({ error: "Please enter a valid phone number." }, 400);
+  }
+  if (!EMAIL_PATTERN.test(email)) {
+    return json({ error: "Please enter a valid email address." }, 400);
   }
 
   const lead = {
     name,
     phone,
     email,
-    suburb: body.suburb?.trim() || "—",
-    vehicle: body.vehicle?.trim() || "—",
-    expectedPrice: body.expectedPrice?.trim() || "—",
-    fuel: body.fuel?.trim() || "—",
-    condition: body.condition?.trim() || "—",
+    suburb: text(body.suburb, 120) || "—",
+    vehicle: text(body.vehicle, 160) || "—",
+    expectedPrice: text(body.expectedPrice, 60) || "—",
+    fuel: ALLOWED_FUEL_TYPES.has(text(body.fuel, 20))
+      ? text(body.fuel, 20)
+      : "—",
+    condition: text(body.condition, 500) || "—",
     receivedAt: new Date().toISOString(),
-    ip,
   };
 
   const webhook = process.env.QUOTE_WEBHOOK_URL;
   const resendKey = process.env.RESEND_API_KEY;
   const toEmail = process.env.QUOTE_TO_EMAIL;
+  const fromEmail =
+    process.env.QUOTE_FROM_EMAIL ??
+    "Unique Cash for Cars <onboarding@resend.dev>";
+
+  if (!webhook && (!resendKey || !toEmail)) {
+    return json(
+      {
+        error:
+          "Online enquiries are temporarily unavailable. Please call 0423 476 111.",
+      },
+      503,
+    );
+  }
 
   try {
     if (webhook) {
@@ -101,7 +170,7 @@ export async function POST(request: Request) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "Website Enquiry <onboarding@resend.dev>",
+          from: fromEmail,
           to: [toEmail],
           reply_to: email,
           subject: `New car quote enquiry — ${name} (${lead.suburb})`,
@@ -109,18 +178,20 @@ export async function POST(request: Request) {
             .map(([k, v]) => `${k}: ${v}`)
             .join("\n"),
         }),
+        signal: AbortSignal.timeout(10_000),
       });
       if (!res.ok) throw new Error(`Resend responded ${res.status}`);
-    } else {
-      console.warn(
-        "[quote] No QUOTE_WEBHOOK_URL or RESEND_API_KEY set — lead logged only:",
-        lead,
-      );
     }
   } catch (err) {
     console.error("[quote] Delivery failed:", err);
-    return NextResponse.json({ error: "Delivery failed" }, { status: 502 });
+    return json(
+      {
+        error:
+          "Your enquiry could not be sent. Please try again or call 0423 476 111.",
+      },
+      502,
+    );
   }
 
-  return NextResponse.json({ ok: true });
+  return json({ ok: true });
 }
