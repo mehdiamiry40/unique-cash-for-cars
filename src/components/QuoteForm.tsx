@@ -54,6 +54,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
   // hairline grey is 1.26:1 — fine for a decorative divider, not for this.
   const inputClass =
     "w-full rounded border border-field bg-surface px-4 py-3 text-base text-ink placeholder:text-ink-muted focus:border-brand focus:outline-2 focus:outline-offset-0 focus:outline-brand";
+  const labelClass = "mb-1.5 block text-sm font-semibold text-ink-heading";
 
   if (status === "success") {
     return (
@@ -89,23 +90,25 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
       </h2>
 
       <div className="grid gap-4">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
           <div>
-            <label htmlFor="q-name" className="sr-only">
-              Your name
+            <label htmlFor="q-name" className={labelClass}>
+              Full name <span aria-hidden="true">*</span>
+              <span className="sr-only"> (required)</span>
             </label>
             <input
               id="q-name"
               name="name"
               required
               autoComplete="name"
-              placeholder="Name*"
+              placeholder="Your full name"
               className={inputClass}
             />
           </div>
           <div>
-            <label htmlFor="q-phone" className="sr-only">
-              Your phone number
+            <label htmlFor="q-phone" className={labelClass}>
+              Phone number <span aria-hidden="true">*</span>
+              <span className="sr-only"> (required)</span>
             </label>
             <input
               id="q-phone"
@@ -114,15 +117,16 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
               required
               autoComplete="tel"
               inputMode="tel"
-              placeholder="Phone*"
+              placeholder="e.g. 0423 476 111"
               className={inputClass}
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="q-email" className="sr-only">
-            Your email address
+          <label htmlFor="q-email" className={labelClass}>
+            Email address <span aria-hidden="true">*</span>
+            <span className="sr-only"> (required)</span>
           </label>
           <input
             id="q-email"
@@ -131,14 +135,14 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
             required
             autoComplete="email"
             inputMode="email"
-            placeholder="Email*"
+            placeholder="you@example.com"
             className={inputClass}
           />
         </div>
 
         <div>
-          <label htmlFor="q-suburb" className="sr-only">
-            Suburb where the car is located
+          <label htmlFor="q-suburb" className={labelClass}>
+            Suburb
           </label>
           <input
             id="q-suburb"
@@ -150,7 +154,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </div>
 
         <div>
-          <label htmlFor="q-vehicle" className="sr-only">
+          <label htmlFor="q-vehicle" className={labelClass}>
             Make, model and year
           </label>
           <input
@@ -162,7 +166,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </div>
 
         <div>
-          <label htmlFor="q-price" className="sr-only">
+          <label htmlFor="q-price" className={labelClass}>
             Expected price
           </label>
           <input
@@ -193,7 +197,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </fieldset>
 
         <div>
-          <label htmlFor="q-condition" className="sr-only">
+          <label htmlFor="q-condition" className={labelClass}>
             Car condition
           </label>
           <input

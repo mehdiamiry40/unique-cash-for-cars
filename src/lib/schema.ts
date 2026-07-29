@@ -26,10 +26,10 @@ export function organizationSchema() {
     url: site.url,
     telephone: site.phone.e164,
     email: site.email,
-    image: `${site.url}/img/logo.jpg`,
+    image: `${site.url}/img/logo-enhanced.png`,
     logo: {
       "@type": "ImageObject",
-      url: `${site.url}/img/logo.jpg`,
+      url: `${site.url}/img/logo-enhanced.png`,
       caption: site.legalName,
     },
     priceRange: "$$",
@@ -46,7 +46,6 @@ export function organizationSchema() {
       closes: slot.closes,
     })),
     sameAs: [site.social.facebook].filter(Boolean),
-    ...(site.abn ? { taxID: site.abn } : {}),
   };
 }
 
