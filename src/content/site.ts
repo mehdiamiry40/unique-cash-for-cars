@@ -33,7 +33,7 @@ export const site = {
     href: "tel:+61732196670",
   },
 
-  email: "uniquecashforcars@gmail.com",
+  email: "info@uniquecashforcars.com.au",
 
   /**
    * Registered as a service-area business: we travel to the customer.
@@ -58,6 +58,19 @@ export const site = {
   social: {
     facebook: "https://www.facebook.com/uniquecashforcars/",
   },
+
+  /**
+   * TODO — fill these in and they render automatically in the footer and on
+   * the About page. Both are trust signals worth real money in this industry.
+   *
+   * The site used to assert "a licensed, insured Queensland business" in four
+   * places while these were empty, which is an unsubstantiated representation
+   * under Australian Consumer Law. That copy has been reworded to claims the
+   * business can actually stand behind. Once you have the licence number,
+   * `git log --grep="Substantiate"` shows exactly which sentences to restore.
+   */
+  abn: "" as string,
+  licenceNumber: "" as string,
 
   /** Headline offer. Change once here, updates every page and title tag. */
   maxPayout: "$9,999",

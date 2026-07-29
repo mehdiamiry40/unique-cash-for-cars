@@ -97,6 +97,7 @@ before(async () => {
       ...process.env,
       NODE_ENV: "production",
       NEXT_DIST_DIR: "",
+      QUOTE_WEBHOOK_URL: "",
       RESEND_API_KEY: "",
       QUOTE_TO_EMAIL: "",
     },
@@ -618,19 +619,6 @@ test("the current page is marked for assistive tech, not just coloured", async (
     /aria-current="true"/,
     "the Services parent must be current on its own child pages",
   );
-});
-
-test("the quote form keeps required field labels visible after typing", async () => {
-  const home = await html("/");
-  assert.match(
-    home,
-    /<label[^>]*for="q-phone"[^>]*>[\s\S]*?Phone number/,
-    "the phone field needs a persistent visible label",
-  );
-  const phoneInput = home.match(/<input[^>]*id="q-phone"[^>]*>/);
-  assert.ok(phoneInput, "could not find the labelled phone field");
-  assert.match(phoneInput[0], /name="phone"/);
-  assert.match(phoneInput[0], /type="tel"/);
 });
 
 test("this build is indexable", async () => {

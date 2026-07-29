@@ -5,6 +5,10 @@
  * changing them would throw away whatever links and rankings they have.
  * Each post lives at src/app/(posts)/<slug>/page.mdx.
  *
+ * Note: the 2020 eco-cars post is badly dated. Options are to refresh it with
+ * current models or to 301 it to a relevant page. Leaving a six-year-old
+ * "best of 2020" list live is the worst of the three.
+ *
  * REVIEW ANNUALLY — the write-off, registration-transfer and finance guides
  * describe Queensland regulatory processes. Those change. Each post carries a
  * caveat pointing readers at TMR or the PPSR as the authority, but a guide
@@ -75,12 +79,11 @@ export const posts: Post[] = [
   },
   {
     slug: "5-best-luxury-eco-friendly-cars-in-australia-2020",
-    title: "5 luxury electric cars to compare in Australia in 2026",
+    title: "5 best luxury eco-friendly cars in Australia (2020)",
     description:
-      "Five current premium EVs, the official range and charging figures that matter, and how to choose one without treating electric as impact-free.",
+      "An archived look at the luxury hybrid and electric models available in Australia in 2020.",
     date: "2020-02-14",
-    updated: "2026-07-29",
-    readingMinutes: 8,
+    readingMinutes: 4,
   },
 ];
 
