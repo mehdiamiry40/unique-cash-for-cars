@@ -1,17 +1,15 @@
 import type { Metadata } from "next";
 
-import { site } from "@/content/site";
 import { pageMeta } from "@/lib/seo";
 import { breadcrumbSchema, graph } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
-import { CallButton, Card, Section, SectionHeading } from "@/components/ui";
+import { CallButton, Section, SectionHeading } from "@/components/ui";
 
 /**
  * URL kept exactly as it was on WordPress. It's an ugly slug, but it's an
  * indexed one — renaming it would throw away whatever equity it has for no gain.
  */
 export const metadata: Metadata = pageMeta({
-  // "Licensed QLD Vehicle Buyer" until site.licenceNumber exists to back it.
   title: "About Unique Cash For Cars — Gold Coast Vehicle Buyer",
   description:
     "Unique Cash For Cars buys unwanted vehicles from Gold Coast residents with free removal, straightforward quotes and cash on collection.",
@@ -82,30 +80,6 @@ export default function CompanyPage() {
           </div>
         </div>
       </Section>
-
-      {(site.abn || site.licenceNumber) && (
-        <Section>
-          <div className="mx-auto max-w-3xl">
-            <SectionHeading align="left">Licensing and credentials</SectionHeading>
-            <Card>
-              <dl className="space-y-3">
-                {site.abn && (
-                  <div className="flex gap-3">
-                    <dt className="font-bold text-ink-heading">ABN</dt>
-                    <dd>{site.abn}</dd>
-                  </div>
-                )}
-                {site.licenceNumber && (
-                  <div className="flex gap-3">
-                    <dt className="font-bold text-ink-heading">QLD licence</dt>
-                    <dd>{site.licenceNumber}</dd>
-                  </div>
-                )}
-              </dl>
-            </Card>
-          </div>
-        </Section>
-      )}
 
       <Section tone="alt">
         <div className="mx-auto max-w-3xl text-center">

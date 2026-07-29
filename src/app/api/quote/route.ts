@@ -4,11 +4,9 @@ import { site } from "@/content/site";
 /**
  * Quote enquiry endpoint.
  *
- * TODO before launch — pick one delivery method and set the matching env var:
- *   RESEND_API_KEY + QUOTE_TO_EMAIL   → email via Resend
- *   QUOTE_WEBHOOK_URL                 → POST to Zapier / Make / your CRM
+ * Configure RESEND_API_KEY and QUOTE_TO_EMAIL before launch.
  *
- * With neither set, the endpoint returns an error instead of pretending that
+ * With either missing, the endpoint returns an error instead of pretending that
  * the enquiry was delivered.
  */
 
@@ -206,14 +204,13 @@ export async function POST(request: Request) {
     receivedAt: new Date().toISOString(),
   };
 
-  const webhook = process.env.QUOTE_WEBHOOK_URL;
   const resendKey = process.env.RESEND_API_KEY;
   const toEmail = process.env.QUOTE_TO_EMAIL;
   const fromEmail =
     process.env.QUOTE_FROM_EMAIL ??
     "Unique Cash for Cars <onboarding@resend.dev>";
 
-  if (!webhook && (!resendKey || !toEmail)) {
+  if (!resendKey || !toEmail) {
     return json(
       {
         error:
@@ -224,33 +221,24 @@ export async function POST(request: Request) {
   }
 
   try {
-    if (webhook) {
-      const res = await fetch(webhook, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(lead),
-      });
-      if (!res.ok) throw new Error(`Webhook responded ${res.status}`);
-    } else if (resendKey && toEmail) {
-      const res = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${resendKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: fromEmail,
-          to: [toEmail],
-          reply_to: email,
-          subject: `New car quote enquiry — ${name} (${lead.suburb})`,
-          text: Object.entries(lead)
-            .map(([k, v]) => `${k}: ${v}`)
-            .join("\n"),
-        }),
-        signal: AbortSignal.timeout(10_000),
-      });
-      if (!res.ok) throw new Error(`Resend responded ${res.status}`);
-    }
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: fromEmail,
+        to: [toEmail],
+        reply_to: email,
+        subject: `New car quote enquiry — ${name} (${lead.suburb})`,
+        text: Object.entries(lead)
+          .map(([k, v]) => `${k}: ${v}`)
+          .join("\n"),
+      }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) throw new Error(`Resend responded ${res.status}`);
   } catch (err) {
     console.error("[quote] Delivery failed:", err);
     return json(

@@ -24,13 +24,6 @@ export const metadata: Metadata = pageMeta({
   path: "/",
 });
 
-/*
- * No licensing or insurance claim appears in this list. site.licenceNumber is
- * still empty, and an unsubstantiated "licensed and insured" line is a
- * representation the business cannot currently back up. Fill in
- * site.licenceNumber and site.abn, then put the claim back — with the number
- * next to it, which is worth far more than the adjective on its own.
- */
 const heroPoints = [
   "A Gold Coast business — we quote it and we pay for it, in person",
   `Top cash for cars Gold Coast — up to ${site.maxPayout} for old and new cars`,
@@ -43,38 +36,38 @@ const heroPoints = [
 const services = [
   {
     title: "Cash for Old Cars",
-    image: "/img/old-car-gold-coast.jpg",
-    alt: "An old sedan parked in a Gold Coast driveway, ready for removal",
+    image: "/img/old-car-gold-coast-enhanced.jpg",
+    alt: "A dirt-streaked old station wagon in an industrial yard",
     body: "An old car sitting in the driveway that nobody drives any more. It doesn't need to be roadworthy and it doesn't need to start — we pay a fair price and tow it away.",
   },
   {
     title: "Cash for Unwanted Cars",
-    image: "/img/unwanted-car-gold-coast.jpg",
-    alt: "An unwanted car left on a Gold Coast property",
+    image: "/img/unwanted-car-gold-coast-enhanced.jpg",
+    alt: "A red compact car stored in a covered vehicle yard",
     body: "Cars, utes, vans, buses, 4WDs, hatchbacks, hybrids and EVs. If it has four wheels and you want it gone, we'll quote on it, usually within a day.",
   },
   {
     title: "Cash for Scrap Cars",
-    image: "/img/car-abandoned.jpg",
-    alt: "An abandoned scrap car with flat tyres awaiting collection",
+    image: "/img/car-abandoned-enhanced.jpg",
+    alt: "A damaged silver car with broken glass in an overgrown salvage yard",
     body: "Past the point of repair is not the same as worthless. We recover the drivetrain, panels, glass and catalytic converter, and dispose of the rest properly.",
   },
   {
     title: "Cash for Accident-Damaged Cars",
-    image: "/img/accident-damaged-car.jpg",
-    alt: "A car with accident damage to the front quarter panel",
+    image: "/img/accident-damaged-car-enhanced.jpg",
+    alt: "A white car with severe roof and windscreen damage in a salvage yard",
     body: "Written off, still at the smash repairer, or sitting where it stopped. Wherever your damaged car is, we come to it and the removal costs you nothing.",
   },
   {
     title: "Cash for Used Cars",
-    image: "/img/used-car-gold-coast.jpg",
-    alt: "A used hatchback of the kind we buy across the Gold Coast",
+    image: "/img/used-car-gold-coast-enhanced.jpg",
+    alt: "A used Toyota four-wheel drive with a bull bar",
     body: "When the repair quote is higher than the car is worth, selling it whole is usually the better outcome. We buy any used car regardless of make, model or year.",
   },
   {
     title: "Cash for Damaged Cars",
-    image: "/img/car-front-damaged.jpg",
-    alt: "A car with a crumpled front end after a collision",
+    image: "/img/car-front-damaged-enhanced.jpg",
+    alt: "A black sedan with severe damage to its front-right corner",
     body: "Body damage, missing parts, electrical faults, mechanical failure, flood or hail damage. Tell us what's wrong up front and we'll price it honestly.",
   },
 ] as const;
