@@ -183,46 +183,61 @@ want gone. The old site made them scroll to find a phone number.
 
 ### 1. Wire up the quote form
 
-`src/app/api/quote/route.ts` sends enquiries through Resend. Configure:
+`src/app/api/quote/route.ts` needs one of these in your environment:
 
 ```bash
+QUOTE_WEBHOOK_URL=...      # Zapier / Make / your CRM
+# or
 RESEND_API_KEY=...
-QUOTE_TO_EMAIL=uniquecashforcars@gmail.com
+QUOTE_TO_EMAIL=...
 ```
 
-**With either missing, the endpoint answers 503 and tells the caller to phone
+**With neither set, the endpoint answers 503 and tells the caller to phone
 instead.** It does not accept and drop the enquiry, and it does not report
 success it cannot deliver — but nobody can reach you through the form until one
 of these is configured. Don't ship without it.
 
-### 2. Replace the testimonial placeholders
+### 2. Fill in the gaps in `src/content/site.ts`
+
+`abn` and `licenceNumber` are empty strings. Fill them in and they appear
+automatically in the footer and on the About page.
+
+This one is not cosmetic. The old site called itself "a trustworthy and
+licensed business" on nearly every page while displaying neither number, and
+the rebuild inherited the claim in four places — the hero list, the homepage
+intro, a homepage FAQ and the About page's `<title>`. Those have been reworded
+to things the business can stand behind, because an unsubstantiated licensing
+representation is an Australian Consumer Law exposure, not just weak copy.
+
+Once you have the licence number, put the stronger wording back **with the
+number next to it** — "Licensed QLD vehicle buyer, licence 12345" is worth far
+more than the adjective on its own.
+
+### 3. Replace the placeholders in `src/content/suburbs.ts`
 
 Search for `NEEDS OWNER INPUT`. Real testimonials with a first name and suburb.
 Don't invent them.
 
-Drafting examples—these are fictional prompts, not customer endorsements:
+### 4. Decide on the 2020 blog post
 
-- `[First name], Southport`: “The quote was clear, pickup was arranged around
-  my workday, and the amount did not change when the truck arrived.”
-- `[First name], Robina`: “My car would not start. They collected it from the
-  driveway and explained the paperwork before loading it.”
-- `[First name], Burleigh Heads`: “I sent the vehicle details in the morning
-  and had it removed that afternoon without a towing charge.”
+`5-best-luxury-eco-friendly-cars-in-australia-2020` is six years out of date.
+It's currently labelled as an archive — and the label is now actually visible,
+which it wasn't: the callout is a blockquote and `prose-site` had no blockquote
+rule, so it rendered as ordinary prose. Either rewrite the post or add a
+redirect in `next.config.ts`.
 
-Replace every bracketed field and sentence with the customer's own approved
-words before adding one to `src/content/suburbs.ts`. These examples are
-deliberately not wired into the public site.
+If you redirect it, delete the `.mdx` file in the same commit. `check:urls`
+will fail if you don't — a page file shadowed by a redirect is built on every
+deploy and served to nobody, which is exactly what happened to the retired
+Brisbane post.
 
-### 3. Review the enhanced service-card photographs
+### 5. Replace the service-card photographs
 
-The original 460×345 service-card images are preserved in `public/img`. The
-homepage uses AI-restored 1200×900 versions with clearer detail, corrected
-exposure and less compression blur. The original 200×87 logo is also preserved;
-the header and schema use a deterministic 800×348 upscale so its lettering is
-unchanged.
-
-Treat the restored photographs as an interim improvement. Replace them with
-high-resolution original photography when it becomes available.
+The six images on the homepage are 460×345, and that is the largest copy that
+exists anywhere in `public/wp-content/uploads`. A modern phone at 2× wants
+roughly 780px across, so the cards are soft on most devices and no code change
+can fix it. Same story for the header logo at 200×87. New photography is the
+only remedy.
 
 ---
 

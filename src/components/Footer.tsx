@@ -41,6 +41,16 @@ export function Footer() {
                 </a>
               </p>
             </div>
+
+            {/* These render only once filled in — see src/content/site.ts */}
+            {site.abn && (
+              <p className="mt-3 text-sm text-ink-muted">ABN {site.abn}</p>
+            )}
+            {site.licenceNumber && (
+              <p className="text-sm text-ink-muted">
+                QLD Licence {site.licenceNumber}
+              </p>
+            )}
           </div>
 
           <div>

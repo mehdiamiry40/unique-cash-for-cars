@@ -63,11 +63,17 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b border-hairline bg-surface/95 backdrop-blur supports-backdrop-filter:bg-surface/80">
       <Container className="flex h-20 items-center justify-between gap-4">
         <Link href="/" className="shrink-0" aria-label={`${site.name} — home`}>
+          {/*
+            width/height are the file's true intrinsic size (200x87). They said
+            170x74, which made next/image advertise 256w and 384w candidates
+            for a 200px source. Note the source is still short of a 2x render
+            at h-14 — a higher-resolution logo is the only real fix for that.
+          */}
           <Image
-            src="/img/logo-enhanced.png"
+            src="/img/logo.jpg"
             alt={site.legalName}
-            width={800}
-            height={348}
+            width={200}
+            height={87}
             priority
             className="h-14 w-auto"
           />
