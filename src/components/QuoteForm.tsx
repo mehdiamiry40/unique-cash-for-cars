@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { site } from "@/content/site";
+import { trackQuoteConversion } from "@/components/GoogleAdsTracking";
 
 const FUEL_TYPES = ["Petrol", "Diesel", "Hybrid"] as const;
 
@@ -32,11 +33,15 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         body: JSON.stringify(data),
       });
 
-      const result = (await res.json().catch(() => ({}))) as { error?: string };
+      const result = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        leadId?: string;
+      };
       if (!res.ok) {
         throw new Error(result.error || `Request failed (${res.status})`);
       }
 
+      trackQuoteConversion(result.leadId);
       setStatus("success");
       form.reset();
     } catch (caught) {
@@ -230,7 +235,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
           data-cta="quote-submit"
           className="w-full rounded bg-brand px-6 py-3.5 font-bold uppercase tracking-wide text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {status === "submitting" ? "Sending…" : "Get Inquiry Now"}
+          {status === "submitting" ? "Sending…" : "Get a Free Quote"}
         </button>
 
         <p className="text-center text-xs text-ink-muted">

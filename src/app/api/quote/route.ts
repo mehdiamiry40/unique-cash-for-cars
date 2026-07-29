@@ -193,8 +193,10 @@ export async function POST(request: Request) {
   }
 
   const fuel = text(body.fuel, 20);
+  const leadId = crypto.randomUUID();
 
   const lead = {
+    leadId,
     name,
     phone,
     email,
@@ -262,5 +264,5 @@ export async function POST(request: Request) {
     );
   }
 
-  return json({ ok: true });
+  return json({ ok: true, leadId });
 }
