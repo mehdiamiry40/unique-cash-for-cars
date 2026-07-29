@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { GoogleAdsTracking } from "@/components/GoogleAdsTracking";
 import { MobileCallBar } from "@/components/MobileCallBar";
 import { JsonLd } from "@/components/JsonLd";
 import { site } from "@/content/site";
@@ -62,6 +63,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en-AU" className={openSans.variable}>
       <body className="flex min-h-full flex-col font-sans antialiased">
+        <GoogleAdsTracking />
+
         {/* Site-wide schema: emitted once, referenced by @id from every page. */}
         <JsonLd data={graph(organizationSchema(), websiteSchema())} />
 
