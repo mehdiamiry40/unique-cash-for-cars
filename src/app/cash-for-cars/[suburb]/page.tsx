@@ -25,10 +25,10 @@ export function generateStaticParams() {
 }
 
 /**
- * The four slugs above are the only ones that exist. Without this, an unknown
- * slug is rendered on demand just to reach notFound() — so every crawler
- * probing /cash-for-cars/<anything> costs a server invocation. Retired suburbs
- * are handled earlier, by the 301s in next.config.ts.
+ * Only the slugs in `suburbs` exist. Without this, an unknown slug is rendered
+ * on demand just to reach notFound() — so every crawler probing
+ * /cash-for-cars/<anything> costs a server invocation. Retired suburbs are
+ * handled earlier, by the 301s in next.config.ts.
  */
 export const dynamicParams = false;
 

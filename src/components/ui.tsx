@@ -79,7 +79,7 @@ export function CallButton({
     <a
       href={site.phone.href}
       data-cta="call"
-      className={`inline-flex items-center justify-center gap-2.5 rounded bg-brand px-7 py-3.5 text-lg font-bold text-white transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${className}`}
+      className={`inline-flex items-center justify-center gap-2.5 rounded bg-brand px-7 py-3.5 text-lg font-bold text-white transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${className}`}
     >
       <PhoneIcon />
       {label ?? site.phone.display}

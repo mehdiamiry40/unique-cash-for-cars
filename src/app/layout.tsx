@@ -8,7 +8,7 @@ import { GoogleAdsTracking } from "@/components/GoogleAdsTracking";
 import { MobileCallBar } from "@/components/MobileCallBar";
 import { JsonLd } from "@/components/JsonLd";
 import { site } from "@/content/site";
-import { isSearchVisible } from "@/lib/deploy";
+import { isAdsEnabled, isSearchVisible } from "@/lib/deploy";
 import { graph, organizationSchema, websiteSchema } from "@/lib/schema";
 
 /**
@@ -68,14 +68,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en-AU" className={openSans.variable}>
       <body className="flex min-h-full flex-col font-sans antialiased">
-        <GoogleAdsTracking />
+        {/* Ads only on the production deployment — preview URLs must not fire
+            production conversion tags against real ad accounts. */}
+        {isAdsEnabled ? <GoogleAdsTracking /> : null}
 
         {/* Site-wide schema: emitted once, referenced by @id from every page. */}
         <JsonLd data={graph(organizationSchema(), websiteSchema())} />
 
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-brand focus:px-4 focus:py-2 focus:text-white"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-brand focus:outline-2 focus:outline-offset-2 focus:outline-white"
         >
           Skip to content
         </a>

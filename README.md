@@ -54,7 +54,7 @@ It asserts, across every page in the sitemap:
   and `WebSite` everywhere, `FAQPage` where FAQs render, `BreadcrumbList`,
   `Service` on location pages, `BlogPosting` on posts), no `aggregateRating`,
   and **every `{"@id"}` reference resolves to a node defined on the same page**
-- The 15 retired location URLs return a permanent redirect to a page that exists
+- The retired location URLs return a permanent redirect to a page that exists
 - The security headers are actually on the response — including HSTS and the
   nonce-free CSP directives — and `x-powered-by` is not
 - Images and the preserved WordPress upload paths are served immutable
@@ -97,7 +97,7 @@ image, and an inverted preview-indexing rule.
 src/
   content/
     site.ts          Business details — name, phone, address, hours. Single source of truth.
-    suburbs.ts       The 4 location pages + the 15 retired-page redirects.
+    suburbs.ts       The 8 location pages + the retired-page redirects.
     services.ts      The 3 service pages.
     posts.ts         Blog index metadata.
   app/
@@ -149,11 +149,12 @@ and every `tel:` link.
 
 Read `docs/seo-audit-uniquecashforcars.md` for the full reasoning. The short list:
 
-**19 location pages → 4.** The old ones were spun from a single template:
+**19 location pages → 8.** The old ones were spun from a single template:
 median 45% of sentences identical between any two pages once the suburb name
 was swapped out, worst pair 93%, and 18 of 19 pages within 140 words of the
 same length. Google treats that as doorway pages and suppresses the whole
-domain. The 15 retired pages 301 to the nearest survivor; nothing 404s.
+domain. The retired pages 301 to the nearest survivor; nothing 404s. Four
+further Gold Coast suburbs were later rewritten with unique local angles.
 
 The pages that remain each lead with something only true of that place —
 basement access in Surfers and salt corrosion in Burleigh, for example.
@@ -255,17 +256,22 @@ escape hatch.
 
 1. `npm run verify` — must pass clean.
 2. `npm run build && npm start` — click through every page locally.
-3. Deploy. Keep the WordPress site up until DNS has fully propagated.
+3. Deploy to production (`VERCEL_ENV=production`). The production site is
+   already the Next.js rebuild — WordPress is gone.
 4. **Search Console:** submit `https://uniquecashforcars.com.au/sitemap.xml`.
    The old `/sitemap_index.xml` 301s to it, so existing submissions keep working.
-5. Re-add the Google Analytics / GTM / Clarity tags. They were on the old site
-   and are **not** in this build yet — decide whether you want them all before
-   adding them back.
-6. Use Search Console's URL Inspection on the six location pages and the
+5. Google Ads conversion / call measurement is already in the production build
+   (`GoogleAdsTracking`, production-only). GA4, GTM and Clarity are still
+   optional — add them only if you want them, and update the privacy policy
+   in the same change.
+6. Use Search Console's URL Inspection on the eight location pages and the
    homepage to confirm the canonical and schema are read correctly.
 7. Watch Coverage in Search Console daily for the first fortnight. A spike in
    404s means a URL was missed — `check:urls` should have caught it, so add the
    URL to `scripts/legacy-urls.json` and fix it.
+8. Fill `site.abn` and `site.licenceNumber`, replace suburb testimonial
+   placeholders, and set up the Google Business Profile — none of those are
+   code problems.
 
 Expect a ranking dip for two to four weeks while Google reprocesses the
 redirects. That's normal for a migration. What isn't normal is a dip that

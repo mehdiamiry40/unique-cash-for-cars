@@ -676,6 +676,64 @@ test("the quote endpoint never reports success without a delivery service", asyn
   assert.match(result.error, /0423 476 111/);
 });
 
+test("a honeypot hit answers 200 without a leadId", async () => {
+  // Silent 200 keeps bots from learning; omitting leadId is what stops the
+  // client from counting a Google Ads conversion for discarded spam.
+  const response = await fetch(`${origin}/api/quote`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-forwarded-for": "192.0.2.12",
+    },
+    body: JSON.stringify({
+      name: "Bot",
+      phone: "0400 000 000",
+      email: "bot@example.com",
+      contactRef: "http://spam.example",
+    }),
+  });
+  const result = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(result.ok, true);
+  assert.equal(result.leadId, undefined);
+});
+
+test("the privacy policy describes the Google Ads tags that production loads", async () => {
+  // The policy previously claimed "no third-party analytics or advertising"
+  // while the root layout loaded googletagmanager.com. Keep the two in sync.
+  const source = await html("/privacy-policy");
+  assert.match(source, /Google Ads/i);
+  assert.doesNotMatch(
+    source,
+    /loads no third-party analytics/i,
+    "privacy policy must not deny the Ads tags the layout loads",
+  );
+});
+
+test("archived posts stay reachable but leave the sitemap", async () => {
+  const archived = "/5-best-luxury-eco-friendly-cars-in-australia-2020";
+  const paths = await sitemapPaths();
+  assert.ok(!paths.includes(archived), "archived posts must not be in the sitemap");
+
+  const response = await fetch(`${origin}${archived}`, { redirect: "manual" });
+  assert.equal(response.status, 200, "archived posts must still resolve for inbound links");
+
+  const blog = await html("/blog");
+  assert.match(blog, /Archived/);
+});
+
+test("Cash For Cars nav lists every live suburb", async () => {
+  const home = await html("/");
+  for (const path of suburbRoutes) {
+    assert.match(
+      home,
+      new RegExp(`href="${path.replace(/\//g, "\\/")}"`),
+      `nav/footer must link to ${path}`,
+    );
+  }
+});
+
 // Builds a second copy of the site as Vercel would build a preview deployment.
 // The assertion is worth the extra build: a preview URL left indexable competes
 // with the live site for its own keywords, and nobody notices for months.
@@ -711,4 +769,12 @@ test("a preview deployment is not indexable", { timeout: 600_000 }, async () => 
   // robots.txt stops crawling; noindex removes anything already discovered.
   // Both matter, so both are checked.
   assert.match(metaOf(built("index.html"), "robots"), /noindex/);
+
+  // Production conversion tags must not ship on preview URLs — they would
+  // pollute the live Google Ads account with clicks from branch deploys.
+  assert.doesNotMatch(
+    built("index.html"),
+    /googletagmanager\.com/,
+    "a preview build must not load Google Ads",
+  );
 });

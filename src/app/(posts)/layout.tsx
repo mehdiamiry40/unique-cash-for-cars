@@ -6,7 +6,7 @@ import { CallButton } from "@/components/ui";
  * Shared shell for MDX blog posts.
  *
  * Route group `(posts)` doesn't appear in URLs, so posts keep the root-level
- * paths they had on WordPress (e.g. /top-5-reasons-to-sell-your-car-for-cash-in-brisbane).
+ * paths they had on WordPress (e.g. /how-much-is-my-scrap-car-worth-gold-coast).
  */
 export default function PostLayout({ children }: { children: React.ReactNode }) {
   return (

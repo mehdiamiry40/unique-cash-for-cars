@@ -29,7 +29,7 @@ export default function BlogIndex() {
             { name: "Home", path: "/" },
             { name: "Blog", path: "/blog" },
           ]),
-          blogSchema(posts),
+          blogSchema(posts.filter((p) => !p.archived)),
         )}
       />
 
@@ -50,9 +50,13 @@ export default function BlogIndex() {
                     </time>
                     {" · "}
                     {post.readingMinutes} min read
+                    {post.archived ? " · Archived" : null}
                   </p>
                   <h2 className="heading-md mb-2">
-                    <Link href={`/${post.slug}`} className="hover:text-brand">
+                    <Link
+                      href={`/${post.slug}`}
+                      className="hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                    >
                       {post.title}
                     </Link>
                   </h2>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { site } from "@/content/site";
 import { trackQuoteConversion } from "@/components/GoogleAdsTracking";
 
-const FUEL_TYPES = ["Petrol", "Diesel", "Hybrid"] as const;
+const FUEL_TYPES = ["Petrol", "Diesel", "Hybrid", "Electric"] as const;
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -41,7 +41,9 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         throw new Error(result.error || `Request failed (${res.status})`);
       }
 
-      trackQuoteConversion(result.leadId);
+      // Only count a conversion when the server issued a lead ID — honeypot
+      // replies are `{ ok: true }` with no id and must not fire Ads events.
+      if (result.leadId) trackQuoteConversion(result.leadId);
       setStatus("success");
       form.reset();
     } catch (caught) {
@@ -75,7 +77,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </p>
         <a
           href={site.phone.href}
-          className="inline-flex items-center gap-2 rounded bg-brand px-6 py-3 font-bold text-white transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          className="inline-flex items-center gap-2 rounded bg-brand px-6 py-3 font-bold text-white transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           {site.phone.display}
         </a>
@@ -91,7 +93,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
       noValidate
     >
       <h2 className="mb-6 text-2xl font-normal uppercase tracking-wide text-ink-heading">
-        Get Fast Enquiry
+        Get a Free Quote
       </h2>
 
       <div className="grid gap-4">
@@ -235,7 +237,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
           type="submit"
           disabled={status === "submitting"}
           data-cta="quote-submit"
-          className="w-full rounded bg-brand px-6 py-3.5 font-bold uppercase tracking-wide text-white transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded bg-brand px-6 py-3.5 font-bold uppercase tracking-wide text-white transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-60"
         >
           {status === "submitting" ? "Sending…" : "Get a Free Quote"}
         </button>

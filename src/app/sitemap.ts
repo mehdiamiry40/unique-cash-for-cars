@@ -42,12 +42,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.9,
   }));
 
-  const postPages: MetadataRoute.Sitemap = posts.map((p) => ({
-    url: `${site.url}/${p.slug}`,
-    lastModified: new Date(p.date),
-    changeFrequency: "yearly",
-    priority: 0.4,
-  }));
+  const postPages: MetadataRoute.Sitemap = posts
+    // Archived carry-overs stay reachable but do not belong in the sitemap —
+    // they compete with current guides for crawl budget and look stale in SERPs.
+    .filter((p) => !p.archived)
+    .map((p) => ({
+      url: `${site.url}/${p.slug}`,
+      lastModified: new Date(p.updated ?? p.date),
+      changeFrequency: "yearly" as const,
+      priority: 0.4,
+    }));
 
   return [...staticPages, ...suburbPages, ...postPages];
 }
