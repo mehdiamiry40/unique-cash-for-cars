@@ -18,9 +18,12 @@ type QuotePayload = {
   name?: string;
   phone?: string;
   suburb?: string;
+  make?: string;
+  model?: string;
+  year?: string;
+  /** Legacy combined field — still accepted if a client sends it. */
   vehicle?: string;
   expectedPrice?: string;
-  fuel?: string;
   condition?: string;
   /**
    * Honeypot — must be empty.
@@ -47,13 +50,6 @@ const MAX_PER_WINDOW = 5;
 const MAX_BODY_BYTES = 32_000;
 /** Cap on distinct IPs tracked, so a spray of unique sources cannot grow the map without bound. */
 const MAX_TRACKED_IPS = 10_000;
-const ALLOWED_FUEL_TYPES = new Set([
-  "Petrol",
-  "Diesel",
-  "Hybrid",
-  "Electric",
-  "Not sure",
-]);
 const DELIVERY_TIMEOUT_MS = 10_000;
 
 function json(body: Record<string, unknown>, status = 200) {
@@ -205,7 +201,15 @@ export async function POST(request: Request) {
     return json({ error: "Please enter a valid phone number." }, 400);
   }
 
-  const fuel = text(body.fuel, 20);
+  const make = text(body.make, 60);
+  const model = text(body.model, 80);
+  const year = text(body.year, 4);
+  // Prefer the split fields from the public form; fall back to a legacy
+  // combined `vehicle` string if an older client still sends one.
+  const vehicle =
+    [year, make, model].filter(Boolean).join(" ").trim() ||
+    text(body.vehicle, 160) ||
+    "—";
   const leadId = crypto.randomUUID();
 
   const lead = {
@@ -213,10 +217,12 @@ export async function POST(request: Request) {
     name,
     phone,
     suburb: text(body.suburb, 120) || "—",
-    vehicle: text(body.vehicle, 160) || "—",
+    make: make || "—",
+    model: model || "—",
+    year: year || "—",
+    vehicle,
     // Kept for older clients / CRM mappings; the public form no longer asks.
     expectedPrice: text(body.expectedPrice, 60) || "—",
-    fuel: ALLOWED_FUEL_TYPES.has(fuel) ? fuel : "—",
     condition: text(body.condition, 500) || "—",
     receivedAt: new Date().toISOString(),
   };

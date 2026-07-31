@@ -4,8 +4,6 @@ import { useState } from "react";
 import { site } from "@/content/site";
 import { trackQuoteConversion } from "@/components/GoogleAdsTracking";
 
-const FUEL_TYPES = ["Petrol", "Diesel", "Hybrid", "Electric", "Not sure"] as const;
-
 type Status = "idle" | "submitting" | "success" | "error";
 
 /**
@@ -110,35 +108,34 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
       </h2>
 
       <div className="grid gap-4">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="q-name" className={labelClass}>
-              Name
-            </label>
-            <input
-              id="q-name"
-              name="name"
-              required
-              autoComplete="name"
-              placeholder="Jane Smith…"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label htmlFor="q-phone" className={labelClass}>
-              Phone
-            </label>
-            <input
-              id="q-phone"
-              name="phone"
-              type="tel"
-              required
-              autoComplete="tel"
-              inputMode="tel"
-              placeholder="0423 000 000…"
-              className={inputClass}
-            />
-          </div>
+        <div>
+          <label htmlFor="q-name" className={labelClass}>
+            Name
+          </label>
+          <input
+            id="q-name"
+            name="name"
+            required
+            autoComplete="name"
+            placeholder="Jane Smith…"
+            className={inputClass}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="q-phone" className={labelClass}>
+            Phone
+          </label>
+          <input
+            id="q-phone"
+            name="phone"
+            type="tel"
+            required
+            autoComplete="tel"
+            inputMode="tel"
+            placeholder="0423 000 000…"
+            className={inputClass}
+          />
         </div>
 
         <div>
@@ -155,33 +152,45 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </div>
 
         <div>
-          <label htmlFor="q-vehicle" className={labelClass}>
-            Make, model and year
+          <label htmlFor="q-make" className={labelClass}>
+            Make
           </label>
           <input
-            id="q-vehicle"
-            name="vehicle"
-            placeholder="Toyota Corolla 2012…"
+            id="q-make"
+            name="make"
+            autoComplete="off"
+            placeholder="Toyota…"
             className={inputClass}
           />
         </div>
 
-        <fieldset>
-          <legend className={labelClass}>Fuel type</legend>
-          <div className="flex flex-wrap gap-x-6 gap-y-3">
-            {FUEL_TYPES.map((fuel) => (
-              <label key={fuel} className="flex min-h-11 items-center gap-2.5 text-sm font-bold">
-                <input
-                  type="radio"
-                  name="fuel"
-                  value={fuel}
-                  className="size-5 accent-[var(--color-brand)]"
-                />
-                {fuel}
-              </label>
-            ))}
-          </div>
-        </fieldset>
+        <div>
+          <label htmlFor="q-model" className={labelClass}>
+            Model
+          </label>
+          <input
+            id="q-model"
+            name="model"
+            autoComplete="off"
+            placeholder="Corolla…"
+            className={inputClass}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="q-year" className={labelClass}>
+            Year
+          </label>
+          <input
+            id="q-year"
+            name="year"
+            inputMode="numeric"
+            autoComplete="off"
+            maxLength={4}
+            placeholder="2012…"
+            className={inputClass}
+          />
+        </div>
 
         <div>
           <label htmlFor="q-condition" className={labelClass}>
