@@ -152,42 +152,14 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </div>
 
         <div>
-          <label htmlFor="q-make" className={labelClass}>
-            Make
+          <label htmlFor="q-vehicle" className={labelClass}>
+            Make, model and year
           </label>
           <input
-            id="q-make"
-            name="make"
+            id="q-vehicle"
+            name="vehicle"
             autoComplete="off"
-            placeholder="Toyota…"
-            className={inputClass}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="q-model" className={labelClass}>
-            Model
-          </label>
-          <input
-            id="q-model"
-            name="model"
-            autoComplete="off"
-            placeholder="Corolla…"
-            className={inputClass}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="q-year" className={labelClass}>
-            Year
-          </label>
-          <input
-            id="q-year"
-            name="year"
-            inputMode="numeric"
-            autoComplete="off"
-            maxLength={4}
-            placeholder="2012…"
+            placeholder="Toyota Corolla 2012…"
             className={inputClass}
           />
         </div>

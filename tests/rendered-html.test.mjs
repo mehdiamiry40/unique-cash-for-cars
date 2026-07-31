@@ -662,9 +662,7 @@ test("the quote endpoint never reports success without a delivery service", asyn
       name: "Jamie Example",
       phone: "0400 000 000",
       suburb: "Southport",
-      make: "Toyota",
-      model: "Corolla",
-      year: "2016",
+      vehicle: "2016 Toyota Corolla",
       condition: "Running",
     }),
   });
@@ -765,10 +763,8 @@ test("the quote form does not collect email", async () => {
   const home = await html("/");
   assert.doesNotMatch(home, /name="email"|id="q-email"/);
   assert.doesNotMatch(home, /type="email"/);
-  assert.match(home, /name="make"/);
-  assert.match(home, /name="model"/);
-  assert.match(home, /name="year"/);
-  assert.doesNotMatch(home, /name="vehicle"/);
+  assert.match(home, /name="vehicle"/);
+  assert.doesNotMatch(home, /name="make"|name="model"|name="year"/);
   assert.doesNotMatch(home, /name="fuel"|Fuel type/);
 
   const response = await fetch(`${origin}/api/quote`, {
@@ -781,9 +777,7 @@ test("the quote form does not collect email", async () => {
       name: "Jamie Example",
       phone: "0400 000 000",
       suburb: "Southport",
-      make: "Toyota",
-      model: "Corolla",
-      year: "2016",
+      vehicle: "2016 Toyota Corolla",
       condition: "Running",
     }),
   });
