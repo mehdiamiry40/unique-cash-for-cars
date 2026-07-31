@@ -35,7 +35,13 @@ type QuotePayload = {
   contactRef?: string;
 };
 
-/** Naive in-memory rate limit. Swap for Upstash/Vercel KV if abuse becomes an issue. */
+/**
+ * Naive in-memory rate limit.
+ *
+ * On Vercel each serverless isolate has its own Map, so this is a soft brake
+ * against accidental double-submits on a warm instance — not a hard ceiling
+ * under load. Swap for Upstash / Vercel KV if abuse becomes an issue.
+ */
 const recent = new Map<string, number[]>();
 const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 5;
@@ -43,7 +49,8 @@ const MAX_BODY_BYTES = 32_000;
 /** Cap on distinct IPs tracked, so a spray of unique sources cannot grow the map without bound. */
 const MAX_TRACKED_IPS = 10_000;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const ALLOWED_FUEL_TYPES = new Set(["Petrol", "Diesel", "Hybrid"]);
+const ALLOWED_FUEL_TYPES = new Set(["Petrol", "Diesel", "Hybrid", "Electric"]);
+const DELIVERY_TIMEOUT_MS = 10_000;
 
 function json(body: Record<string, unknown>, status = 200) {
   return NextResponse.json(body, {
@@ -94,7 +101,14 @@ function sweep(now: number) {
 function rateLimited(ip: string) {
   const now = Date.now();
 
-  if (recent.size >= MAX_TRACKED_IPS) sweep(now);
+  // Sweep stale keys every request. The previous "only at 10k" threshold left
+  // aged IPs sitting in memory on long-lived isolates until the ceiling hit.
+  if (recent.size > 0) sweep(now);
+  if (recent.size >= MAX_TRACKED_IPS) {
+    // Still full after a sweep — drop the oldest tracked IP rather than grow.
+    const oldest = recent.keys().next().value;
+    if (oldest !== undefined) recent.delete(oldest);
+  }
 
   const hits = (recent.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
   hits.push(now);
@@ -173,6 +187,7 @@ export async function POST(request: Request) {
   }
 
   // Honeypot tripped — accept silently so the bot doesn't learn.
+  // No `leadId`: the client must not treat this as a delivered conversion.
   if (body.contactRef) return json({ ok: true });
 
   const name = text(body.name, 100);
@@ -231,6 +246,7 @@ export async function POST(request: Request) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(lead),
+        signal: AbortSignal.timeout(DELIVERY_TIMEOUT_MS),
       });
       if (!res.ok) throw new Error(`Webhook responded ${res.status}`);
     } else if (resendKey && toEmail) {
@@ -249,7 +265,7 @@ export async function POST(request: Request) {
             .map(([k, v]) => `${k}: ${v}`)
             .join("\n"),
         }),
-        signal: AbortSignal.timeout(10_000),
+        signal: AbortSignal.timeout(DELIVERY_TIMEOUT_MS),
       });
       if (!res.ok) throw new Error(`Resend responded ${res.status}`);
     }

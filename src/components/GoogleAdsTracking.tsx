@@ -2,6 +2,8 @@
 
 import Script from "next/script";
 
+import { site } from "@/content/site";
+
 declare global {
   interface Window {
     dataLayer?: unknown[];
@@ -12,7 +14,6 @@ declare global {
 const accountGoogleAdsId = "AW-750701638";
 const accountQuoteConversionLabel = "PXg6CPz39usBEMaY--UC";
 const accountPhoneConversionLabel = "sF8gCNG54ZgBEMaY--UC";
-const phoneConversionNumber = "0423 476 111";
 
 const googleAdsId =
   process.env.NEXT_PUBLIC_GOOGLE_ADS_ID?.trim() || accountGoogleAdsId;
@@ -44,10 +45,12 @@ function sendConversion(
 
 /**
  * Records a delivered quote enquiry, not a button click or an attempted form
- * submission. The server-issued lead ID becomes Google Ads' transaction ID so
- * a retry cannot count the same customer twice.
+ * submission. Requires the server-issued lead ID — honeypot responses and
+ * failed deliveries must not count. That ID becomes Google Ads' transaction ID
+ * so a retry cannot count the same customer twice.
  */
 export function trackQuoteConversion(transactionId?: string) {
+  if (!transactionId) return;
   sendConversion(quoteConversionLabel, {
     transaction_id: transactionId,
   });
@@ -60,6 +63,9 @@ export function trackQuoteConversion(transactionId?: string) {
  * The phone configuration uses Google's forwarding-number measurement. It
  * counts connected calls that meet the duration threshold configured in Ads,
  * rather than counting every tap on a phone link as a conversion.
+ *
+ * This component is only mounted in production — see `isAdsEnabled` in
+ * `src/lib/deploy.ts` and the root layout.
  */
 export function GoogleAdsTracking() {
   if (!validAdsId) return null;
@@ -84,7 +90,7 @@ export function GoogleAdsTracking() {
           ${
             phoneSendTo
               ? `gtag('config', ${JSON.stringify(phoneSendTo)}, {
-                  'phone_conversion_number': ${JSON.stringify(phoneConversionNumber)}
+                  'phone_conversion_number': ${JSON.stringify(site.phone.display)}
                 });`
               : ""
           }

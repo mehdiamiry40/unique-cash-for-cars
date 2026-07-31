@@ -171,7 +171,7 @@ export const servicePages: ServicePage[] = [
     slug: "unwanted-car-buyer",
     title: "Unwanted Car Buyer — Any Condition, Any Age",
     metaDescription:
-      "We buy unwanted cars in any condition across South East Queensland — non-runners, write-offs, project cars and deceased estates. Free removal, cash paid.",
+      "We buy unwanted cars in any condition across the Gold Coast — non-runners, write-offs, project cars and deceased estates. Free removal, cash paid.",
     h1: "Unwanted Car Buyer",
     intro:
       "The car that was going to be fixed. The one from a deceased estate. The project that never got finished. If it's taking up space and doing nothing, we'll take it and pay you for it.",

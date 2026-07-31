@@ -26,6 +26,11 @@ export type Post = {
   /** Set when the post has been meaningfully rewritten, not for typo fixes. */
   updated?: string;
   readingMinutes: number;
+  /**
+   * Kept for inbound links but excluded from the sitemap and flagged on the
+   * blog index. Prefer a refresh or a 301 over leaving dated advice unmarked.
+   */
+  archived?: boolean;
 };
 
 export const posts: Post[] = [
@@ -84,6 +89,7 @@ export const posts: Post[] = [
       "An archived look at the luxury hybrid and electric models available in Australia in 2020.",
     date: "2020-02-14",
     readingMinutes: 4,
+    archived: true,
   },
 ];
 

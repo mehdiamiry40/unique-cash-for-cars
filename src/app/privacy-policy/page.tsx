@@ -21,7 +21,7 @@ export default function PrivacyPolicyPage() {
   // Hardcoded on purpose. This is the date the policy was last reviewed, not
   // the date the site was last deployed — a build-time date would silently
   // claim a review that never happened. Bump it when you change the text.
-  const updated = "28 July 2026";
+  const updated = "31 July 2026";
 
   return (
     <Section>
@@ -50,17 +50,24 @@ export default function PrivacyPolicyPage() {
         </p>
 
         {/*
-          This section previously described analytics and cookies that the site
-          does not have — no Google Analytics, GTM, Clarity or advertising
-          pixel is loaded, and no cookie is set. Overstating collection is its
-          own compliance problem. If tags are re-added (see the launch checklist
-          in README.md), rewrite this section at the same time.
+          Keep this section honest about every third-party script the layout
+          actually loads. Google Ads conversion / call measurement was added in
+          July 2026; the previous "no tracking" wording became false that day.
+          If you add GA4, GTM, Clarity or a CRM pixel, update this section and
+          bump `updated` in the same change.
         */}
-        <h2>Analytics and cookies</h2>
+        <h2>Analytics, advertising and cookies</h2>
         <p>
-          This site sets no cookies and loads no third-party analytics,
-          advertising or tracking scripts. Nothing is shared with Google,
-          Meta or any other third party when you browse it.
+          This site loads Google Ads conversion and call-measurement tags so we
+          can tell which ads led to a quote enquiry or a phone call. Google may
+          set or read cookies and similar technologies for that purpose, and
+          receive technical details about the page visit (such as the page URL
+          and a truncated IP address) when the tags run.
+        </p>
+        <p>
+          We do not use those tags to show you remarketing ads across the web,
+          and we do not load Google Analytics, Meta Pixel or Microsoft Clarity
+          on this site today. If that changes, this policy will be updated first.
         </p>
         <p>
           Our hosting provider keeps standard server logs — the requested page,
@@ -71,10 +78,12 @@ export default function PrivacyPolicyPage() {
 
         <h2>Who we share it with</h2>
         <p>
-          Your details are shared only where necessary to complete the transaction:
-          with the Queensland Department of Transport and Main Roads for the
-          registration transfer, with our towing operator to arrange collection, and
-          with our accountant or auditor where required by law.
+          Your details are shared only where necessary to complete the transaction
+          or run the site: with the Queensland Department of Transport and Main
+          Roads for the registration transfer, with our towing operator to arrange
+          collection, with Google for the advertising measurement described above,
+          with our email or form-delivery provider when you submit a quote online,
+          and with our accountant or auditor where required by law.
         </p>
 
         <h2>How long we keep it</h2>

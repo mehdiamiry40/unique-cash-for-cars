@@ -17,3 +17,13 @@
  * Google, which is far worse than the failure this guards against.
  */
 export const isSearchVisible = process.env.VERCEL_ENV !== "preview";
+
+/**
+ * Whether Google Ads conversion / call-measurement tags should load.
+ *
+ * Stricter than `isSearchVisible`: only the production deployment loads Ads.
+ * Preview URLs and local `next build` must not fire production conversion tags
+ * into the live ad account. There is no "count a local test click" mode —
+ * point a separate Ads account at a preview via env vars if you need that.
+ */
+export const isAdsEnabled = process.env.VERCEL_ENV === "production";
