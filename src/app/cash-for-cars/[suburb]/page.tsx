@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
-import { getSuburb, suburbs } from "@/content/suburbs";
+import { getSuburb, hrefForPlace, suburbs } from "@/content/suburbs";
 import { site } from "@/content/site";
 import { pageMeta } from "@/lib/seo";
 import {
@@ -14,6 +14,7 @@ import {
 import { JsonLd } from "@/components/JsonLd";
 import { QuoteForm } from "@/components/QuoteForm";
 import { FaqAccordion } from "@/components/FaqAccordion";
+import { FurtherReading } from "@/components/FurtherReading";
 import { CallButton, Card, Container, Section, SectionHeading } from "@/components/ui";
 import { HowItWorks } from "@/components/HowItWorks";
 
@@ -131,6 +132,17 @@ export default async function SuburbPage({ params }: Props) {
               <p key={para.slice(0, 40)}>{para}</p>
             ))}
           </div>
+
+          {suburb.testimonial && (
+            <figure className="mt-10 border-l-4 border-brand bg-surface px-6 py-5">
+              <blockquote className="text-lg text-ink">
+                “{suburb.testimonial.quote}”
+              </blockquote>
+              <figcaption className="mt-3 text-sm font-semibold text-ink-heading">
+                — {suburb.testimonial.author}
+              </figcaption>
+            </figure>
+          )}
         </div>
       </Section>
 
@@ -162,14 +174,25 @@ export default async function SuburbPage({ params }: Props) {
               already coming your way:
             </p>
             <ul className="flex flex-wrap gap-2">
-              {suburb.nearby.map((area) => (
-                <li
-                  key={area}
-                  className="rounded-full border border-hairline bg-surface-alt px-4 py-1.5 text-sm"
-                >
-                  {area}
-                </li>
-              ))}
+              {suburb.nearby.map((area) => {
+                const href = hrefForPlace(area);
+                const className =
+                  "rounded-full border border-hairline bg-surface-alt px-4 py-1.5 text-sm";
+                return (
+                  <li key={area}>
+                    {href ? (
+                      <Link
+                        href={href}
+                        className={`${className} transition-colors hover:border-brand hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand`}
+                      >
+                        {area}
+                      </Link>
+                    ) : (
+                      <span className={className}>{area}</span>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>
@@ -185,8 +208,15 @@ export default async function SuburbPage({ params }: Props) {
         </div>
       </Section>
 
+      <FurtherReading
+        slugs={[
+          "how-much-is-my-scrap-car-worth-gold-coast",
+          "transferring-car-registration-in-queensland",
+        ]}
+      />
+
       {/* Other locations — real internal linking, not a footer dump */}
-      <Section tone="alt">
+      <Section>
         <SectionHeading>Other areas we cover</SectionHeading>
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {others.map((other) => (

@@ -4,15 +4,16 @@ import { useState } from "react";
 import { site } from "@/content/site";
 import { trackQuoteConversion } from "@/components/GoogleAdsTracking";
 
-const FUEL_TYPES = ["Petrol", "Diesel", "Hybrid", "Electric"] as const;
+const FUEL_TYPES = ["Petrol", "Diesel", "Hybrid", "Electric", "Not sure"] as const;
 
 type Status = "idle" | "submitting" | "success" | "error";
 
 /**
- * The "Get Fast Enquiry" form from the original site.
+ * Quote enquiry form.
  *
- * Posts to /api/quote. Includes a honeypot field — the WordPress form was
- * getting hit by bots and Contact Form 7 has no built-in protection.
+ * Posts to /api/quote. Name + phone only — we call back; no email field.
+ * Includes a honeypot field — the WordPress form was getting hit by bots and
+ * Contact Form 7 has no built-in protection.
  */
 export function QuoteForm({ id = "quote" }: { id?: string }) {
   const [status, setStatus] = useState<Status>("idle");
@@ -25,6 +26,18 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
 
     const form = event.currentTarget;
     const data = Object.fromEntries(new FormData(form).entries());
+
+    const name = String(data.name ?? "").trim();
+    const phone = String(data.phone ?? "").trim();
+    if (!name || phone.replace(/\D/g, "").length < 8) {
+      setStatus("error");
+      setError(
+        !name
+          ? "Please enter your name."
+          : "Please enter a valid phone number so we can call you back.",
+      );
+      return;
+    }
 
     try {
       const res = await fetch("/api/quote", {
@@ -61,6 +74,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
   // hairline grey is 1.26:1 — fine for a decorative divider, not for this.
   const inputClass =
     "w-full rounded border border-field bg-surface px-4 py-3 text-base text-ink placeholder:text-ink-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-brand";
+  const labelClass = "mb-1.5 block text-sm font-semibold text-ink-heading";
 
   if (status === "success") {
     return (
@@ -90,7 +104,6 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
       id={id}
       onSubmit={handleSubmit}
       className="scroll-mt-28 rounded-lg border border-hairline bg-surface p-6 shadow-lg sm:p-8"
-      noValidate
     >
       <h2 className="mb-6 text-2xl font-normal uppercase tracking-wide text-ink-heading">
         Get a Free Quote
@@ -99,8 +112,8 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
       <div className="grid gap-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="q-name" className="sr-only">
-              Your name
+            <label htmlFor="q-name" className={labelClass}>
+              Name
             </label>
             <input
               id="q-name"
@@ -112,8 +125,8 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
             />
           </div>
           <div>
-            <label htmlFor="q-phone" className="sr-only">
-              Your phone number
+            <label htmlFor="q-phone" className={labelClass}>
+              Phone
             </label>
             <input
               id="q-phone"
@@ -129,25 +142,8 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </div>
 
         <div>
-          <label htmlFor="q-email" className="sr-only">
-            Your email address
-          </label>
-          <input
-            id="q-email"
-            name="email"
-            type="email"
-            required
-            autoComplete="email"
-            inputMode="email"
-            spellCheck={false}
-            placeholder="you@example.com…"
-            className={inputClass}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="q-suburb" className="sr-only">
-            Suburb where the car is located
+          <label htmlFor="q-suburb" className={labelClass}>
+            Suburb
           </label>
           <input
             id="q-suburb"
@@ -159,7 +155,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </div>
 
         <div>
-          <label htmlFor="q-vehicle" className="sr-only">
+          <label htmlFor="q-vehicle" className={labelClass}>
             Make, model and year
           </label>
           <input
@@ -170,30 +166,16 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
           />
         </div>
 
-        <div>
-          <label htmlFor="q-price" className="sr-only">
-            Expected price
-          </label>
-          <input
-            id="q-price"
-            name="expectedPrice"
-            inputMode="numeric"
-            placeholder="$1,500…"
-            className={inputClass}
-          />
-        </div>
-
         <fieldset>
-          <legend className="mb-2 text-sm font-semibold text-ink-heading">Fuel type</legend>
-          <div className="flex flex-wrap gap-x-8 gap-y-3">
-            {FUEL_TYPES.map((fuel, i) => (
-              <label key={fuel} className="flex items-center gap-2 text-sm font-bold">
+          <legend className={labelClass}>Fuel type</legend>
+          <div className="flex flex-wrap gap-x-6 gap-y-3">
+            {FUEL_TYPES.map((fuel) => (
+              <label key={fuel} className="flex min-h-11 items-center gap-2.5 text-sm font-bold">
                 <input
                   type="radio"
                   name="fuel"
                   value={fuel}
-                  defaultChecked={i === 0}
-                  className="size-4 accent-[var(--color-brand)]"
+                  className="size-5 accent-[var(--color-brand)]"
                 />
                 {fuel}
               </label>
@@ -202,8 +184,8 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </fieldset>
 
         <div>
-          <label htmlFor="q-condition" className="sr-only">
-            Car condition
+          <label htmlFor="q-condition" className={labelClass}>
+            Condition
           </label>
           <input
             id="q-condition"
@@ -219,8 +201,8 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
           The name is deliberately meaningless. It used to be `website`, which
           password managers and browser autofill will happily populate; because
           a tripped honeypot answers 200, a real customer would have seen the
-          success panel while their enquiry went in the bin. Don't rename this
-          to anything autofill recognises.
+          success panel while their enquiry was discarded, with no trace
+          anywhere. Don't rename this to anything autofill recognises.
         */}
         <div aria-hidden="true" className="absolute -left-[9999px]">
           <label htmlFor="q-contact-ref">Leave this field empty</label>
@@ -243,7 +225,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </button>
 
         <p className="text-center text-xs text-ink-muted">
-          Free, no-obligation quote. We&apos;ll never share your details.
+          Free, no-obligation quote. We&apos;ll call you back — we never share your number.
         </p>
       </div>
     </form>

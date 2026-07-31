@@ -31,10 +31,11 @@ export default function PrivacyPolicyPage() {
 
         <h2>What we collect</h2>
         <p>
-          When you submit a quote request we collect your name, phone number, email
-          address, the suburb where the vehicle is located, and the details you give
-          us about the vehicle itself. When you call us we record the same
-          information so we can quote and arrange collection.
+          When you submit a quote request we collect your name, phone number, the
+          suburb where the vehicle is located, and the details you give us about
+          the vehicle itself. When you call us we record the same information so
+          we can quote and arrange collection. The online form does not ask for
+          an email address — we call you back on the number you provide.
         </p>
         <p>
           When you complete a sale we additionally sight your photo identification

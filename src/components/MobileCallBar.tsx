@@ -1,6 +1,27 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+
 import { site } from "@/content/site";
 import { PhoneIcon } from "@/components/ui";
+
+const ON_PAGE_QUOTE_PATHS = new Set([
+  "/",
+  "/contact-us",
+  "/sell-my-car-gold-coast",
+  "/car-removal-gold-coast",
+  "/unwanted-car-buyer",
+]);
+
+function hasOnPageQuote(pathname: string) {
+  if (ON_PAGE_QUOTE_PATHS.has(pathname)) return true;
+  // Every live suburb page mounts <QuoteForm id="quote" />.
+  if (pathname.startsWith("/cash-for-cars/") && pathname !== "/cash-for-cars") {
+    return true;
+  }
+  return false;
+}
 
 /**
  * Fixed call bar on mobile.
@@ -10,6 +31,9 @@ import { PhoneIcon } from "@/components/ui";
  * next to a car they want gone.
  */
 export function MobileCallBar() {
+  const pathname = usePathname() || "/";
+  const quoteHref = hasOnPageQuote(pathname) ? "#quote" : "/#quote";
+
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-2 border-t border-brand-dark lg:hidden">
       <a
@@ -21,7 +45,7 @@ export function MobileCallBar() {
         Call Now
       </a>
       <Link
-        href="/#quote"
+        href={quoteHref}
         data-cta="quote-mobile-bar"
         className="flex items-center justify-center bg-navy py-3.5 text-base font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-white"
       >

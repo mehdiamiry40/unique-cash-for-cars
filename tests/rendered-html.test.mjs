@@ -642,7 +642,6 @@ test("the quote endpoint validates contact details", async () => {
     body: JSON.stringify({
       name: "Jamie Example",
       phone: "123",
-      email: "not-an-email",
     }),
   });
   const result = await response.json();
@@ -662,10 +661,8 @@ test("the quote endpoint never reports success without a delivery service", asyn
     body: JSON.stringify({
       name: "Jamie Example",
       phone: "0400 000 000",
-      email: "jamie@example.com",
       suburb: "Southport",
       vehicle: "2016 Toyota Corolla",
-      expectedPrice: "$5,000",
       fuel: "Petrol",
       condition: "Running",
     }),
@@ -688,7 +685,6 @@ test("a honeypot hit answers 200 without a leadId", async () => {
     body: JSON.stringify({
       name: "Bot",
       phone: "0400 000 000",
-      email: "bot@example.com",
       contactRef: "http://spam.example",
     }),
   });
@@ -732,6 +728,63 @@ test("Cash For Cars nav lists every live suburb", async () => {
       `nav/footer must link to ${path}`,
     );
   }
+});
+
+test("homepage What we buy cards link into service pages", async () => {
+  const home = await html("/");
+  for (const path of serviceRoutes) {
+    assert.match(
+      home,
+      new RegExp(`href="${path.replace(/\//g, "\\/")}"`),
+      `homepage must link to ${path}`,
+    );
+  }
+});
+
+test("suburb nearby pills link live and retired places", async () => {
+  const southport = await html("/cash-for-cars/southport");
+  // Labrador is a live suburb; Ashmore is retired and resolves to Southport.
+  assert.match(southport, /href="\/cash-for-cars\/labrador"/);
+  assert.match(southport, /<a[^>]*>\s*Ashmore\s*<\/a>/);
+});
+
+test("the short Adelaide URL redirects permanently", async () => {
+  const response = await fetch(`${origin}/cash-for-cars/adelaide`, {
+    redirect: "manual",
+  });
+  assert.ok(
+    response.status === 301 || response.status === 308,
+    `expected permanent redirect, got ${response.status}`,
+  );
+  const location = response.headers.get("location") ?? "";
+  assert.match(location, /\/$/);
+});
+
+test("the quote form does not collect email", async () => {
+  const home = await html("/");
+  assert.doesNotMatch(home, /name="email"|id="q-email"/);
+  assert.doesNotMatch(home, /type="email"/);
+
+  const response = await fetch(`${origin}/api/quote`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-forwarded-for": "192.0.2.13",
+    },
+    body: JSON.stringify({
+      name: "Jamie Example",
+      phone: "0400 000 000",
+      suburb: "Southport",
+      vehicle: "2016 Toyota Corolla",
+      fuel: "Not sure",
+      condition: "Running",
+    }),
+  });
+  const result = await response.json();
+
+  // No delivery configured in tests → 503 after name/phone validation.
+  assert.equal(response.status, 503);
+  assert.match(result.error, /0423 476 111/);
 });
 
 // Builds a second copy of the site as Vercel would build a preview deployment.
