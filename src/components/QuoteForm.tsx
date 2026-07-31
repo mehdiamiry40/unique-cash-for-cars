@@ -110,35 +110,34 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
       </h2>
 
       <div className="grid gap-4">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="q-name" className={labelClass}>
-              Name
-            </label>
-            <input
-              id="q-name"
-              name="name"
-              required
-              autoComplete="name"
-              placeholder="Jane Smith…"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label htmlFor="q-phone" className={labelClass}>
-              Phone
-            </label>
-            <input
-              id="q-phone"
-              name="phone"
-              type="tel"
-              required
-              autoComplete="tel"
-              inputMode="tel"
-              placeholder="0423 000 000…"
-              className={inputClass}
-            />
-          </div>
+        <div>
+          <label htmlFor="q-name" className={labelClass}>
+            Name
+          </label>
+          <input
+            id="q-name"
+            name="name"
+            required
+            autoComplete="name"
+            placeholder="Jane Smith…"
+            className={inputClass}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="q-phone" className={labelClass}>
+            Phone
+          </label>
+          <input
+            id="q-phone"
+            name="phone"
+            type="tel"
+            required
+            autoComplete="tel"
+            inputMode="tel"
+            placeholder="0423 000 000…"
+            className={inputClass}
+          />
         </div>
 
         <div>
@@ -155,13 +154,42 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </div>
 
         <div>
-          <label htmlFor="q-vehicle" className={labelClass}>
-            Make, model and year
+          <label htmlFor="q-make" className={labelClass}>
+            Make
           </label>
           <input
-            id="q-vehicle"
-            name="vehicle"
-            placeholder="Toyota Corolla 2012…"
+            id="q-make"
+            name="make"
+            autoComplete="off"
+            placeholder="Toyota…"
+            className={inputClass}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="q-model" className={labelClass}>
+            Model
+          </label>
+          <input
+            id="q-model"
+            name="model"
+            autoComplete="off"
+            placeholder="Corolla…"
+            className={inputClass}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="q-year" className={labelClass}>
+            Year
+          </label>
+          <input
+            id="q-year"
+            name="year"
+            inputMode="numeric"
+            autoComplete="off"
+            maxLength={4}
+            placeholder="2012…"
             className={inputClass}
           />
         </div>

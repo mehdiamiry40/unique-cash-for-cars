@@ -18,6 +18,10 @@ type QuotePayload = {
   name?: string;
   phone?: string;
   suburb?: string;
+  make?: string;
+  model?: string;
+  year?: string;
+  /** Legacy combined field — still accepted if a client sends it. */
   vehicle?: string;
   expectedPrice?: string;
   fuel?: string;
@@ -206,6 +210,15 @@ export async function POST(request: Request) {
   }
 
   const fuel = text(body.fuel, 20);
+  const make = text(body.make, 60);
+  const model = text(body.model, 80);
+  const year = text(body.year, 4);
+  // Prefer the split fields from the public form; fall back to a legacy
+  // combined `vehicle` string if an older client still sends one.
+  const vehicle =
+    [year, make, model].filter(Boolean).join(" ").trim() ||
+    text(body.vehicle, 160) ||
+    "—";
   const leadId = crypto.randomUUID();
 
   const lead = {
@@ -213,7 +226,10 @@ export async function POST(request: Request) {
     name,
     phone,
     suburb: text(body.suburb, 120) || "—",
-    vehicle: text(body.vehicle, 160) || "—",
+    make: make || "—",
+    model: model || "—",
+    year: year || "—",
+    vehicle,
     // Kept for older clients / CRM mappings; the public form no longer asks.
     expectedPrice: text(body.expectedPrice, 60) || "—",
     fuel: ALLOWED_FUEL_TYPES.has(fuel) ? fuel : "—",
