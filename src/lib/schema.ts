@@ -26,10 +26,10 @@ export function organizationSchema() {
     url: site.url,
     telephone: site.phone.e164,
     email: site.email,
-    image: `${site.url}/img/logo.jpg`,
+    image: `${site.url}/img/logo.png`,
     logo: {
       "@type": "ImageObject",
-      url: `${site.url}/img/logo.jpg`,
+      url: `${site.url}/img/logo.png`,
       caption: site.legalName,
     },
     priceRange: "$$",

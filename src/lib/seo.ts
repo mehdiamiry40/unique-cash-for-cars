@@ -47,8 +47,8 @@ export function pageMeta(opts: {
       images: [
         {
           url: image,
-          width: 1920,
-          height: 800,
+          width: 3840,
+          height: 1600,
           alt: `${site.legalName} — cash for cars and free removal`,
         },
       ],

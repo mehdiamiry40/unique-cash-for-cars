@@ -134,8 +134,8 @@ export default function HomePage() {
       {/* Hero */}
       <section className="relative isolate overflow-hidden bg-surface">
         {/*
-          The hero art is a 1920x800 banner: a pale Gold Coast skyline with
-          cars and cash. It needs two different treatments, because
+          The hero art is a 3840×1600 (2.4:1) banner: a pale Gold Coast skyline
+          with cars and cash. It needs two different treatments, because
           object-cover cropping a 2.4:1 image into a tall column turns it into
           a flat wash with no cars in frame.
 
