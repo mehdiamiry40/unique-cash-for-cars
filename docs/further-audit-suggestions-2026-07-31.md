@@ -240,14 +240,41 @@ Once listed (TrueLocal, Hotfrog, etc.), add to `site.social` / schema. Effort S,
 
 ---
 
-## Suggested next sequence (30 days)
+## Suggested next sequence
 
-1. **Owner:** GBP + review SMS discipline; ABN/licence numbers.  
-2. **Code:** Render testimonials; fix mobile quote href; slim quote form; link nearby/contact/service cards.  
-3. **Code + Owner:** Swap in sharper images from `wp-content`; GA4 + privacy update.  
-4. **Copy:** SERP titles away from losing $9,999 war unless payout rises honestly.  
-5. **Content:** One new guide; resolve 2020 archive; stagger post dates on revisit.  
-6. **Hygiene:** Font weight trim; Adelaide redirect; prune dead uploads; KV if spam.
+### Do this week (owner — highest ROI)
+
+| # | Action | Outcome |
+|---|---|---|
+| 1 | Create / verify Google Business Profile as a Service Area Business for the Gold Coast suburbs you actually cover | Map-pack eligibility |
+| 2 | SMS a review link at every cash handover until you have ≥25 reviews | Stars next to the listing |
+| 3 | Fill `site.abn` and `site.licenceNumber` (footer + company page already render them) | Instant trust / ACL hygiene |
+| 4 | Decide SERP angle: raise `maxPayout` only if honest, **or** lead titles with same-day / cash-on-collection | Better CTR when you rank |
+
+### Do next in code (no owner blockers)
+
+| # | Action | File(s) |
+|---|---|---|
+| 5 | Render `suburb.testimonial` when present | `[suburb]/page.tsx` |
+| 6 | Mobile “Free Quote” → `#quote` on pages that already have a form | `MobileCallBar.tsx` |
+| 7 | Slim quote form (optional email, no expected-price, no default fuel) | `QuoteForm.tsx`, `api/quote` |
+| 8 | Link nearby pills + contact area cards + homepage “What we buy” | suburb / contact / home |
+| 9 | Point service cards at larger `wp-content` originals where quality is better | `page.tsx` image paths |
+| 10 | Redirect `/cash-for-cars/adelaide` → `/` | `next.config.ts` |
+
+### Do this month
+
+| # | Action |
+|---|---|
+| 11 | GA4 (production-gated) + privacy update; wire `data-cta` events |
+| 12 | Enrich company page with photos + quote form once credentials exist |
+| 13 | One new high-intent guide (cancel rego / roadworthy-to-sell) |
+| 14 | 301 or rewrite the 2020 eco-cars archive |
+| 15 | Publish weekend / after-hours callback policy if the mobile is answered |
+
+### Later / if needed
+
+KV rate limit if spam · delay Ads JS · drop font weight 600 · prune unused uploads · make pages only with unique stock angles · photo upload on quote.
 
 ---
 
