@@ -257,7 +257,7 @@ Once listed (TrueLocal, Hotfrog, etc.), add to `site.social` / schema. Effort S,
 |---|---|---|
 | 5 | Render `suburb.testimonial` when present | **Done** — fill `suburbs.ts` to show |
 | 6 | Mobile “Free Quote” → `#quote` on pages that already have a form | **Done** |
-| 7 | Slim quote form (optional email, no expected-price, no default fuel) | **Done** |
+| 7 | Slim quote form (no email, no expected-price, no default fuel) | **Done** |
 | 8 | Link nearby pills + contact area cards + homepage “What we buy” | **Done** |
 | 9 | Sharper service-card images from `wp-content` originals | **Done** (logo still needs a new asset) |
 | 10 | Redirect `/cash-for-cars/adelaide` → `/` | **Done** |

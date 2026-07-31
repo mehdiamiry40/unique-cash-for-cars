@@ -642,7 +642,6 @@ test("the quote endpoint validates contact details", async () => {
     body: JSON.stringify({
       name: "Jamie Example",
       phone: "123",
-      email: "not-an-email",
     }),
   });
   const result = await response.json();
@@ -662,10 +661,8 @@ test("the quote endpoint never reports success without a delivery service", asyn
     body: JSON.stringify({
       name: "Jamie Example",
       phone: "0400 000 000",
-      email: "jamie@example.com",
       suburb: "Southport",
       vehicle: "2016 Toyota Corolla",
-      expectedPrice: "$5,000",
       fuel: "Petrol",
       condition: "Running",
     }),
@@ -688,7 +685,6 @@ test("a honeypot hit answers 200 without a leadId", async () => {
     body: JSON.stringify({
       name: "Bot",
       phone: "0400 000 000",
-      email: "bot@example.com",
       contactRef: "http://spam.example",
     }),
   });
@@ -764,7 +760,11 @@ test("the short Adelaide URL redirects permanently", async () => {
   assert.match(location, /\/$/);
 });
 
-test("quote endpoint accepts phone-only enquiries", async () => {
+test("the quote form does not collect email", async () => {
+  const home = await html("/");
+  assert.doesNotMatch(home, /name="email"|id="q-email"/);
+  assert.doesNotMatch(home, /type="email"/);
+
   const response = await fetch(`${origin}/api/quote`, {
     method: "POST",
     headers: {
@@ -782,7 +782,7 @@ test("quote endpoint accepts phone-only enquiries", async () => {
   });
   const result = await response.json();
 
-  // No delivery configured in tests → 503 after validation, not 400 for email.
+  // No delivery configured in tests → 503 after name/phone validation.
   assert.equal(response.status, 503);
   assert.match(result.error, /0423 476 111/);
 });

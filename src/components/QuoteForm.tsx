@@ -11,8 +11,7 @@ type Status = "idle" | "submitting" | "success" | "error";
 /**
  * Quote enquiry form.
  *
- * Posts to /api/quote. Name + phone are required; email is optional so people
- * standing next to a car can get a callback without typing an address first.
+ * Posts to /api/quote. Name + phone only — we call back; no email field.
  * Includes a honeypot field — the WordPress form was getting hit by bots and
  * Contact Form 7 has no built-in protection.
  */
@@ -143,22 +142,6 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </div>
 
         <div>
-          <label htmlFor="q-email" className={labelClass}>
-            Email <span className="font-normal text-ink-muted">(optional)</span>
-          </label>
-          <input
-            id="q-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            inputMode="email"
-            spellCheck={false}
-            placeholder="you@example.com…"
-            className={inputClass}
-          />
-        </div>
-
-        <div>
           <label htmlFor="q-suburb" className={labelClass}>
             Suburb
           </label>
@@ -242,7 +225,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </button>
 
         <p className="text-center text-xs text-ink-muted">
-          Free, no-obligation quote. Phone is enough — we&apos;ll never share your details.
+          Free, no-obligation quote. We&apos;ll call you back — we never share your number.
         </p>
       </div>
     </form>

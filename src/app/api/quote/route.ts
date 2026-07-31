@@ -17,7 +17,6 @@ export const runtime = "nodejs";
 type QuotePayload = {
   name?: string;
   phone?: string;
-  email?: string;
   suburb?: string;
   vehicle?: string;
   expectedPrice?: string;
@@ -48,7 +47,6 @@ const MAX_PER_WINDOW = 5;
 const MAX_BODY_BYTES = 32_000;
 /** Cap on distinct IPs tracked, so a spray of unique sources cannot grow the map without bound. */
 const MAX_TRACKED_IPS = 10_000;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ALLOWED_FUEL_TYPES = new Set([
   "Petrol",
   "Diesel",
@@ -198,19 +196,13 @@ export async function POST(request: Request) {
 
   const name = text(body.name, 100);
   const phone = text(body.phone, 40);
-  const email = text(body.email, 254);
 
-  // Phone is the primary contact channel for this business. Email is useful
-  // but optional — requiring it cost completions from people standing next
-  // to a car with only a phone number handy.
+  // Phone-only contact. The public form does not collect email — we call back.
   if (!name || !phone) {
     return json({ error: "Name and phone are required." }, 400);
   }
   if (phone.replace(/\D/g, "").length < 8) {
     return json({ error: "Please enter a valid phone number." }, 400);
-  }
-  if (email && !EMAIL_PATTERN.test(email)) {
-    return json({ error: "Please enter a valid email address." }, 400);
   }
 
   const fuel = text(body.fuel, 20);
@@ -220,7 +212,6 @@ export async function POST(request: Request) {
     leadId,
     name,
     phone,
-    email: email || "—",
     suburb: text(body.suburb, 120) || "—",
     vehicle: text(body.vehicle, 160) || "—",
     // Kept for older clients / CRM mappings; the public form no longer asks.
@@ -266,7 +257,6 @@ export async function POST(request: Request) {
         body: JSON.stringify({
           from: fromEmail,
           to: [toEmail],
-          reply_to: email,
           subject: `New car quote enquiry — ${name} (${lead.suburb})`,
           text: Object.entries(lead)
             .map(([k, v]) => `${k}: ${v}`)
