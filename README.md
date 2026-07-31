@@ -115,7 +115,7 @@ scripts/             Asset fetch + the two pre-deploy checks.
 docs/                SEO audit that prompted this rebuild.
 public/
   img/               The 8 images the pages currently use.
-  assets/            Hero artwork as webp (1920x800 landscape, 800x1000 portrait).
+  assets/            Hero artwork as webp (3840x1600 landscape, 800x1000 portrait).
                      Not currently rendered — the hero uses public/img.
   wp-content/uploads/  116 original WordPress images. See below.
 .github/workflows/   CI: verify + build on push and PR.
@@ -237,8 +237,8 @@ Brisbane post.
 The six images on the homepage are 460×345, and that is the largest copy that
 exists anywhere in `public/wp-content/uploads`. A modern phone at 2× wants
 roughly 780px across, so the cards are soft on most devices and no code change
-can fix it. Same story for the header logo at 200×87. New photography is the
-only remedy.
+can fix it. The header logo is now 800×348 PNG (retina-ready at `h-14`); the
+hero banner is 3840×1600.
 
 ---
 
