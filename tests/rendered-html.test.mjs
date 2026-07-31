@@ -665,7 +665,6 @@ test("the quote endpoint never reports success without a delivery service", asyn
       make: "Toyota",
       model: "Corolla",
       year: "2016",
-      fuel: "Petrol",
       condition: "Running",
     }),
   });
@@ -770,6 +769,7 @@ test("the quote form does not collect email", async () => {
   assert.match(home, /name="model"/);
   assert.match(home, /name="year"/);
   assert.doesNotMatch(home, /name="vehicle"/);
+  assert.doesNotMatch(home, /name="fuel"|Fuel type/);
 
   const response = await fetch(`${origin}/api/quote`, {
     method: "POST",
@@ -784,7 +784,6 @@ test("the quote form does not collect email", async () => {
       make: "Toyota",
       model: "Corolla",
       year: "2016",
-      fuel: "Not sure",
       condition: "Running",
     }),
   });

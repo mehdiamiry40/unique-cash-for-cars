@@ -4,8 +4,6 @@ import { useState } from "react";
 import { site } from "@/content/site";
 import { trackQuoteConversion } from "@/components/GoogleAdsTracking";
 
-const FUEL_TYPES = ["Petrol", "Diesel", "Hybrid", "Electric", "Not sure"] as const;
-
 type Status = "idle" | "submitting" | "success" | "error";
 
 /**
@@ -193,23 +191,6 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
             className={inputClass}
           />
         </div>
-
-        <fieldset>
-          <legend className={labelClass}>Fuel type</legend>
-          <div className="flex flex-wrap gap-x-6 gap-y-3">
-            {FUEL_TYPES.map((fuel) => (
-              <label key={fuel} className="flex min-h-11 items-center gap-2.5 text-sm font-bold">
-                <input
-                  type="radio"
-                  name="fuel"
-                  value={fuel}
-                  className="size-5 accent-[var(--color-brand)]"
-                />
-                {fuel}
-              </label>
-            ))}
-          </div>
-        </fieldset>
 
         <div>
           <label htmlFor="q-condition" className={labelClass}>
