@@ -20,7 +20,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
    */
   const staticPages: MetadataRoute.Sitemap = (
     [
-      { url: `${site.url}/`, changeFrequency: "weekly", priority: 1 },
+      /*
+       * Homepage loc must match the canonical exactly. pageMeta({ path: "/" })
+       * uses site.url with no trailing slash; appending "/" here made the
+       * sitemap disagree with every other signal for the same URL.
+       */
+      { url: site.url, changeFrequency: "weekly", priority: 1 },
       { url: `${site.url}/cash-for-cars`, changeFrequency: "monthly", priority: 0.9 },
       { url: `${site.url}/sell-my-car-gold-coast`, changeFrequency: "monthly", priority: 0.8 },
       { url: `${site.url}/car-removal-gold-coast`, changeFrequency: "monthly", priority: 0.8 },
