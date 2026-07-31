@@ -207,14 +207,20 @@ async function sitemapPaths() {
 }
 
 test("every sitemap URL resolves, and its canonical points back at itself", async () => {
-  for (const path of await sitemapPaths()) {
+  const xml = await html("/sitemap.xml");
+  const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, url]) => url);
+
+  for (const loc of locs) {
+    assert.ok(loc.startsWith(publicOrigin), `sitemap URL not on canonical origin: ${loc}`);
+    // Homepage loc is site.url with no trailing slash — path is "".
+    const path = loc.slice(publicOrigin.length) || "/";
     const response = await get(path);
     assert.equal(response.status, 200, `${path} returned ${response.status}, not a direct 200`);
 
     // A sitemap that lists a redirecting URL wastes crawl budget and confuses
-    // which version is canonical.
-    const expected = path === "/" ? publicOrigin : `${publicOrigin}${path}`;
-    assert.equal(canonicalOf(await response.text()), expected, `${path} canonical`);
+    // which version is canonical. The <loc> string itself must match the
+    // canonical tag — not a slash-normalized cousin of it.
+    assert.equal(canonicalOf(await response.text()), loc, `${path} canonical must equal sitemap loc`);
   }
 });
 
@@ -713,6 +719,17 @@ test("archived posts stay reachable but leave the sitemap", async () => {
 
   const response = await fetch(`${origin}${archived}`, { redirect: "manual" });
   assert.equal(response.status, 200, "archived posts must still resolve for inbound links");
+
+  const source = await response.text();
+  const robots =
+    source.match(/name="robots"\s+content="([^"]+)"/i)?.[1] ??
+    source.match(/content="([^"]+)"\s+name="robots"/i)?.[1] ??
+    "";
+  assert.match(
+    robots,
+    /noindex/i,
+    "archived posts must be noindex so exclusion from the sitemap is not undermined",
+  );
 
   const blog = await html("/blog");
   assert.match(blog, /Archived/);

@@ -6,6 +6,9 @@ export const metadata = pageMeta({
   description:
     "An archived 2020 look at luxury hybrid and electric models in Australia. Kept for reference; the market has moved on considerably since.",
   path: "/5-best-luxury-eco-friendly-cars-in-australia-2020",
+  // Out of the sitemap already; noindex stops leftover discovery from competing
+  // with current guides while keeping the URL alive for old inbound links.
+  noIndex: true,
 });
 
 <PostSchema slug="5-best-luxury-eco-friendly-cars-in-australia-2020" />
