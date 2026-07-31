@@ -46,6 +46,7 @@ export const metadata: Metadata = {
   },
   description: site.description,
   applicationName: site.legalName,
+  themeColor: "#c14142",
   // Preview deployments are kept out of search here as well as in robots.txt:
   // Disallow stops crawling, noindex removes anything already discovered.
   robots: isSearchVisible

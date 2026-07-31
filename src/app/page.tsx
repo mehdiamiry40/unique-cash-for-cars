@@ -167,8 +167,10 @@ export default function HomePage() {
 
         <Container className="pt-10 pb-14 sm:pb-16 lg:pt-14 lg:pb-14 xl:pt-16">
           <div className="grid items-start gap-10 lg:grid-cols-[1fr_26rem]">
-            <div>
-              <p className="mb-2 text-xl text-brand">Sell your car fast with</p>
+            <div className="animate-hero-copy">
+              <p className="mb-2 text-xl font-extrabold tracking-tight text-brand">
+                {site.name}
+              </p>
               <h1 className="heading-xl mb-6">Get Cash For Cars Gold Coast</h1>
 
               <CheckList items={heroPoints} />
@@ -181,7 +183,9 @@ export default function HomePage() {
               <CallButton className="text-xl" />
             </div>
 
-            <QuoteForm id="quote" />
+            <div className="animate-hero-form">
+              <QuoteForm id="quote" />
+            </div>
           </div>
         </Container>
       </section>
@@ -259,7 +263,7 @@ export default function HomePage() {
             <li key={suburb.slug}>
               <Link
                 href={`/cash-for-cars/${suburb.slug}`}
-                className="group flex h-full flex-col rounded border border-hairline bg-surface p-6 transition-colors hover:border-brand"
+                className="group flex h-full flex-col rounded border border-hairline bg-surface p-6 transition-colors hover:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
               >
                 <span className="heading-md group-hover:text-brand">
                   Cash for Cars {suburb.name}
@@ -317,7 +321,7 @@ export default function HomePage() {
           <a
             href={site.phone.href}
             data-cta="call-home-footer"
-            className="inline-flex items-center gap-2 rounded bg-white px-8 py-4 text-xl font-extrabold text-brand transition-colors hover:bg-surface-alt"
+            className="inline-flex items-center gap-2 rounded bg-white px-8 py-4 text-xl font-extrabold text-brand transition-colors hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             {site.phone.display}
           </a>

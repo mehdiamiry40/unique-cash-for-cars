@@ -101,7 +101,7 @@ export function Header() {
                         onClick={() =>
                           setOpenMenu(openMenu === item.label ? null : item.label)
                         }
-                        className={`flex items-center gap-1 py-2 text-[0.95rem] uppercase tracking-wide transition-colors hover:text-brand ${
+                        className={`flex items-center gap-1 py-2 text-[0.95rem] uppercase tracking-wide transition-colors hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
                           isActive(item) ? "text-brand" : "text-ink"
                         }`}
                       >
@@ -124,7 +124,7 @@ export function Header() {
                               <Link
                                 href={child.href}
                                 aria-current={matches(child.href) ? "page" : undefined}
-                                className="block px-4 py-2.5 text-sm hover:bg-surface-alt hover:text-brand"
+                                className="block px-4 py-2.5 text-sm hover:bg-surface-alt hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand"
                               >
                                 {child.label}
                               </Link>
@@ -137,7 +137,7 @@ export function Header() {
                     <Link
                       href={item.href}
                       aria-current={matches(item.href) ? "page" : undefined}
-                      className={`block py-2 text-[0.95rem] uppercase tracking-wide transition-colors hover:text-brand ${
+                      className={`block py-2 text-[0.95rem] uppercase tracking-wide transition-colors hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
                         isActive(item) ? "text-brand" : "text-ink"
                       }`}
                     >
@@ -154,7 +154,7 @@ export function Header() {
           <a
             href={site.phone.href}
             data-cta="call-header"
-            className="hidden items-center gap-2 rounded bg-brand px-5 py-3 text-lg font-bold text-white transition-colors hover:bg-brand-dark sm:inline-flex"
+            className="hidden items-center gap-2 rounded bg-brand px-5 py-3 text-lg font-bold text-white transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:inline-flex"
           >
             <PhoneIcon />
             <span className="whitespace-nowrap">{site.phone.display}</span>
@@ -166,9 +166,9 @@ export function Header() {
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
-            className="rounded p-2.5 text-ink-heading hover:bg-surface-alt lg:hidden"
+            className="rounded p-2.5 text-ink-heading hover:bg-surface-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand lg:hidden"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-6">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" className="size-6">
               {mobileOpen ? (
                 <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
               ) : (
@@ -188,9 +188,9 @@ export function Header() {
                 <li key={item.label} className="py-1">
                   {"children" in item && item.children ? (
                     <details>
-                      <summary className="flex cursor-pointer list-none items-center justify-between py-3 text-sm font-semibold uppercase tracking-wide">
+                      <summary className="flex cursor-pointer list-none items-center justify-between py-3 text-sm font-semibold uppercase tracking-wide focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
                         {item.label}
-                        <svg viewBox="0 0 20 20" fill="currentColor" className="size-4">
+                        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" className="size-4">
                           <path d="M5.5 7.5 10 12l4.5-4.5H5.5Z" />
                         </svg>
                       </summary>
