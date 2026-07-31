@@ -58,7 +58,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
   // boundary and needs 3:1 against its surroundings (WCAG 1.4.11). The
   // hairline grey is 1.26:1 — fine for a decorative divider, not for this.
   const inputClass =
-    "w-full rounded border border-field bg-surface px-4 py-3 text-base text-ink placeholder:text-ink-muted focus:border-brand focus:outline-2 focus:outline-offset-0 focus:outline-brand";
+    "w-full rounded border border-field bg-surface px-4 py-3 text-base text-ink placeholder:text-ink-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-brand";
 
   if (status === "success") {
     return (
@@ -66,6 +66,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         id={id}
         className="scroll-mt-28 rounded-lg border border-hairline bg-surface p-8 shadow-lg"
         role="status"
+        aria-live="polite"
       >
         <h2 className="heading-md mb-3">Thanks — we&apos;ve got your details</h2>
         <p className="mb-6">
@@ -74,7 +75,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </p>
         <a
           href={site.phone.href}
-          className="inline-flex items-center gap-2 rounded bg-brand px-6 py-3 font-bold text-white hover:bg-brand-dark"
+          className="inline-flex items-center gap-2 rounded bg-brand px-6 py-3 font-bold text-white transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
           {site.phone.display}
         </a>
@@ -104,7 +105,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
               name="name"
               required
               autoComplete="name"
-              placeholder="Name*"
+              placeholder="Jane Smith…"
               className={inputClass}
             />
           </div>
@@ -119,7 +120,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
               required
               autoComplete="tel"
               inputMode="tel"
-              placeholder="Phone*"
+              placeholder="0423 000 000…"
               className={inputClass}
             />
           </div>
@@ -136,7 +137,8 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
             required
             autoComplete="email"
             inputMode="email"
-            placeholder="Email*"
+            spellCheck={false}
+            placeholder="you@example.com…"
             className={inputClass}
           />
         </div>
@@ -149,7 +151,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
             id="q-suburb"
             name="suburb"
             autoComplete="address-level2"
-            placeholder="Suburb"
+            placeholder="Southport…"
             className={inputClass}
           />
         </div>
@@ -161,7 +163,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
           <input
             id="q-vehicle"
             name="vehicle"
-            placeholder="Make, Model, & Year"
+            placeholder="Toyota Corolla 2012…"
             className={inputClass}
           />
         </div>
@@ -174,7 +176,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
             id="q-price"
             name="expectedPrice"
             inputMode="numeric"
-            placeholder="Expected Price"
+            placeholder="$1,500…"
             className={inputClass}
           />
         </div>
@@ -204,7 +206,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
           <input
             id="q-condition"
             name="condition"
-            placeholder="Car Condition"
+            placeholder="Runs, needs work, wreck…"
             className={inputClass}
           />
         </div>
@@ -233,7 +235,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
           type="submit"
           disabled={status === "submitting"}
           data-cta="quote-submit"
-          className="w-full rounded bg-brand px-6 py-3.5 font-bold uppercase tracking-wide text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded bg-brand px-6 py-3.5 font-bold uppercase tracking-wide text-white transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-60"
         >
           {status === "submitting" ? "Sending…" : "Get a Free Quote"}
         </button>

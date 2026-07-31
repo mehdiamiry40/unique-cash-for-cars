@@ -12,7 +12,7 @@ export function FaqAccordion({ faqs }: { faqs: readonly Faq[] }) {
     <div className="divide-y divide-hairline border-y border-hairline">
       {faqs.map((faq) => (
         <details key={faq.question} className="group py-1">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-left font-semibold text-ink-heading hover:text-brand">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-left font-semibold text-ink-heading hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
             <span>{faq.question}</span>
             <svg
               viewBox="0 0 20 20"

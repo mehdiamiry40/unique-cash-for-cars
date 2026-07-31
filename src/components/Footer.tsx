@@ -30,13 +30,19 @@ export function Footer() {
             <div className="space-y-2">
               <p>
                 <span className="font-semibold">Phone: </span>
-                <a href={site.phone.href} className="hover:text-brand">
+                <a
+                  href={site.phone.href}
+                  className="hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                >
                   {site.phone.display}
                 </a>
               </p>
               <p>
                 <span className="font-semibold">Email: </span>
-                <a href={`mailto:${site.email}`} className="hover:text-brand">
+                <a
+                  href={`mailto:${site.email}`}
+                  className="hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                >
                   {site.email}
                 </a>
               </p>
@@ -60,7 +66,10 @@ export function Footer() {
             <ul className="space-y-2">
               {otherLinks.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="hover:text-brand">
+                  <Link
+                    href={link.href}
+                    className="hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                  >
                     {link.label}
                   </Link>
                 </li>
@@ -75,7 +84,10 @@ export function Footer() {
             <ul className="space-y-2">
               {services.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="hover:text-brand">
+                  <Link
+                    href={link.href}
+                    className="hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                  >
                     {link.label}
                   </Link>
                 </li>
@@ -90,7 +102,10 @@ export function Footer() {
             <ul className="space-y-2">
               {suburbs.map((s) => (
                 <li key={s.slug}>
-                  <Link href={`/cash-for-cars/${s.slug}`} className="hover:text-brand">
+                  <Link
+                    href={`/cash-for-cars/${s.slug}`}
+                    className="hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                  >
                     Cash For Cars {s.name}
                   </Link>
                 </li>
@@ -104,7 +119,10 @@ export function Footer() {
           <p>
             Copyright {year} © {site.legalName}. All Rights Reserved.
           </p>
-          <Link href="/privacy-policy" className="hover:text-brand">
+          <Link
+            href="/privacy-policy"
+            className="hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          >
             Privacy Policy
           </Link>
         </div>

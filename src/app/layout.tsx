@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -57,6 +57,11 @@ export const metadata: Metadata = {
         "max-video-preview": -1,
       }
     : { index: false, follow: false },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#c14142",
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

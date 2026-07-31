@@ -13,7 +13,7 @@ export const site = {
   legalName: "Unique Cash For Cars Gold Coast",
   url: "https://uniquecashforcars.com.au",
   description:
-    "We pay Cash for Cars Gold Coast up to $9,999. Earn fast cash for any vehicle, whether unwanted, old, or damaged, and receive free removal.",
+    "Get a firm cash offer for your Gold Coast car in about a minute. Up to $9,999, free towing, any condition. Call Unique Cash For Cars today.",
 
   phone: {
     /**
