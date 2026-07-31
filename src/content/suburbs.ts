@@ -478,6 +478,31 @@ export function getSuburb(slug: string): Suburb | undefined {
   return suburbs.find((s) => s.slug === slug);
 }
 
+/** Slugify a place name the same way our suburb URLs are formed. */
+function placeSlug(name: string) {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+/**
+ * Best internal URL for a place name used in nearby/coverage copy.
+ *
+ * Live suburbs win; retired suburb redirects are next (so Ashmore etc. still
+ * pass equity to a surviving page); unknown places return null and stay text.
+ */
+export function hrefForPlace(name: string): string | null {
+  const slug = placeSlug(name);
+  if (!slug) return null;
+
+  const live = suburbs.find((s) => s.slug === slug || placeSlug(s.name) === slug);
+  if (live) return `/cash-for-cars/${live.slug}`;
+
+  return retiredSuburbRedirects[slug] ?? null;
+}
+
 /**
  * Retired location pages → where each one now redirects.
  *
@@ -503,4 +528,6 @@ export const retiredSuburbRedirects: Record<string, string> = {
   ipswich: "/cash-for-cars",
   toowoomba: "/cash-for-cars",
   "cash-for-cars-adelaide": "/",
+  // Short form people (and some crawlers) guess; the WP slug was the longer one.
+  adelaide: "/",
 };

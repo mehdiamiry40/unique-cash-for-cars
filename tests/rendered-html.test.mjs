@@ -734,6 +734,59 @@ test("Cash For Cars nav lists every live suburb", async () => {
   }
 });
 
+test("homepage What we buy cards link into service pages", async () => {
+  const home = await html("/");
+  for (const path of serviceRoutes) {
+    assert.match(
+      home,
+      new RegExp(`href="${path.replace(/\//g, "\\/")}"`),
+      `homepage must link to ${path}`,
+    );
+  }
+});
+
+test("suburb nearby pills link live and retired places", async () => {
+  const southport = await html("/cash-for-cars/southport");
+  // Labrador is a live suburb; Ashmore is retired and resolves to Southport.
+  assert.match(southport, /href="\/cash-for-cars\/labrador"/);
+  assert.match(southport, /<a[^>]*>\s*Ashmore\s*<\/a>/);
+});
+
+test("the short Adelaide URL redirects permanently", async () => {
+  const response = await fetch(`${origin}/cash-for-cars/adelaide`, {
+    redirect: "manual",
+  });
+  assert.ok(
+    response.status === 301 || response.status === 308,
+    `expected permanent redirect, got ${response.status}`,
+  );
+  const location = response.headers.get("location") ?? "";
+  assert.match(location, /\/$/);
+});
+
+test("quote endpoint accepts phone-only enquiries", async () => {
+  const response = await fetch(`${origin}/api/quote`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-forwarded-for": "192.0.2.13",
+    },
+    body: JSON.stringify({
+      name: "Jamie Example",
+      phone: "0400 000 000",
+      suburb: "Southport",
+      vehicle: "2016 Toyota Corolla",
+      fuel: "Not sure",
+      condition: "Running",
+    }),
+  });
+  const result = await response.json();
+
+  // No delivery configured in tests → 503 after validation, not 400 for email.
+  assert.equal(response.status, 503);
+  assert.match(result.error, /0423 476 111/);
+});
+
 // Builds a second copy of the site as Vercel would build a preview deployment.
 // The assertion is worth the extra build: a preview URL left indexable competes
 // with the live site for its own keywords, and nobody notices for months.

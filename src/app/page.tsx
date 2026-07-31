@@ -43,36 +43,42 @@ const heroPoints = [
 const services = [
   {
     title: "Cash for Old Cars",
+    href: "/sell-my-car-gold-coast",
     image: "/img/old-car-gold-coast.jpg",
     alt: "An old sedan parked in a Gold Coast driveway, ready for removal",
     body: "An old car sitting in the driveway that nobody drives any more. It doesn't need to be roadworthy and it doesn't need to start — we pay a fair price and tow it away.",
   },
   {
     title: "Cash for Unwanted Cars",
+    href: "/unwanted-car-buyer",
     image: "/img/unwanted-car-gold-coast.jpg",
     alt: "An unwanted car left on a Gold Coast property",
     body: "Cars, utes, vans, buses, 4WDs, hatchbacks, hybrids and EVs. If it has four wheels and you want it gone, we'll quote on it, usually within a day.",
   },
   {
     title: "Cash for Scrap Cars",
+    href: "/car-removal-gold-coast",
     image: "/img/car-abandoned.jpg",
     alt: "An abandoned scrap car with flat tyres awaiting collection",
     body: "Past the point of repair is not the same as worthless. We recover the drivetrain, panels, glass and catalytic converter, and dispose of the rest properly.",
   },
   {
     title: "Cash for Accident-Damaged Cars",
+    href: "/sell-my-car-gold-coast",
     image: "/img/accident-damaged-car.jpg",
     alt: "A car with accident damage to the front quarter panel",
     body: "Written off, still at the smash repairer, or sitting where it stopped. Wherever your damaged car is, we come to it and the removal costs you nothing.",
   },
   {
     title: "Cash for Used Cars",
+    href: "/sell-my-car-gold-coast",
     image: "/img/used-car-gold-coast.jpg",
     alt: "A used hatchback of the kind we buy across the Gold Coast",
     body: "When the repair quote is higher than the car is worth, selling it whole is usually the better outcome. We buy any used car regardless of make, model or year.",
   },
   {
     title: "Cash for Damaged Cars",
+    href: "/unwanted-car-buyer",
     image: "/img/car-front-damaged.jpg",
     alt: "A car with a crumpled front end after a collision",
     body: "Body damage, missing parts, electrical faults, mechanical failure, flood or hail damage. Tell us what's wrong up front and we'll price it honestly.",
@@ -226,23 +232,28 @@ export default function HomePage() {
         <SectionHeading>What we buy</SectionHeading>
         <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {services.map((service) => (
-            <li
-              key={service.title}
-              className="flex flex-col overflow-hidden rounded border border-hairline bg-surface shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
-            >
-              <div className="relative aspect-4/3 bg-surface-alt">
-                <Image
-                  src={service.image}
-                  alt={service.alt}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 24rem"
-                  className="object-cover"
-                />
-              </div>
-              <div className="flex flex-1 flex-col p-6">
-                <h3 className="heading-md mb-2">{service.title}</h3>
-                <p>{service.body}</p>
-              </div>
+            <li key={service.title}>
+              <Link
+                href={service.href}
+                className="group flex h-full flex-col overflow-hidden rounded border border-hairline bg-surface shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-colors hover:border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              >
+                <div className="relative aspect-4/3 bg-surface-alt">
+                  <Image
+                    src={service.image}
+                    alt={service.alt}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 24rem"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="flex flex-1 flex-col p-6">
+                  <h3 className="heading-md mb-2 group-hover:text-brand">{service.title}</h3>
+                  <p>{service.body}</p>
+                  <span className="mt-4 text-sm font-semibold text-brand">
+                    Learn more
+                  </span>
+                </div>
+              </Link>
             </li>
           ))}
         </ul>

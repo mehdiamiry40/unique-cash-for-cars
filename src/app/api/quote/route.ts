@@ -49,7 +49,13 @@ const MAX_BODY_BYTES = 32_000;
 /** Cap on distinct IPs tracked, so a spray of unique sources cannot grow the map without bound. */
 const MAX_TRACKED_IPS = 10_000;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const ALLOWED_FUEL_TYPES = new Set(["Petrol", "Diesel", "Hybrid", "Electric"]);
+const ALLOWED_FUEL_TYPES = new Set([
+  "Petrol",
+  "Diesel",
+  "Hybrid",
+  "Electric",
+  "Not sure",
+]);
 const DELIVERY_TIMEOUT_MS = 10_000;
 
 function json(body: Record<string, unknown>, status = 200) {
@@ -194,16 +200,16 @@ export async function POST(request: Request) {
   const phone = text(body.phone, 40);
   const email = text(body.email, 254);
 
-  if (!name || !phone || !email) {
-    return json(
-      { error: "Name, phone and email are required." },
-      400,
-    );
+  // Phone is the primary contact channel for this business. Email is useful
+  // but optional — requiring it cost completions from people standing next
+  // to a car with only a phone number handy.
+  if (!name || !phone) {
+    return json({ error: "Name and phone are required." }, 400);
   }
   if (phone.replace(/\D/g, "").length < 8) {
     return json({ error: "Please enter a valid phone number." }, 400);
   }
-  if (!EMAIL_PATTERN.test(email)) {
+  if (email && !EMAIL_PATTERN.test(email)) {
     return json({ error: "Please enter a valid email address." }, 400);
   }
 
@@ -214,9 +220,10 @@ export async function POST(request: Request) {
     leadId,
     name,
     phone,
-    email,
+    email: email || "—",
     suburb: text(body.suburb, 120) || "—",
     vehicle: text(body.vehicle, 160) || "—",
+    // Kept for older clients / CRM mappings; the public form no longer asks.
     expectedPrice: text(body.expectedPrice, 60) || "—",
     fuel: ALLOWED_FUEL_TYPES.has(fuel) ? fuel : "—",
     condition: text(body.condition, 500) || "—",

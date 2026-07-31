@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { site } from "@/content/site";
+import { hrefForPlace } from "@/content/suburbs";
 import { pageMeta } from "@/lib/seo";
 import { breadcrumbSchema, contactPageSchema, graph } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
@@ -109,11 +111,20 @@ export default function ContactPage() {
           Call us to confirm availability in your suburb.
         </p>
         <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {site.areaServed.slice(1).map((area) => (
-            <Card key={area} className="text-center font-bold text-ink-heading">
-              {area}
-            </Card>
-          ))}
+          {site.areaServed.slice(1).map((area) => {
+            const href = hrefForPlace(area);
+            const className =
+              "block text-center font-bold text-ink-heading transition-colors hover:border-brand hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
+            return href ? (
+              <Link key={area} href={href} className={`rounded border border-hairline bg-surface p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] ${className}`}>
+                {area}
+              </Link>
+            ) : (
+              <Card key={area} className="text-center font-bold text-ink-heading">
+                {area}
+              </Card>
+            );
+          })}
         </div>
       </Section>
     </>

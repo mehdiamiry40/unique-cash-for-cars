@@ -251,16 +251,16 @@ Once listed (TrueLocal, Hotfrog, etc.), add to `site.social` / schema. Effort S,
 | 3 | Fill `site.abn` and `site.licenceNumber` (footer + company page already render them) | Instant trust / ACL hygiene |
 | 4 | Decide SERP angle: raise `maxPayout` only if honest, **or** lead titles with same-day / cash-on-collection | Better CTR when you rank |
 
-### Do next in code (no owner blockers)
+### Code quick-wins — done in this PR
 
-| # | Action | File(s) |
+| # | Action | Status |
 |---|---|---|
-| 5 | Render `suburb.testimonial` when present | `[suburb]/page.tsx` |
-| 6 | Mobile “Free Quote” → `#quote` on pages that already have a form | `MobileCallBar.tsx` |
-| 7 | Slim quote form (optional email, no expected-price, no default fuel) | `QuoteForm.tsx`, `api/quote` |
-| 8 | Link nearby pills + contact area cards + homepage “What we buy” | suburb / contact / home |
-| 9 | Point service cards at larger `wp-content` originals where quality is better | `page.tsx` image paths |
-| 10 | Redirect `/cash-for-cars/adelaide` → `/` | `next.config.ts` |
+| 5 | Render `suburb.testimonial` when present | **Done** — fill `suburbs.ts` to show |
+| 6 | Mobile “Free Quote” → `#quote` on pages that already have a form | **Done** |
+| 7 | Slim quote form (optional email, no expected-price, no default fuel) | **Done** |
+| 8 | Link nearby pills + contact area cards + homepage “What we buy” | **Done** |
+| 9 | Sharper service-card images from `wp-content` originals | **Done** (logo still needs a new asset) |
+| 10 | Redirect `/cash-for-cars/adelaide` → `/` | **Done** |
 
 ### Do this month
 
