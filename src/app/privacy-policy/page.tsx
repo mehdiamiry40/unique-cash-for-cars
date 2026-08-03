@@ -113,6 +113,8 @@ export default function PrivacyPolicyPage() {
         <p>
           {site.legalName}
           <br />
+          Operated by {site.registeredEntityName} · ABN {site.abn}
+          <br />
           <a href={site.phone.href}>{site.phone.display}</a> ·{" "}
           <a href={`mailto:${site.email}`}>{site.email}</a>
         </p>
