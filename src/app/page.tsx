@@ -210,7 +210,7 @@ export default function HomePage() {
             <p className="mb-4 text-lg">
               Scrap, damaged, flood-affected, unregistered or simply unwanted: we buy
               it, we come to it, and we recycle it properly rather than leaving it to
-              rust in a driveway.
+              rust in a driveway. Free car removal is included on every job we quote.
             </p>
             <p className="text-lg">
               Reach us on{" "}

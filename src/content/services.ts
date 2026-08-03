@@ -40,7 +40,7 @@ export const servicePages: ServicePage[] = [
       {
         heading: "When selling to us makes sense — and when it doesn't",
         body: [
-          "We'll be straight with you, because it saves us both time. If your car is registered, roadworthy, under about ten years old and you're not in a hurry, you will almost certainly get more for it selling privately. Take the photos, write the listing, be patient.",
+          "We'll be straight with you, because it saves us both time. Most car buyers on the Gold Coast will not tell you this, but if your car is registered, roadworthy, under about ten years old and you're not in a hurry, you will almost certainly get more for it selling privately. Take the photos, write the listing, be patient.",
           "Where we're the better option is everything else. Cars that don't start. Cars that would fail a roadworthy. Cars that are worth less than the repair quote. Cars you need gone by Friday because you're moving, or the lease is up, or you've already bought the replacement. In those situations a private sale is slow, stressful and often ends in the same place anyway.",
         ],
       },
@@ -110,7 +110,7 @@ export const servicePages: ServicePage[] = [
       "Free car removal across the Gold Coast. Basements, driveways and roadsides are covered. No callout fee and we pay you for the car.",
     h1: "Car Removal Gold Coast",
     intro:
-      "Towing charges are why so many dead cars sit in driveways for years. Ours is free, and we pay you for the car on top of it.",
+      "Towing charges are why so many dead cars sit in driveways for years. Free car removal across the Gold Coast is the whole point of what we do — and we pay you for the car on top of it.",
     sections: [
       {
         heading: "Free means free",
@@ -169,10 +169,10 @@ export const servicePages: ServicePage[] = [
 
   {
     slug: "unwanted-car-buyer",
-    title: "Unwanted Car Buyer — Any Condition, Any Age",
+    title: "Unwanted Car Buyer Gold Coast — Any Condition, Any Age",
     metaDescription:
       "We buy unwanted cars in any condition across the Gold Coast — non-runners, write-offs, project cars and deceased estates. Free removal, cash paid.",
-    h1: "Unwanted Car Buyer",
+    h1: "Unwanted Car Buyer Gold Coast",
     intro:
       "The car that was going to be fixed. The one from a deceased estate. The project that never got finished. If it's taking up space and doing nothing, we'll take it and pay you for it.",
     sections: [
@@ -232,6 +232,80 @@ export const servicePages: ServicePage[] = [
       "statutory-vs-repairable-write-off-queensland",
       "what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide",
       "transferring-car-registration-in-queensland",
+    ],
+  },
+
+  {
+    slug: "car-wreckers-gold-coast",
+    title: "Car Wreckers Gold Coast — We Buy And Dismantle",
+    metaDescription:
+      "Gold Coast car wreckers paying cash for complete vehicles. We dismantle, recover parts and recycle the shell — free removal, any make, any condition.",
+    h1: "Car Wreckers Gold Coast",
+    intro:
+      "Most people meet a wrecker at the end of a car's life and have no idea what actually happens next. It matters, because how a car is dismantled is exactly what determines the number we can offer you for it.",
+    sections: [
+      {
+        heading: "What a wrecker does that a scrap yard doesn't",
+        body: [
+          "The two get used interchangeably and they are not the same trade. A metal recycler is paid by weight: the car is depolluted, crushed or shredded, and the steel goes back into the supply chain. That is the floor price for any vehicle, and it is what a stripped shell is worth.",
+          "A wrecker takes the car apart first. Every component with a resale market comes off and is catalogued before what remains goes to the recycler. That is more work, and it is why a wrecker can pay more than a scrap yard for the same car — there are simply more ways to recover the money.",
+          "The practical consequence for you is that the more complete your car is, the wider that gap gets. A car with its engine, gearbox, converter and panels intact is worth substantially more to us than the same car after someone has sold the good bits off it individually.",
+        ],
+      },
+      {
+        heading: "What comes off a car, and why it has value",
+        body: [
+          "When we quote, this is the list we are pricing against — not the badge and not the odometer:",
+        ],
+        list: [
+          "Engine and transmission, including cores that no longer run",
+          "Catalytic converter, which contains recoverable platinum, palladium and rhodium",
+          "Alternator, starter motor, radiator and air conditioning compressor",
+          "Straight, unrusted panels — doors, bonnets, guards, tailgates",
+          "Glass, headlights, tail lights and mirrors",
+          "Wheels, tyres with tread left, and the spare",
+          "Interior modules, seats, dashboard components and the ECU",
+          "The remaining shell, several hundred kilograms of recyclable steel",
+        ],
+      },
+      {
+        heading: "Doing it properly is not optional",
+        body: [
+          "An end-of-life vehicle holds engine oil, coolant, brake fluid, transmission fluid, fuel, refrigerant and a lead-acid battery. All of it has to be drained and contained before anything is crushed, because all of it causes real damage in stormwater.",
+          "It is worth asking whoever collects your car what happens to it afterwards. A legitimate operator can tell you. If the answer is vague, that tells you something — both about the environmental side and about whether the price you were quoted is one that will still be honoured when the truck arrives.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Do you buy cars for wrecking if they still drive?",
+        answer:
+          "Yes, though it is worth a conversation first. A registered, roadworthy car will usually fetch more in a private sale than it is worth dismantled. Where wrecking wins is when the repair bill has passed the car's value, when it will not pass a safety inspection, or when you want it gone this week without the listing-and-no-shows process.",
+      },
+      {
+        question: "Can I buy second-hand parts from you?",
+        answer:
+          "We recover parts from Korean, Japanese, Australian, European and American vehicles. Call with the make, model and year and we will check what is on the shelf — availability changes constantly as cars come in.",
+      },
+      {
+        question: "Is my car worth more complete or stripped?",
+        answer:
+          "Complete, almost always. Owners sometimes sell the alloy wheels or the battery first and assume the rest is unaffected. It is not — each part removed comes off the offer, and the labour of dealing with a partly dismantled car works against you too. Sell it whole unless you have a specific buyer paying well above market for one component.",
+      },
+      {
+        question: "What happens to the fluids and the battery?",
+        answer:
+          "They are drained and contained before anything else happens, which is both a legal requirement for end-of-life vehicles in Queensland and the reason a car cannot simply be crushed as it sits. Batteries go to lead recycling; oils, coolant and fuel are handled separately.",
+      },
+      {
+        question: "Do you take 4WDs, utes, vans and light trucks?",
+        answer:
+          "Yes. Larger vehicles often carry more recoverable weight and more valuable driveline components, so they are frequently worth more than a small hatchback in similar condition. Trailers and light commercials as well.",
+      },
+    ],
+    related: [
+      "where-do-old-junk-cars-go-in-gold-coast-car-selling-options-in-gold-coast-qld",
+      "how-much-is-my-scrap-car-worth-gold-coast",
     ],
   },
 ];

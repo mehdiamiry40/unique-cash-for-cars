@@ -30,6 +30,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       { url: `${site.url}/sell-my-car-gold-coast`, changeFrequency: "monthly", priority: 0.8 },
       { url: `${site.url}/car-removal-gold-coast`, changeFrequency: "monthly", priority: 0.8 },
       { url: `${site.url}/unwanted-car-buyer`, changeFrequency: "monthly", priority: 0.8 },
+      { url: `${site.url}/car-wreckers-gold-coast`, changeFrequency: "monthly", priority: 0.8 },
       {
         url: `${site.url}/company-info-cash-for-cars-gold-coast-and-free-car-removal`,
         changeFrequency: "yearly",

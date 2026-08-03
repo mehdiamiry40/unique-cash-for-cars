@@ -13,7 +13,8 @@ const otherLinks = [
 const services = [
   { label: "Sell My Car Gold Coast", href: "/sell-my-car-gold-coast" },
   { label: "Car Removal Gold Coast", href: "/car-removal-gold-coast" },
-  { label: "Unwanted Car Buyer", href: "/unwanted-car-buyer" },
+  { label: "Unwanted Car Buyer Gold Coast", href: "/unwanted-car-buyer" },
+  { label: "Car Wreckers Gold Coast", href: "/car-wreckers-gold-coast" },
 ];
 
 export function Footer() {
