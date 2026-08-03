@@ -22,6 +22,7 @@ export function organizationSchema() {
     "@type": "AutomotiveBusiness",
     "@id": ORG_ID,
     name: site.legalName,
+    legalName: site.registeredEntityName,
     alternateName: site.name,
     url: site.url,
     telephone: site.phone.e164,
@@ -47,6 +48,15 @@ export function organizationSchema() {
     })),
     sameAs: [site.social.facebook].filter(Boolean),
     ...(site.abn ? { taxID: site.abn } : {}),
+    ...(site.licenceNumber
+      ? {
+          identifier: {
+            "@type": "PropertyValue",
+            name: "Queensland motor dealer licence",
+            value: site.licenceNumber,
+          },
+        }
+      : {}),
   };
 }
 

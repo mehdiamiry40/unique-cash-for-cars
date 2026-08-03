@@ -11,8 +11,7 @@ import { CallButton, Card, Section, SectionHeading } from "@/components/ui";
  * indexed one — renaming it would throw away whatever equity it has for no gain.
  */
 export const metadata: Metadata = pageMeta({
-  // "Licensed QLD Vehicle Buyer" until site.licenceNumber exists to back it.
-  title: "About Unique Cash For Cars — Gold Coast Vehicle Buyer",
+  title: "About Unique Cash For Cars — Licensed QLD Vehicle Buyer",
   description:
     "Unique Cash For Cars buys unwanted vehicles from Gold Coast residents with free removal, straightforward quotes and cash on collection.",
   path: "/company-info-cash-for-cars-gold-coast-and-free-car-removal",
@@ -89,6 +88,10 @@ export default function CompanyPage() {
             <SectionHeading align="left">Licensing and credentials</SectionHeading>
             <Card>
               <dl className="space-y-3">
+                <div className="flex gap-3">
+                  <dt className="font-bold text-ink-heading">Registered entity</dt>
+                  <dd>{site.registeredEntityName}</dd>
+                </div>
                 {site.abn && (
                   <div className="flex gap-3">
                     <dt className="font-bold text-ink-heading">ABN</dt>

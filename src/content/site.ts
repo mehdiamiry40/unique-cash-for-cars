@@ -11,6 +11,8 @@ export const site = {
   name: "Unique Cash For Cars",
   /** Longer form for page titles and schema. */
   legalName: "Unique Cash For Cars Gold Coast",
+  /** Registered corporation operating the Unique Cash For Cars service. */
+  registeredEntityName: "A Plus Car Removal Pty Ltd",
   url: "https://uniquecashforcars.com.au",
   description:
     "Get a firm cash offer for your Gold Coast car in about a minute. Up to $9,999, free towing, any condition. Call Unique Cash For Cars today.",
@@ -59,18 +61,9 @@ export const site = {
     facebook: "https://www.facebook.com/uniquecashforcars/",
   },
 
-  /**
-   * TODO — fill these in and they render automatically in the footer and on
-   * the About page. Both are trust signals worth real money in this industry.
-   *
-   * The site used to assert "a licensed, insured Queensland business" in four
-   * places while these were empty, which is an unsubstantiated representation
-   * under Australian Consumer Law. That copy has been reworded to claims the
-   * business can actually stand behind. Once you have the licence number,
-   * `git log --grep="Substantiate"` shows exactly which sentences to restore.
-   */
-  abn: "" as string,
-  licenceNumber: "" as string,
+  /** Public registration details confirmed against the Australian and QLD registers. */
+  abn: "39 627 952 916" as string,
+  licenceNumber: "4253110" as string,
 
   /** Headline offer. Change once here, updates every page and title tag. */
   maxPayout: "$9,999",
