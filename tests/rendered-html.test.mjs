@@ -66,6 +66,7 @@ const serviceRoutes = [
   "/sell-my-car-gold-coast",
   "/car-removal-gold-coast",
   "/unwanted-car-buyer",
+  "/car-wreckers-gold-coast",
 ];
 const postRoutes = [
   "/what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide",

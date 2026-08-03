@@ -35,7 +35,7 @@ export default function CompanyPage() {
 
       <Section>
         <div className="mx-auto max-w-3xl">
-          <h1 className="heading-xl mb-5">About Unique Cash For Cars</h1>
+          <h1 className="heading-xl mb-5">About Unique Cash For Cars Gold Coast</h1>
           <div className="space-y-4 text-lg">
             <p>
               We buy cars nobody else wants. Scrap, damaged, flood-affected,

@@ -41,7 +41,7 @@ export default function ContactPage() {
       <Section>
         <div className="grid items-start gap-10 lg:grid-cols-[1fr_26rem]">
           <div>
-            <h1 className="heading-xl mb-4">Contact us</h1>
+            <h1 className="heading-xl mb-4">Contact Unique Cash For Cars Gold Coast</h1>
             <p className="mb-8 text-xl">
               The fastest way to get a number for your car is to ring us. If
               you&apos;d rather we called you, fill in the form and we&apos;ll get

@@ -11,7 +11,13 @@ import { QuoteForm } from "@/components/QuoteForm";
 import { CallButton, Section, SectionHeading } from "@/components/ui";
 
 export const metadata: Metadata = pageMeta({
-  title: "Cash For Cars Gold Coast | Free Vehicle Removal",
+  /*
+   * Deliberately NOT "Cash For Cars Gold Coast" — that is the homepage's term,
+   * and both pages carrying it had them competing for the same result. This
+   * page exists to answer "do you cover my suburb", so it targets that intent
+   * instead and the homepage keeps the head term to itself.
+   */
+  title: "Cash For Cars Gold Coast Suburbs — Areas We Cover",
   description:
     "We buy cars across the Gold Coast — Southport, Surfers Paradise, Robina, Burleigh Heads, Labrador, Nerang, Helensvale and Mermaid Waters. Free towing.",
   path: "/cash-for-cars",
@@ -38,7 +44,9 @@ export default function CashForCarsHub() {
       <Section>
         <div className="grid items-start gap-10 lg:grid-cols-[1fr_26rem]">
           <div>
-            <h1 className="heading-xl mb-4">Where we buy cars</h1>
+            <h1 className="heading-xl mb-4">
+              Cash for cars in your Gold Coast suburb
+            </h1>
             <p className="mb-4 text-xl">
               We collect across the Gold Coast, from the northern corridor to the
               southern beaches and inland to Nerang. Each service area is worth a

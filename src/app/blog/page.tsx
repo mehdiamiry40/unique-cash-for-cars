@@ -8,7 +8,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { Section } from "@/components/ui";
 
 export const metadata: Metadata = pageMeta({
-  title: "Blog — Selling, Scrapping & Removing Cars in QLD",
+  title: "Gold Coast Car Selling Guides — Scrap, Damage, Paperwork",
   description:
     "Practical guides on selling a damaged car, what scrap cars are worth, and how vehicle disposal actually works in South East Queensland.",
   path: "/blog",
@@ -35,7 +35,7 @@ export default function BlogIndex() {
 
       <Section>
         <div className="mx-auto max-w-3xl">
-          <h1 className="heading-xl mb-4">Blog</h1>
+          <h1 className="heading-xl mb-4">Gold Coast car selling guides</h1>
           <p className="mb-10 text-xl">
             Straight answers to the questions people ask before they call us.
           </p>
