@@ -9,7 +9,7 @@ type Status = "idle" | "submitting" | "success" | "error";
 /**
  * Quote enquiry form.
  *
- * Posts to /api/quote. Name + phone only are required — we call back; no email field.
+ * Posts to /api/quote. Name, phone and expected price are required; no email field.
  * Includes a honeypot field — the WordPress form was getting hit by bots and
  * Contact Form 7 has no built-in protection.
  */
@@ -27,12 +27,15 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
 
     const name = String(data.name ?? "").trim();
     const phone = String(data.phone ?? "").trim();
-    if (!name || phone.replace(/\D/g, "").length < 8) {
+    const expectedPrice = String(data.expectedPrice ?? "").trim();
+    if (!name || phone.replace(/\D/g, "").length < 8 || !expectedPrice) {
       setStatus("error");
       setError(
         !name
           ? "Please enter your name."
-          : "Please enter a valid phone number so we can call you back.",
+          : phone.replace(/\D/g, "").length < 8
+            ? "Please enter a valid phone number so we can call you back."
+            : "Please enter your expected price.",
       );
       return;
     }
@@ -166,11 +169,12 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
 
         <div>
           <label htmlFor="q-price" className={labelClass}>
-            Expected price <span className="font-normal text-ink-muted">(optional)</span>
+            Expected price
           </label>
           <input
             id="q-price"
             name="expectedPrice"
+            required
             inputMode="numeric"
             autoComplete="off"
             placeholder="$1,500…"

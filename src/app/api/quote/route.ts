@@ -188,6 +188,7 @@ export async function POST(request: Request) {
 
   const name = text(body.name, 100);
   const phone = text(body.phone, 40);
+  const expectedPrice = text(body.expectedPrice, 60);
 
   // Phone-only contact. The public form does not collect email — we call back.
   if (!name || !phone) {
@@ -195,6 +196,9 @@ export async function POST(request: Request) {
   }
   if (phone.replace(/\D/g, "").length < 8) {
     return json({ error: "Please enter a valid phone number." }, 400);
+  }
+  if (!expectedPrice) {
+    return json({ error: "Expected price is required." }, 400);
   }
 
   const leadId = crypto.randomUUID();
@@ -205,7 +209,7 @@ export async function POST(request: Request) {
     phone,
     suburb: text(body.suburb, 120) || "—",
     vehicle: text(body.vehicle, 160) || "—",
-    expectedPrice: text(body.expectedPrice, 60) || "—",
+    expectedPrice,
     condition: text(body.condition, 500) || "—",
     receivedAt: new Date().toISOString(),
   };

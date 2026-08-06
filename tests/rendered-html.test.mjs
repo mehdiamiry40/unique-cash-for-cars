@@ -658,6 +658,24 @@ test("the quote endpoint validates contact details", async () => {
   assert.equal(response.headers.get("cache-control"), "no-store");
 });
 
+test("the quote endpoint requires an expected price", async () => {
+  const response = await fetch(`${origin}/api/quote`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-forwarded-for": "192.0.2.14",
+    },
+    body: JSON.stringify({
+      name: "Jamie Example",
+      phone: "0400 000 000",
+    }),
+  });
+  const result = await response.json();
+
+  assert.equal(response.status, 400);
+  assert.match(result.error, /expected price is required/i);
+});
+
 test("the quote endpoint never reports success without a delivery service", async () => {
   const response = await fetch(`${origin}/api/quote`, {
     method: "POST",
@@ -670,6 +688,7 @@ test("the quote endpoint never reports success without a delivery service", asyn
       phone: "0400 000 000",
       suburb: "Southport",
       vehicle: "2016 Toyota Corolla",
+      expectedPrice: "$3,000",
       condition: "Running",
     }),
   });
@@ -777,7 +796,7 @@ test("the short Adelaide URL redirects permanently", async () => {
   assert.match(location, /\/$/);
 });
 
-test("the quote form collects expected price without reintroducing retired fields", async () => {
+test("the quote form requires expected price without reintroducing retired fields", async () => {
   const home = await html("/");
   assert.doesNotMatch(home, /name="email"|id="q-email"/);
   assert.doesNotMatch(home, /type="email"/);
@@ -785,7 +804,7 @@ test("the quote form collects expected price without reintroducing retired field
   const expectedPriceInput = home.match(/<input[^>]*name="expectedPrice"[^>]*>/)?.[0];
   assert.ok(expectedPriceInput, "quote form must include an expected-price input");
   assert.match(expectedPriceInput, /inputMode="numeric"/);
-  assert.doesNotMatch(expectedPriceInput, /\srequired(?:=|\s|>)/);
+  assert.match(expectedPriceInput, /\srequired=""/);
   assert.doesNotMatch(home, /name="make"|name="model"|name="year"/);
   assert.doesNotMatch(home, /name="fuel"|Fuel type/);
 
@@ -800,6 +819,7 @@ test("the quote form collects expected price without reintroducing retired field
       phone: "0400 000 000",
       suburb: "Southport",
       vehicle: "2016 Toyota Corolla",
+      expectedPrice: "$3,000",
       condition: "Running",
     }),
   });
