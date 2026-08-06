@@ -7,15 +7,13 @@
  */
 
 export const site = {
-  /** Legal trading name. Use this everywhere — no variations. */
+  /** Public website brand. The registered entity is listed separately below. */
   name: "Unique Cash For Cars",
-  /** Longer form for page titles and schema. */
-  legalName: "Unique Cash For Cars Gold Coast",
   /** Registered corporation operating the Unique Cash For Cars service. */
   registeredEntityName: "A Plus Car Removal Pty Ltd",
   url: "https://uniquecashforcars.com.au",
   description:
-    "Get a firm cash offer for your Gold Coast car in about a minute. Up to $9,999, free towing, any condition. Call Unique Cash For Cars today.",
+    "Get a Cash For Cars Gold Coast quote up to $9,999 for any make or condition, with free car removal across the city. Call for an offer.",
 
   phone: {
     /**
@@ -61,7 +59,7 @@ export const site = {
     facebook: "https://www.facebook.com/uniquecashforcars/",
   },
 
-  /** Public registration details confirmed against the Australian and QLD registers. */
+  /** Licence 4253110 was current in the QLD register on 5 August 2026; recheck at expiry. */
   abn: "39 627 952 916" as string,
   licenceNumber: "4253110" as string,
 
@@ -70,34 +68,11 @@ export const site = {
 } as const;
 
 export const nav = [
-  { label: "Home", href: "/" },
-  {
-    label: "Cash For Cars",
-    href: "/cash-for-cars",
-    children: [
-      { label: "Cash for Cars Southport", href: "/cash-for-cars/southport" },
-      { label: "Cash for Cars Surfers Paradise", href: "/cash-for-cars/surfers-paradise" },
-      { label: "Cash for Cars Robina", href: "/cash-for-cars/robina" },
-      { label: "Cash for Cars Burleigh Heads", href: "/cash-for-cars/burleigh-heads" },
-      { label: "Cash for Cars Labrador", href: "/cash-for-cars/labrador" },
-      { label: "Cash for Cars Nerang", href: "/cash-for-cars/nerang" },
-      { label: "Cash for Cars Helensvale", href: "/cash-for-cars/helensvale" },
-      { label: "Cash for Cars Mermaid Waters", href: "/cash-for-cars/mermaid-waters" },
-    ],
-  },
-  { label: "Company", href: "/company-info-cash-for-cars-gold-coast-and-free-car-removal" },
-  { label: "Blog", href: "/blog" },
-  { label: "Contact Us", href: "/contact-us" },
-  {
-    label: "Services",
-    href: "#",
-    children: [
-      { label: "Sell My Car Gold Coast", href: "/sell-my-car-gold-coast" },
-      { label: "Car Removal Gold Coast", href: "/car-removal-gold-coast" },
-      { label: "Unwanted Car Buyer Gold Coast", href: "/unwanted-car-buyer" },
-      { label: "Car Wreckers Gold Coast", href: "/car-wreckers-gold-coast" },
-    ],
-  },
+  { label: "Cash For Cars", href: "/" },
+  { label: "Car Removal", href: "/car-removal-gold-coast" },
+  { label: "About", href: "/about" },
+  { label: "Guides", href: "/blog" },
+  { label: "Contact", href: "/contact-us" },
 ] as const;
 
 export type NavItem = (typeof nav)[number];

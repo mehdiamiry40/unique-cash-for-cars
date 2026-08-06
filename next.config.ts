@@ -55,6 +55,21 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
 
+      // Consolidate overlapping commercial intent into two canonical pillars.
+      { source: "/cash-for-cars", destination: "/", permanent: true },
+      { source: "/sell-my-car-gold-coast", destination: "/", permanent: true },
+      { source: "/unwanted-car-buyer", destination: "/", permanent: true },
+      {
+        source: "/car-wreckers-gold-coast",
+        destination: "/car-removal-gold-coast",
+        permanent: true,
+      },
+      {
+        source: "/company-info-cash-for-cars-gold-coast-and-free-car-removal",
+        destination: "/about",
+        permanent: true,
+      },
+
       ...suburbRedirects,
 
       // WordPress internals that were indexed or linked. Send them somewhere useful.

@@ -40,6 +40,7 @@ export const posts: Post[] = [
     description:
       "What a dismantler is actually paying for, the five things that move the number, and when scrapping is the wrong answer.",
     date: "2026-07-28",
+    updated: "2026-08-06",
     readingMinutes: 6,
   },
   {
@@ -48,6 +49,7 @@ export const posts: Post[] = [
     description:
       "Which classification you have decides whether the car can ever be driven again — and it changes the value less than most owners expect.",
     date: "2026-07-28",
+    updated: "2026-08-06",
     readingMinutes: 7,
   },
   {
@@ -56,6 +58,7 @@ export const posts: Post[] = [
     description:
       "You can sell an encumbered car. How the payout figure, the PPSR and negative equity actually work, and what delays a sale.",
     date: "2026-07-28",
+    updated: "2026-08-06",
     readingMinutes: 6,
   },
   {
@@ -64,6 +67,7 @@ export const posts: Post[] = [
     description:
       "Who lodges what, when a safety certificate is required, and the three ownership situations that hold up a collection.",
     date: "2026-07-28",
+    updated: "2026-08-06",
     readingMinutes: 6,
   },
   {
@@ -72,6 +76,7 @@ export const posts: Post[] = [
     description:
       "Repair, claim, part out or sell — how to work out which option actually leaves you better off after an accident or a failed roadworthy.",
     date: "2024-06-18",
+    updated: "2026-08-06",
     readingMinutes: 7,
   },
   {

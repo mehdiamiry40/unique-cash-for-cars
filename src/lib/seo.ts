@@ -15,6 +15,7 @@ export function pageMeta(opts: {
   path: string;
   image?: string;
   noIndex?: boolean;
+  type?: "website" | "article";
 }): Metadata {
   const url = opts.path === "/" ? site.url : `${site.url}${opts.path}`;
   /*
@@ -34,9 +35,9 @@ export function pageMeta(opts: {
       title: opts.title,
       description: opts.description,
       url,
-      siteName: site.legalName,
+      siteName: site.name,
       locale: "en_AU",
-      type: "website",
+      type: opts.type ?? "website",
       /*
        * Dimensions and alt are not decoration. Several social clients reserve
        * layout for the image before it loads and fall back to a small
@@ -49,7 +50,7 @@ export function pageMeta(opts: {
           url: image,
           width: 3840,
           height: 1600,
-          alt: `${site.legalName} — cash for cars and free removal`,
+          alt: `${site.name} — Cash For Cars Gold Coast and Car Removal Gold Coast`,
         },
       ],
     },

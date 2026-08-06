@@ -4,29 +4,27 @@ const steps = [
   {
     n: "01",
     title: "Tell us about the car",
-    body: "Call us or fill in the form. We need the make, model, year, rough condition and where it's parked. That's enough for a firm number — usually in about a minute.",
+    body: "Call us or fill in the form with the make, model, year, rough condition and pickup location. We use those details to assess the vehicle and explain the offer.",
   },
   {
     n: "02",
     title: "We confirm and book a time",
-    body: "If you're happy with the quote we lock in a pickup. We come to you: home, work, a carpark, the side of the road. Same day is often possible.",
+    body: "If you're happy with the quote, we confirm an available pickup window for the home, workplace, yard or breakdown location. Timing depends on the route, access and paperwork.",
   },
   {
     n: "03",
     title: "Paperwork, cash, gone",
-    body: "We check ID and registration, you sign the transfer, we pay you on the spot and tow the car away free. The price we quoted is the price you get.",
+    body: "We verify identity, ownership and the correct registration or cancellation path, then arrange payment and tow the car away free. The agreed quote is not reduced by a towing fee.",
   },
 ] as const;
 
 /**
- * The three-step process block, shared across the homepage and every
- * location page. Deliberately one component rather than copies — the old
- * site had this text duplicated across 20 pages.
+ * The three-step process block shared by the two commercial pillars.
  */
 export function HowItWorks({ tone = "default" }: { tone?: "default" | "alt" }) {
   return (
     <Section tone={tone}>
-      <SectionHeading>How selling your car works</SectionHeading>
+      <SectionHeading>How cash for cars and car removal works</SectionHeading>
       <ol className="grid gap-6 md:grid-cols-3">
         {steps.map((step) => (
           <li

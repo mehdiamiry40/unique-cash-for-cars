@@ -40,12 +40,12 @@ const openSans = localFont({
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `Cash For Cars Gold Coast — Up to ${site.maxPayout}, Free Removal`,
+    default: site.name,
     // Pages set their own full title — no suffix appended.
     template: "%s",
   },
   description: site.description,
-  applicationName: site.legalName,
+  applicationName: site.name,
   // Preview deployments are kept out of search here as well as in robots.txt:
   // Disallow stops crawling, noindex removes anything already discovered.
   robots: isSearchVisible

@@ -1,17 +1,16 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { site } from "@/content/site";
-import { hrefForPlace } from "@/content/suburbs";
 import { pageMeta } from "@/lib/seo";
 import { breadcrumbSchema, contactPageSchema, graph } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
 import { QuoteForm } from "@/components/QuoteForm";
+import { PrimaryServiceLinks } from "@/components/PrimaryServiceLinks";
 import { Card, Section, SectionHeading } from "@/components/ui";
 
 export const metadata: Metadata = pageMeta({
-  title: "Contact Unique Cash For Cars Gold Coast",
-  description: `Call ${site.phone.display} for a free Gold Coast car quote, or send your vehicle details and we will call you back during business hours.`,
+  title: "Contact Unique Cash For Cars | Vehicle Quotes",
+  description: `Call ${site.phone.display} for Cash For Cars Gold Coast quotes or Car Removal Gold Coast bookings, or send your vehicle details for a callback.`,
   path: "/contact-us",
 });
 
@@ -41,7 +40,7 @@ export default function ContactPage() {
       <Section>
         <div className="grid items-start gap-10 lg:grid-cols-[1fr_26rem]">
           <div>
-            <h1 className="heading-xl mb-4">Contact Unique Cash For Cars Gold Coast</h1>
+            <h1 className="heading-xl mb-4">Contact Unique Cash For Cars</h1>
             <p className="mb-8 text-xl">
               The fastest way to get a number for your car is to ring us. If
               you&apos;d rather we called you, fill in the form and we&apos;ll get
@@ -111,22 +110,15 @@ export default function ContactPage() {
           Call us to confirm availability in your suburb.
         </p>
         <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {site.areaServed.slice(1).map((area) => {
-            const href = hrefForPlace(area);
-            const className =
-              "block text-center font-bold text-ink-heading transition-colors hover:border-brand hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
-            return href ? (
-              <Link key={area} href={href} className={`rounded border border-hairline bg-surface p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] ${className}`}>
-                {area}
-              </Link>
-            ) : (
-              <Card key={area} className="text-center font-bold text-ink-heading">
-                {area}
-              </Card>
-            );
-          })}
+          {site.areaServed.slice(1).map((area) => (
+            <Card key={area} className="text-center font-bold text-ink-heading">
+              {area}
+            </Card>
+          ))}
         </div>
       </Section>
+
+      <PrimaryServiceLinks tone="default" />
     </>
   );
 }

@@ -9,6 +9,7 @@ export const metadata: Metadata = pageMeta({
   description:
     "How Unique Cash For Cars collects, uses and stores the personal information you provide when requesting a vehicle quote.",
   path: "/privacy-policy",
+  noIndex: true,
 });
 
 /**
@@ -21,7 +22,7 @@ export default function PrivacyPolicyPage() {
   // Hardcoded on purpose. This is the date the policy was last reviewed, not
   // the date the site was last deployed — a build-time date would silently
   // claim a review that never happened. Bump it when you change the text.
-  const updated = "31 July 2026";
+  const updated = "6 August 2026";
 
   return (
     <Section>
@@ -39,15 +40,16 @@ export default function PrivacyPolicyPage() {
         </p>
         <p>
           When you complete a sale we additionally sight your photo identification
-          and vehicle registration documents, as required for the transfer of
-          registration. We record only what the transfer requires.
+          and vehicle registration documents, as required for the applicable
+          transfer, cancellation or dealer record. We record only what the
+          transaction requires.
         </p>
 
         <h2>Why we collect it</h2>
         <p>
-          To quote on your vehicle, arrange collection, complete the transfer of
-          registration, and meet our record-keeping obligations as a vehicle buyer in
-          Queensland. We do not sell your information to anyone.
+          To quote on your vehicle, arrange collection, complete the applicable
+          registration or disposal process, and meet our record-keeping obligations as
+          a vehicle buyer in Queensland. We do not sell your information to anyone.
         </p>
 
         {/*
@@ -81,7 +83,7 @@ export default function PrivacyPolicyPage() {
         <p>
           Your details are shared only where necessary to complete the transaction
           or run the site: with the Queensland Department of Transport and Main
-          Roads for the registration transfer, with our towing operator to arrange
+          Roads for a registration transfer or cancellation, with our towing operator to arrange
           collection, with Google for the advertising measurement described above,
           with our email or form-delivery provider when you submit a quote online,
           and with our accountant or auditor where required by law.
@@ -111,7 +113,7 @@ export default function PrivacyPolicyPage() {
 
         <h2>Contact</h2>
         <p>
-          {site.legalName}
+          {site.name}
           <br />
           Operated by {site.registeredEntityName} · ABN {site.abn}
           <br />

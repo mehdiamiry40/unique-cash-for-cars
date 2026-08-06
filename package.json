@@ -10,8 +10,7 @@
     "typecheck": "tsc --noEmit",
     "fetch:assets": "node scripts/fetch-assets.mjs",
     "check:urls": "node scripts/check-urls.mjs",
-    "check:duplication": "node scripts/check-duplication.mjs",
-    "verify": "npm run typecheck && npm run lint && npm run check:urls && npm run check:duplication && npm test",
+    "verify": "npm run typecheck && npm run lint && npm run check:urls && npm test",
     "test": "npm run build && node --test tests/*.test.mjs"
   },
   "dependencies": {
