@@ -4,17 +4,14 @@ import { site } from "@/content/site";
 import { pageMeta } from "@/lib/seo";
 import { breadcrumbSchema, graph } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
+import { PrimaryServiceLinks } from "@/components/PrimaryServiceLinks";
 import { CallButton, Card, Section, SectionHeading } from "@/components/ui";
 
-/**
- * URL kept exactly as it was on WordPress. It's an ugly slug, but it's an
- * indexed one — renaming it would throw away whatever equity it has for no gain.
- */
 export const metadata: Metadata = pageMeta({
-  title: "About Unique Cash For Cars — Licensed QLD Vehicle Buyer",
+  title: "About Unique Cash For Cars | Queensland Vehicle Buyer",
   description:
-    "Unique Cash For Cars buys unwanted vehicles from Gold Coast residents with free removal, straightforward quotes and cash on collection.",
-  path: "/company-info-cash-for-cars-gold-coast-and-free-car-removal",
+    "Learn who operates the Cash For Cars Gold Coast and Car Removal Gold Coast services, how vehicle offers are calculated, and which business details apply.",
+  path: "/about",
 });
 
 export default function CompanyPage() {
@@ -24,17 +21,14 @@ export default function CompanyPage() {
         data={graph(
           breadcrumbSchema([
             { name: "Home", path: "/" },
-            {
-              name: "Company",
-              path: "/company-info-cash-for-cars-gold-coast-and-free-car-removal",
-            },
+            { name: "About", path: "/about" },
           ]),
         )}
       />
 
       <Section>
         <div className="mx-auto max-w-3xl">
-          <h1 className="heading-xl mb-5">About Unique Cash For Cars Gold Coast</h1>
+          <h1 className="heading-xl mb-5">About Unique Cash For Cars</h1>
           <div className="space-y-4 text-lg">
             <p>
               We buy cars nobody else wants. Scrap, damaged, flood-affected,
@@ -47,9 +41,9 @@ export default function CompanyPage() {
               homes, workplaces and other accessible locations across the city.
             </p>
             <p>
-              We&apos;re a small operation, which we think works in your favour. The
-              person who quotes your car is the person who authorises the payment, so
-              the number doesn&apos;t change between the phone call and the driveway.
+              We keep the quote process direct. Describe the condition, missing parts,
+              registration status and pickup access accurately so the offer and removal
+              plan can be confirmed before a truck is dispatched.
             </p>
           </div>
         </div>
@@ -85,7 +79,7 @@ export default function CompanyPage() {
       {(site.abn || site.licenceNumber) && (
         <Section>
           <div className="mx-auto max-w-3xl">
-            <SectionHeading align="left">Licensing and credentials</SectionHeading>
+            <SectionHeading align="left">Operator and licence details</SectionHeading>
             <Card>
               <dl className="space-y-3">
                 <div className="flex gap-3">
@@ -95,13 +89,28 @@ export default function CompanyPage() {
                 {site.abn && (
                   <div className="flex gap-3">
                     <dt className="font-bold text-ink-heading">ABN</dt>
-                    <dd>{site.abn}</dd>
+                    <dd>
+                      <a
+                        href="https://abr.business.gov.au/ABN/View?id=39627952916"
+                        className="text-brand underline"
+                      >
+                        {site.abn}
+                      </a>
+                    </dd>
                   </div>
                 )}
                 {site.licenceNumber && (
                   <div className="flex gap-3">
                     <dt className="font-bold text-ink-heading">QLD licence</dt>
-                    <dd>{site.licenceNumber}</dd>
+                    <dd>
+                      {site.licenceNumber} ·{" "}
+                      <a
+                        href="https://ftlr.fairtrading.qld.gov.au/home/search?LicenceNumber=4253110&GivenName=&LastName=&CompanyName=&MasterType=MOTOR%20DEALING"
+                        className="text-brand underline"
+                      >
+                        check the QLD register
+                      </a>
+                    </dd>
                   </div>
                 )}
               </dl>
@@ -110,11 +119,13 @@ export default function CompanyPage() {
         </Section>
       )}
 
-      <Section tone="alt">
+      <PrimaryServiceLinks tone="alt" />
+
+      <Section>
         <div className="mx-auto max-w-3xl text-center">
           <SectionHeading>Get a number for your car</SectionHeading>
           <p className="mb-7 text-lg">
-            One call, about a minute, no obligation either way.
+            One call, no obligation either way.
           </p>
           <CallButton className="text-xl" />
         </div>

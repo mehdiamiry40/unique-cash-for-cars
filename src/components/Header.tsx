@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { nav, site } from "@/content/site";
 import { Container, PhoneIcon } from "@/components/ui";
@@ -11,8 +11,6 @@ import { Container, PhoneIcon } from "@/components/ui";
 export function Header() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const navRef = useRef<HTMLElement>(null);
 
   // Close everything on route change. Adjusting state during render (rather
   // than in an effect) is the recommended pattern — it avoids the extra
@@ -21,43 +19,22 @@ export function Header() {
   if (lastPath !== pathname) {
     setLastPath(pathname);
     setMobileOpen(false);
-    setOpenMenu(null);
   }
 
-  // Close dropdowns on outside click or Escape.
+  // Close the mobile navigation on Escape.
   useEffect(() => {
-    function onPointerDown(e: MouseEvent) {
-      if (navRef.current && !navRef.current.contains(e.target as Node)) setOpenMenu(null);
-    }
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
-        setOpenMenu(null);
         setMobileOpen(false);
       }
     }
-    document.addEventListener("mousedown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
+    return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
   const matches = (href: string) => {
-    // A nav item can carry a placeholder href ("#") when it exists only to open
-    // a submenu. startsWith("#") is never true for a pathname, so treating it
-    // as a path silently left the "Services" parent inactive on all three of
-    // its own child pages.
-    if (!href.startsWith("/")) return false;
     return href === "/" ? pathname === "/" : pathname.startsWith(href);
   };
-
-  /** A parent is current when it, or any of its children, is the open page. */
-  const isActive = (item: (typeof nav)[number]) =>
-    matches(item.href) ||
-    ("children" in item && item.children
-      ? item.children.some((child) => matches(child.href))
-      : false);
 
   return (
     <header className="sticky top-0 z-40 border-b border-hairline bg-surface/95 backdrop-blur supports-backdrop-filter:bg-surface/80">
@@ -69,82 +46,31 @@ export function Header() {
           */}
           <Image
             src="/img/logo.png"
-            alt={site.legalName}
+            alt={site.name}
             width={800}
             height={348}
             priority
+            sizes="129px"
             className="h-14 w-auto"
           />
         </Link>
 
         {/* Desktop nav */}
-        <nav ref={navRef} aria-label="Main" className="hidden lg:block">
+        <nav aria-label="Main" className="hidden lg:block">
           <ul className="flex items-center gap-6">
-            {nav.map((item) => {
-              const hasChildren = "children" in item && item.children;
-              return (
-                <li key={item.label} className="relative">
-                  {hasChildren ? (
-                    <>
-                      {/*
-                        No aria-haspopup. It maps to "menu", which promises
-                        arrow-key navigation and roving focus that this widget
-                        does not implement. aria-expanded on its own is the
-                        correct disclosure pattern for a list of links.
-                      */}
-                      <button
-                        type="button"
-                        aria-expanded={openMenu === item.label}
-                        aria-current={isActive(item) ? "true" : undefined}
-                        onClick={() =>
-                          setOpenMenu(openMenu === item.label ? null : item.label)
-                        }
-                        className={`flex items-center gap-1 py-2 text-[0.95rem] uppercase tracking-wide transition-colors hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
-                          isActive(item) ? "text-brand" : "text-ink"
-                        }`}
-                      >
-                        {item.label}
-                        <svg
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          aria-hidden="true"
-                          className={`size-4 transition-transform ${
-                            openMenu === item.label ? "rotate-180" : ""
-                          }`}
-                        >
-                          <path d="M5.5 7.5 10 12l4.5-4.5H5.5Z" />
-                        </svg>
-                      </button>
-                      {openMenu === item.label && (
-                        <ul className="absolute left-0 top-full z-50 min-w-64 rounded border border-hairline bg-surface py-2 shadow-lg">
-                          {item.children.map((child) => (
-                            <li key={child.href}>
-                              <Link
-                                href={child.href}
-                                aria-current={matches(child.href) ? "page" : undefined}
-                                className="block px-4 py-2.5 text-sm hover:bg-surface-alt hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand"
-                              >
-                                {child.label}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </>
-                  ) : (
-                    <Link
-                      href={item.href}
-                      aria-current={matches(item.href) ? "page" : undefined}
-                      className={`block py-2 text-[0.95rem] uppercase tracking-wide transition-colors hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
-                        isActive(item) ? "text-brand" : "text-ink"
-                      }`}
-                    >
-                      {item.label}
-                    </Link>
-                  )}
-                </li>
-              );
-            })}
+            {nav.map((item) => (
+              <li key={item.label}>
+                <Link
+                  href={item.href}
+                  aria-current={matches(item.href) ? "page" : undefined}
+                  className={`block py-2 text-[0.95rem] uppercase tracking-wide transition-colors hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
+                    matches(item.href) ? "text-brand" : "text-ink"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
           </ul>
         </nav>
 
@@ -184,37 +110,13 @@ export function Header() {
             <ul className="divide-y divide-hairline">
               {nav.map((item) => (
                 <li key={item.label} className="py-1">
-                  {"children" in item && item.children ? (
-                    <details>
-                      <summary className="flex cursor-pointer list-none items-center justify-between py-3 text-sm font-semibold uppercase tracking-wide focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">
-                        {item.label}
-                        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" className="size-4">
-                          <path d="M5.5 7.5 10 12l4.5-4.5H5.5Z" />
-                        </svg>
-                      </summary>
-                      <ul className="pb-2 pl-3">
-                        {item.children.map((child) => (
-                          <li key={child.href}>
-                            <Link
-                              href={child.href}
-                              aria-current={matches(child.href) ? "page" : undefined}
-                              className="block py-2.5 text-sm hover:text-brand"
-                            >
-                              {child.label}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </details>
-                  ) : (
-                    <Link
-                      href={item.href}
-                      aria-current={matches(item.href) ? "page" : undefined}
-                      className="block py-3 text-sm font-semibold uppercase tracking-wide hover:text-brand"
-                    >
-                      {item.label}
-                    </Link>
-                  )}
+                  <Link
+                    href={item.href}
+                    aria-current={matches(item.href) ? "page" : undefined}
+                    className="block py-3 text-sm font-semibold uppercase tracking-wide hover:text-brand"
+                  >
+                    {item.label}
+                  </Link>
                 </li>
               ))}
             </ul>

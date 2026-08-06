@@ -1,315 +1,141 @@
 import type { Faq } from "@/lib/schema";
 
 /**
- * The three service pages carried over from WordPress, at their original URLs.
+ * The site has two commercial pillars:
  *
- * The old /sell-my-car-gold-coast/ page shipped with an unfilled template
- * placeholder in its FAQ — `"Website name" will pay you anywhere from $50 to
- * $9,999` — which was live and indexed. That's fixed here.
+ *   /                        Cash For Cars Gold Coast
+ *   /car-removal-gold-coast  Car Removal Gold Coast
+ *
+ * The homepage is authored directly. This file holds the removal pillar only;
+ * former sell-my-car, unwanted-car and wrecker pages permanently redirect into
+ * the most relevant pillar so their signals are not split across lookalike
+ * commercial pages.
  */
-
 export type ServicePage = {
   slug: string;
   title: string;
   metaDescription: string;
   h1: string;
   intro: string;
+  serviceType: string;
   sections: { heading: string; body: string[]; list?: string[] }[];
   faqs: Faq[];
-  /**
-   * Slugs from posts.ts to link at the foot of the page.
-   *
-   * Pick guides that answer a question this page raises but does not have room
-   * to settle — the finance and paperwork detail, for instance. It is a real
-   * internal-linking path for the blog, not a related-posts widget: without it
-   * each guide hangs off /blog alone.
-   */
   related?: string[];
 };
 
 export const servicePages: ServicePage[] = [
   {
-    slug: "sell-my-car-gold-coast",
-    title: "Sell My Car Gold Coast — Paid Same Day, No Inspections",
+    slug: "car-removal-gold-coast",
+    title: "Car Removal Gold Coast | Free Pickup + Cash Paid",
     metaDescription:
-      "Sell your car on the Gold Coast without listings, tyre-kickers or no-shows. Firm quote on the phone, cash on collection, free removal. Call today.",
-    h1: "Sell My Car Gold Coast",
+      "Car removal Gold Coast service with free towing from homes, basements, roadsides and yards. Same-day pickup is often available, with cash paid for your car.",
+    h1: "Car Removal Gold Coast",
+    serviceType: "Car Removal Gold Coast",
     intro:
-      "Selling privately means photos, listings, messages, strangers at your house and a fortnight of no-shows. Selling to us means one phone call and a truck. Here's how to decide which is right for your car.",
+      "We collect cars across the Gold Coast without a callout or towing fee. Tell us what the vehicle is, where it is parked and anything that makes access difficult; we will quote the car and confirm the collection plan before dispatch.",
     sections: [
       {
-        heading: "When selling to us makes sense — and when it doesn't",
+        heading: "Free car removal with no hidden towing deduction",
         body: [
-          "We'll be straight with you, because it saves us both time. Most car buyers on the Gold Coast will not tell you this, but if your car is registered, roadworthy, under about ten years old and you're not in a hurry, you will almost certainly get more for it selling privately. Take the photos, write the listing, be patient.",
-          "Where we're the better option is everything else. Cars that don't start. Cars that would fail a roadworthy. Cars that are worth less than the repair quote. Cars you need gone by Friday because you're moving, or the lease is up, or you've already bought the replacement. In those situations a private sale is slow, stressful and often ends in the same place anyway.",
+          "There is no separate callout fee or towing charge inside our Gold Coast service area. The removal cost is not taken back out of the vehicle offer when the truck arrives.",
+          "This is different from booking an ordinary tow. We are collecting a vehicle we have agreed to buy, so the quote covers both the vehicle and the cost of getting it to us. If the location or condition could change the job, we discuss that before you accept the offer.",
         ],
       },
       {
-        heading: "What you need to have ready",
+        heading: "Vehicles we collect across the Gold Coast",
         body: [
-          "Selling is quick when the paperwork is in order and slow when it isn't. Before you call, check you have:",
+          "A vehicle does not need to start, drive or pass a safety inspection for us to assess it. We quote according to the specific vehicle and its recoverable value rather than using one flat scrap rate.",
         ],
         list: [
-          "Photo ID matching the registered owner",
-          "The registration certificate, or the rego number if you can't find it",
-          "Any finance payout letter, if there's money still owing",
-          "The keys — not essential, but it helps the price",
+          "Old and unwanted cars that are no longer being used",
+          "Non-runners with engine, gearbox, electrical or battery faults",
+          "Accident, hail, flood and write-off vehicles",
+          "Unregistered and unroadworthy cars",
+          "Incomplete projects and vehicles with missing parts",
+          "Utes, vans, 4WDs, SUVs and light commercial vehicles",
         ],
       },
       {
-        heading: "What happens on the day",
+        heading: "Pickup from driveways, basements, roadsides and yards",
         body: [
-          "We turn up at the time we agreed, at your home, work, or wherever the car is sitting. We check the car matches what you described, verify your ID and ownership, and you sign the transfer of registration.",
-          "Then we pay you — cash on the spot, or bank transfer if you'd rather — and load the car. You keep the plates if the registration is still current so you can claim any refund from TMR. The whole thing usually takes about twenty minutes.",
+          "We collect from homes, workplaces, repairers, storage yards and breakdown locations. A non-running car can usually be winched, and a car with seized brakes or missing wheels may need skates or different loading equipment.",
+          "Apartment basements, gated complexes, narrow streets, soft acreage access and blocked-in vehicles all need a little planning. Give us the clearance height, parking level and access instructions when you book so the right recovery setup is sent the first time.",
+        ],
+      },
+      {
+        heading: "What to prepare before collection",
+        body: [
+          "We must confirm that the person selling the vehicle has lawful authority to do so. The registration path also changes depending on whether the vehicle will remain registered or is leaving the road for dismantling. Queensland requires a registered vehicle sold for parts to be de-registered first, so check the current TMR process before collection.",
+        ],
+        list: [
+          "Photo identification for the owner or authorised seller",
+          "Proof of ownership and the current registration status",
+          "A finance payout letter if money is still owing",
+          "Keys if available, plus any access codes or booking instructions",
+          "Number plates where TMR requires them to be returned or retained",
+        ],
+      },
+      {
+        heading: "What happens after your car is removed",
+        body: [
+          "Reusable components are assessed before the remaining vehicle is sent through the appropriate recycling process. Engines, transmissions, panels, glass, wheels, lights and electrical modules may retain value even when the complete car no longer runs.",
+          "Fluids and batteries must be handled separately before an end-of-life shell is processed. Keeping the car complete usually gives us more recoverable value to include in the offer than receiving it after the high-value parts have been removed.",
+        ],
+      },
+      {
+        heading: "Same-day collection when the route allows",
+        body: [
+          "Same-day pickup is often possible when you call early and the vehicle is ready, but it is not a blanket promise. Truck availability, access, distance and ownership paperwork all affect the booking window.",
+          "We confirm the time and the quote before collection. Describe the car and its location accurately so the offer and recovery plan are based on the job that is actually waiting for us.",
         ],
       },
     ],
     faqs: [
       {
-        question: "How much will you pay for my car?",
+        question: "Is car removal free everywhere on the Gold Coast?",
         answer:
-          "Between a few hundred dollars for a stripped scrap shell and $9,999 for a late-model vehicle in good order. We won't pretend a single number applies to every car — call us with the make, model, year and condition and we'll give you a real figure in about a minute.",
+          "Removal is free inside the Gold Coast service area for vehicles we agree to buy. There is no separate callout fee or towing deduction. Give us the exact suburb and access details so we can confirm coverage before you accept the quote.",
       },
       {
-        question: "Is your quote based on anything, or is it a guess?",
+        question: "Can you remove my car on the same day?",
         answer:
-          "It's based on current wholesale and salvage values for that make and model, the recoverable parts, and the scrap steel price at the time. That's why the number moves with the market and why we ask specific questions rather than quoting a flat rate.",
+          "Often, particularly when you call early and the vehicle is accessible with its ownership paperwork ready. Same-day service depends on the truck route and the recovery equipment required, so we confirm timing rather than advertising a guarantee we cannot always keep.",
       },
       {
-        question: "Can you buy my car the same day?",
+        question: "Does the car need to start or roll?",
         answer:
-          "Often, yes — particularly across the Gold Coast if you call in the morning. Tell us your deadline when you ring and we'll tell you honestly whether we can meet it.",
+          "No. We can assess non-runners. Tell us if the brakes are seized, wheels are missing, the steering is locked or another vehicle blocks access so the recovery requirements can be confirmed before dispatch.",
       },
       {
-        question: "Can I sell a car that still has finance owing on it?",
+        question: "Do I have to be there when the vehicle is collected?",
         answer:
-          "Yes, provided the payout figure is less than what we're paying you, or you can cover the difference. You'll need a payout letter from the finance company. We can't complete a sale while an encumbrance is still registered against the vehicle.",
+          "The owner or a person with clear legal authority normally needs to be available so we can verify identity, ownership and the required paperwork. Confirm an authorised handover with us before the truck is dispatched.",
       },
       {
-        question: "Do you buy cars that don't run?",
+        question: "Do I need a Queensland safety certificate?",
         answer:
-          "That's most of what we buy. Flat battery, blown engine, no gearbox, four flat tyres, hasn't moved in five years — none of it matters. We tow it regardless, so it never needs to start.",
+          "Queensland generally does not require a safety certificate for an unregistered vehicle or when a registered vehicle is traded to a licensed motor dealer. A registered vehicle being sold for parts must first be de-registered. Check the current TMR rules for your situation rather than relying on the vehicle simply being removed from the road.",
       },
       {
-        question: "Will you sell me spare parts?",
+        question: "What happens to the number plates?",
         answer:
-          "We recover parts from Korean, Japanese, Australian, European and American vehicles. Call with the make, model and year and we'll check what's on the shelf.",
+          "That depends on the registration outcome. If registration is cancelled, TMR explains how to deal with the plates and claim any eligible refund. Personalised plates have separate rules. We confirm the intended transaction, but the current TMR guidance is the authority.",
+      },
+      {
+        question: "Will you pay me as well as remove the car?",
+        answer:
+          "Yes, when we agree to buy it. The offer depends on make, model, year, condition, completeness and current salvage value. Cash or bank transfer is arranged as part of the collection, and any condition that could affect the quote is discussed before booking.",
       },
     ],
     related: [
       "how-much-is-my-scrap-car-worth-gold-coast",
-      "selling-a-car-with-finance-owing-queensland",
       "transferring-car-registration-in-queensland",
-    ],
-  },
-
-  {
-    slug: "car-removal-gold-coast",
-    title: "Car Removal Gold Coast — Free Towing, Same Day",
-    metaDescription:
-      "Free car removal across the Gold Coast. Basements, driveways and roadsides are covered. No callout fee and we pay you for the car.",
-    h1: "Car Removal Gold Coast",
-    intro:
-      "Towing charges are why so many dead cars sit in driveways for years. Free car removal across the Gold Coast is the whole point of what we do — and we pay you for the car on top of it.",
-    sections: [
-      {
-        heading: "Free means free",
-        body: [
-          "There is no callout fee, no towing charge, no distance surcharge inside our service area and nothing deducted from your quote when the truck arrives. The figure we give you on the phone is the figure that goes in your hand.",
-          "This catches people out because it's the reverse of a normal tow. You're not paying us to take the car away — we're paying you for it, and the removal is our cost of collecting something we want.",
-        ],
-      },
-      {
-        heading: "Where we can get to",
-        body: ["We collect from just about anywhere a truck or a winch cable can reach:"],
-        list: [
-          "Home driveways, garages and carports",
-          "Apartment basements with height restrictions — we winch to street level",
-          "Workplace and shopping-centre carparks",
-          "Roadsides and breakdown locations",
-          "Smash repairers, mechanics and storage yards",
-          "Acreage and unsealed driveways",
-        ],
-      },
-      {
-        heading: "Tell us the awkward bit up front",
-        body: [
-          "The jobs that go wrong are the ones where we find out about the problem on arrival. A clearance bar we can't fit under, a driveway too soft to hold a loaded truck, a car boxed in by two others, a building that needs a loading-dock booking.",
-          "None of these stop us. All of them cost you a day if we turn up without knowing. When you book, describe where the car actually is and we'll send the right truck the first time.",
-        ],
-      },
-    ],
-    faqs: [
-      {
-        question: "Do I have to be there when you collect the car?",
-        answer:
-          "Yes, or someone authorised to sign on your behalf. We need to verify ID against the registered owner and get the transfer signed. It's a legal requirement, not paperwork for its own sake.",
-      },
-      {
-        question: "What if the car is blocked in or won't roll?",
-        answer:
-          "Seized brakes, missing wheels and cars boxed in by other vehicles are all routine. Tell us when you book so we bring skates and a winch. We've very rarely had to leave one behind.",
-      },
-      {
-        question: "Do I need to remove the number plates?",
-        answer:
-          "If the registration is still current, take the plates off and return them to TMR — you may be entitled to a refund on the unused portion. If the car is already unregistered, leave them on and we'll dispose of them.",
-      },
-      {
-        question: "How much notice do you need?",
-        answer:
-          "Not much. Same-day is often possible on the Gold Coast if you call in the morning. We will confirm timing when you request your quote.",
-      },
-    ],
-    related: [
-      "transferring-car-registration-in-queensland",
-      "where-do-old-junk-cars-go-in-gold-coast-car-selling-options-in-gold-coast-qld",
-    ],
-  },
-
-  {
-    slug: "unwanted-car-buyer",
-    title: "Unwanted Car Buyer Gold Coast — Any Condition, Any Age",
-    metaDescription:
-      "We buy unwanted cars in any condition across the Gold Coast — non-runners, write-offs, project cars and deceased estates. Free removal, cash paid.",
-    h1: "Unwanted Car Buyer Gold Coast",
-    intro:
-      "The car that was going to be fixed. The one from a deceased estate. The project that never got finished. If it's taking up space and doing nothing, we'll take it and pay you for it.",
-    sections: [
-      {
-        heading: "What counts as unwanted",
-        body: [
-          "Nearly anything. The common thread isn't the car's condition, it's that keeping it has stopped making sense — the repair costs more than it's worth, nobody in the household drives it, or it came with a house or an estate and needs to go.",
-        ],
-        list: [
-          "Non-runners and mechanical write-offs",
-          "Insurance write-offs, including statutory and repairable",
-          "Flood and hail-damaged vehicles",
-          "Half-finished project cars and shells",
-          "Deceased estate vehicles",
-          "Cars left behind by tenants",
-          "Fleet and business vehicles at end of life",
-        ],
-      },
-      {
-        heading: "Deceased estates and cars you didn't buy",
-        body: [
-          "A good share of our work is cars the seller never chose — inherited, left behind by a tenant, or included with a property. These need more paperwork than a normal sale, not less, and it's worth sorting before we come out.",
-          "For an estate vehicle we'll generally need the death certificate and evidence that you're the executor or administrator, along with your own ID. For an abandoned tenant's car, Queensland has a defined process for goods left behind at the end of a tenancy and it needs to have been followed. Call us before you book and we'll tell you exactly what's required — it's usually more straightforward than people expect.",
-        ],
-      },
-      {
-        heading: "Why an unwanted car is worth more than it looks",
-        body: [
-          "Owners routinely assume a car that can't be driven is worth nothing. It very rarely is. The engine and transmission hold value even when the car doesn't run, catalytic converters contain recoverable precious metals, and panels, glass, wheels, lights and interior parts all have a market. Even after all that, the shell is several hundred kilos of recyclable steel.",
-          "The only cars genuinely worth close to nothing are ones already stripped of their drivetrain and body panels. If yours is complete, it's worth a phone call.",
-        ],
-      },
-    ],
-    faqs: [
-      {
-        question: "The car has been sitting for ten years. Is it too far gone?",
-        answer:
-          "Almost certainly not. Time off the road affects tyres, fluids and the battery, none of which drive the value much. What matters is whether the car is complete. If the engine, gearbox and panels are still on it, we'll make an offer.",
-      },
-      {
-        question: "I'm the executor of an estate. Can I sell the car?",
-        answer:
-          "Yes, with the right documentation — normally the death certificate plus evidence of your appointment as executor or administrator, and your own photo ID. Ring us before booking so we can confirm what Queensland Transport will need for the transfer.",
-      },
-      {
-        question: "Can I sell a car that isn't registered in my name?",
-        answer:
-          "Not as it stands, but it's usually fixable. If a previous owner never completed the transfer, we'll talk you through what's needed. Please sort it before we come out rather than at the roadside.",
-      },
-      {
-        question: "Do you take motorbikes, trailers or machinery?",
-        answer:
-          "Trailers and light commercial vehicles, yes. Motorbikes and machinery we assess case by case — send a photo and we'll tell you straight away.",
-      },
-    ],
-    related: [
       "statutory-vs-repairable-write-off-queensland",
       "what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide",
-      "transferring-car-registration-in-queensland",
-    ],
-  },
-
-  {
-    slug: "car-wreckers-gold-coast",
-    title: "Car Wreckers Gold Coast — We Buy And Dismantle",
-    metaDescription:
-      "Gold Coast car wreckers paying cash for complete vehicles. We dismantle, recover parts and recycle the shell — free removal, any make, any condition.",
-    h1: "Car Wreckers Gold Coast",
-    intro:
-      "Most people meet a wrecker at the end of a car's life and have no idea what actually happens next. It matters, because how a car is dismantled is exactly what determines the number we can offer you for it.",
-    sections: [
-      {
-        heading: "What a wrecker does that a scrap yard doesn't",
-        body: [
-          "The two get used interchangeably and they are not the same trade. A metal recycler is paid by weight: the car is depolluted, crushed or shredded, and the steel goes back into the supply chain. That is the floor price for any vehicle, and it is what a stripped shell is worth.",
-          "A wrecker takes the car apart first. Every component with a resale market comes off and is catalogued before what remains goes to the recycler. That is more work, and it is why a wrecker can pay more than a scrap yard for the same car — there are simply more ways to recover the money.",
-          "The practical consequence for you is that the more complete your car is, the wider that gap gets. A car with its engine, gearbox, converter and panels intact is worth substantially more to us than the same car after someone has sold the good bits off it individually.",
-        ],
-      },
-      {
-        heading: "What comes off a car, and why it has value",
-        body: [
-          "When we quote, this is the list we are pricing against — not the badge and not the odometer:",
-        ],
-        list: [
-          "Engine and transmission, including cores that no longer run",
-          "Catalytic converter, which contains recoverable platinum, palladium and rhodium",
-          "Alternator, starter motor, radiator and air conditioning compressor",
-          "Straight, unrusted panels — doors, bonnets, guards, tailgates",
-          "Glass, headlights, tail lights and mirrors",
-          "Wheels, tyres with tread left, and the spare",
-          "Interior modules, seats, dashboard components and the ECU",
-          "The remaining shell, several hundred kilograms of recyclable steel",
-        ],
-      },
-      {
-        heading: "Doing it properly is not optional",
-        body: [
-          "An end-of-life vehicle holds engine oil, coolant, brake fluid, transmission fluid, fuel, refrigerant and a lead-acid battery. All of it has to be drained and contained before anything is crushed, because all of it causes real damage in stormwater.",
-          "It is worth asking whoever collects your car what happens to it afterwards. A legitimate operator can tell you. If the answer is vague, that tells you something — both about the environmental side and about whether the price you were quoted is one that will still be honoured when the truck arrives.",
-        ],
-      },
-    ],
-    faqs: [
-      {
-        question: "Do you buy cars for wrecking if they still drive?",
-        answer:
-          "Yes, though it is worth a conversation first. A registered, roadworthy car will usually fetch more in a private sale than it is worth dismantled. Where wrecking wins is when the repair bill has passed the car's value, when it will not pass a safety inspection, or when you want it gone this week without the listing-and-no-shows process.",
-      },
-      {
-        question: "Can I buy second-hand parts from you?",
-        answer:
-          "We recover parts from Korean, Japanese, Australian, European and American vehicles. Call with the make, model and year and we will check what is on the shelf — availability changes constantly as cars come in.",
-      },
-      {
-        question: "Is my car worth more complete or stripped?",
-        answer:
-          "Complete, almost always. Owners sometimes sell the alloy wheels or the battery first and assume the rest is unaffected. It is not — each part removed comes off the offer, and the labour of dealing with a partly dismantled car works against you too. Sell it whole unless you have a specific buyer paying well above market for one component.",
-      },
-      {
-        question: "What happens to the fluids and the battery?",
-        answer:
-          "They are drained and contained before anything else happens, which is both a legal requirement for end-of-life vehicles in Queensland and the reason a car cannot simply be crushed as it sits. Batteries go to lead recycling; oils, coolant and fuel are handled separately.",
-      },
-      {
-        question: "Do you take 4WDs, utes, vans and light trucks?",
-        answer:
-          "Yes. Larger vehicles often carry more recoverable weight and more valuable driveline components, so they are frequently worth more than a small hatchback in similar condition. Trailers and light commercials as well.",
-      },
-    ],
-    related: [
-      "where-do-old-junk-cars-go-in-gold-coast-car-selling-options-in-gold-coast-qld",
-      "how-much-is-my-scrap-car-worth-gold-coast",
     ],
   },
 ];
 
 export function getServicePage(slug: string): ServicePage | undefined {
-  return servicePages.find((p) => p.slug === slug);
+  return servicePages.find((page) => page.slug === slug);
 }

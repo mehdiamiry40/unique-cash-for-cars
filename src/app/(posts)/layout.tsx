@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Section } from "@/components/ui";
-import { CallButton } from "@/components/ui";
+import { PrimaryServiceLinks } from "@/components/PrimaryServiceLinks";
 
 /**
  * Shared shell for MDX blog posts.
@@ -33,15 +33,7 @@ export default function PostLayout({ children }: { children: React.ReactNode }) 
         </div>
       </Section>
 
-      <Section tone="alt">
-        <div className="mx-auto max-w-3xl text-center">
-          <h2 className="heading-lg mb-3">Want a number for your car?</h2>
-          <p className="mb-7 text-lg">
-            Free quote in about a minute, no obligation, free removal if you go ahead.
-          </p>
-          <CallButton className="text-xl" />
-        </div>
-      </Section>
+      <PrimaryServiceLinks />
     </>
   );
 }

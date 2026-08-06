@@ -101,29 +101,6 @@ summary,
   text-wrap: pretty;
 }
 
-/*
- * Hero entrance — one orchestrated beat, not scattered effects.
- * transform/opacity only; disabled under prefers-reduced-motion below.
- */
-@keyframes hero-rise {
-  from {
-    opacity: 0;
-    transform: translateY(0.75rem);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@utility animate-hero-copy {
-  animation: hero-rise 0.55s ease-out both;
-}
-
-@utility animate-hero-form {
-  animation: hero-rise 0.65s ease-out 0.12s both;
-}
-
 /* Body copy authored in MDX.
  *
  * h1 and blockquote are not optional here. Tailwind's preflight resets every

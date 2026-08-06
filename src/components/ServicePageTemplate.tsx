@@ -6,6 +6,7 @@ import { QuoteForm } from "@/components/QuoteForm";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { HowItWorks } from "@/components/HowItWorks";
 import { FurtherReading } from "@/components/FurtherReading";
+import { PrimaryServiceLinks } from "@/components/PrimaryServiceLinks";
 import { CallButton, Container, Section, SectionHeading } from "@/components/ui";
 
 export function ServicePageTemplate({ page }: { page: ServicePage }) {
@@ -17,13 +18,14 @@ export function ServicePageTemplate({ page }: { page: ServicePage }) {
             { name: "Home", path: "/" },
             { name: page.h1, path: `/${page.slug}` },
           ]),
-          // These pages describe services and had no Service node — the
-          // location pages have carried one since the rebuild, so the markup
-          // was inconsistent about what the site actually sells.
+          // Stable page-specific Service identity, matching the same service
+          // advertised in the site-wide offer catalog.
           serviceSchema({
             name: page.h1,
             description: page.metaDescription,
             areaServed: "Gold Coast",
+            path: `/${page.slug}`,
+            serviceType: page.serviceType,
           }),
           faqSchema(page.faqs),
         )}
@@ -77,12 +79,14 @@ export function ServicePageTemplate({ page }: { page: ServicePage }) {
 
       {page.related && <FurtherReading slugs={page.related} />}
 
+      <PrimaryServiceLinks current="removal" tone="default" />
+
       <section className="bg-brand py-14 text-white">
         <Container className="text-center">
-          <h2 className="mb-3 text-3xl font-extrabold">Get a quote in about a minute</h2>
+          <h2 className="mb-3 text-3xl font-extrabold">Book Car Removal Gold Coast</h2>
           <p className="mx-auto mb-7 max-w-2xl text-lg text-white">
-            Tell us the make, model, year and rough condition. We&apos;ll give you a
-            firm number and stick to it.
+            Tell us the make, model, year, condition and exact pickup location. We&apos;ll
+            quote the vehicle and confirm the removal window before dispatch.
           </p>
           <a
             href={site.phone.href}

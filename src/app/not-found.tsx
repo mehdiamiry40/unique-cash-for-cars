@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { suburbs } from "@/content/suburbs";
 import { CallButton, Section } from "@/components/ui";
+
+export const metadata: Metadata = {
+  title: "Page Not Found | Unique Cash For Cars",
+  robots: { index: false, follow: false },
+};
 
 export default function NotFound() {
   return (
@@ -16,18 +21,24 @@ export default function NotFound() {
         <CallButton className="text-xl" />
 
         <div className="mt-12 text-left">
-          <h2 className="heading-md mb-4 text-center">Areas we cover</h2>
+          <h2 className="heading-md mb-4 text-center">Start with one of our services</h2>
           <ul className="grid gap-3 sm:grid-cols-2">
-            {suburbs.map((suburb) => (
-              <li key={suburb.slug}>
-                <Link
-                  href={`/cash-for-cars/${suburb.slug}`}
-                  className="block rounded border border-hairline px-4 py-3 hover:border-brand hover:text-brand"
-                >
-                  Cash for Cars {suburb.name}
-                </Link>
-              </li>
-            ))}
+            <li>
+              <Link
+                href="/"
+                className="block rounded border border-hairline px-4 py-3 text-center font-bold hover:border-brand hover:text-brand"
+              >
+                Cash For Cars Gold Coast
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/car-removal-gold-coast"
+                className="block rounded border border-hairline px-4 py-3 text-center font-bold hover:border-brand hover:text-brand"
+              >
+                Car Removal Gold Coast
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

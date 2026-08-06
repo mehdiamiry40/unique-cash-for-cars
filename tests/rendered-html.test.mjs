@@ -14,9 +14,7 @@
  * harness below — spawn a server on a pid-derived port, poll until ready — is
  * kept from it, as is the coverage list. The assertions are new.
  *
- * Complements, rather than repeats, the two static checks:
- *   scripts/check-urls.mjs        legacy URL parity, by walking src/app
- *   scripts/check-duplication.mjs location-page similarity, by reading content
+ * Complements the static legacy-URL parity check in scripts/check-urls.mjs.
  */
 
 import assert from "node:assert/strict";
@@ -49,25 +47,15 @@ let serverOutput = "";
  * the file states the intended structure — if a page silently stops emitting
  * its FAQ or breadcrumb graph, that is the bug this catches.
  */
-const suburbRoutes = [
-  "/cash-for-cars/southport",
-  "/cash-for-cars/surfers-paradise",
-  "/cash-for-cars/robina",
-  "/cash-for-cars/burleigh-heads",
-  // Promoted out of retiredSuburbRedirects — these URLs existed on WordPress
-  // and had been 301'ing to a neighbour. Listing them here is what subjects
-  // them to the Service/FAQPage/breadcrumb assertions below.
-  "/cash-for-cars/labrador",
-  "/cash-for-cars/nerang",
-  "/cash-for-cars/helensvale",
-  "/cash-for-cars/mermaid-waters",
-];
-const serviceRoutes = [
-  "/sell-my-car-gold-coast",
-  "/car-removal-gold-coast",
-  "/unwanted-car-buyer",
-  "/car-wreckers-gold-coast",
-];
+const pillarRoutes = ["/", "/car-removal-gold-coast"];
+const serviceRoutes = ["/car-removal-gold-coast"];
+const retiredCommercialRoutes = new Map([
+  ["/cash-for-cars", "/"],
+  ["/sell-my-car-gold-coast", "/"],
+  ["/unwanted-car-buyer", "/"],
+  ["/car-wreckers-gold-coast", "/car-removal-gold-coast"],
+  ["/company-info-cash-for-cars-gold-coast-and-free-car-removal", "/about"],
+]);
 const postRoutes = [
   "/what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide",
   "/where-do-old-junk-cars-go-in-gold-coast-car-selling-options-in-gold-coast-qld",
@@ -78,7 +66,7 @@ const postRoutes = [
   "/transferring-car-registration-in-queensland",
 ];
 /** Pages that render an FAQ block, and so must carry FAQPage. */
-const faqRoutes = ["/", ...serviceRoutes, ...suburbRoutes];
+const faqRoutes = ["/", ...serviceRoutes];
 /**
  * Everything except the privacy policy shows a breadcrumb trail.
  *
@@ -173,6 +161,22 @@ const canonicalOf = (source) =>
 const metaOf = (source, name) =>
   attr(source, new RegExp(`<meta\\b[^>]*\\bname=["']${name}["'][^>]*>`, "i"), "content");
 const titleOf = (source) => source.match(/<title>([\s\S]*?)<\/title>/i)?.[1] ?? "";
+const plainText = (source) =>
+  source
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&#x27;|&#39;|&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/\s+/g, " ")
+    .trim();
+const h1Of = (source) => plainText(source.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1] ?? "");
+
+function linksIn(source) {
+  return [...source.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)].map(([, attributes, body]) => ({
+    href: attributes.match(/\bhref=["']([^"']*)["']/i)?.[1] ?? "",
+    text: plainText(body),
+  }));
+}
 
 /** Every JSON-LD node on the page, flattened across script tags and @graphs. */
 function schemaNodes(source) {
@@ -199,7 +203,7 @@ function schemaNodes(source) {
 async function sitemapPaths() {
   const xml = await html("/sitemap.xml");
   const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, url]) => url);
-  assert.ok(urls.length >= 16, `sitemap listed only ${urls.length} URLs`);
+  assert.ok(urls.length >= 11, `sitemap listed only ${urls.length} URLs`);
   return urls.map((url) => {
     assert.ok(url.startsWith(publicOrigin), `sitemap URL not on canonical origin: ${url}`);
     const path = url.slice(publicOrigin.length);
@@ -264,6 +268,26 @@ test("titles and descriptions fit what a search result shows, and none repeat", 
   }
 });
 
+test("each target keyword has exactly one title-and-H1 owner", async () => {
+  const owners = new Map([
+    ["cash for cars gold coast", []],
+    ["car removal gold coast", []],
+  ]);
+
+  for (const path of await sitemapPaths()) {
+    const source = await html(path);
+    const primaryCopy = `${path.replace(/-/g, " ")} ${plainText(titleOf(source))} ${h1Of(
+      source,
+    )}`.toLowerCase();
+    for (const [keyword, paths] of owners) {
+      if (primaryCopy.includes(keyword)) paths.push(path);
+    }
+  }
+
+  assert.deepEqual(owners.get("cash for cars gold coast"), ["/"]);
+  assert.deepEqual(owners.get("car removal gold coast"), ["/car-removal-gold-coast"]);
+});
+
 test("structured data is valid, typed per page, and every @id reference resolves", async () => {
   for (const path of await sitemapPaths()) {
     const nodes = schemaNodes(await html(path));
@@ -293,11 +317,34 @@ test("structured data is valid, typed per page, and every @id reference resolves
         "Helensvale",
         "Mermaid Waters",
       ],
-      // Widened as location pages were added, but the point is unchanged: every
-      // entry is a Gold Coast suburb. The old site claimed Adelaide, Ipswich,
-      // Logan and Toowoomba while operating from one place, and this is what
-      // stops that creeping back.
+      // The first entry is the city and the remainder are Gold Coast suburbs.
+      // This prevents out-of-area locations from creeping back into entity data.
       `${path}: business must remain Gold Coast only`,
+    );
+    assert.equal(business.areaServed[0]["@type"], "City", `${path}: Gold Coast area type`);
+    assert.ok(
+      business.areaServed.slice(1).every((area) => area["@type"] === "Place"),
+      `${path}: suburbs must be typed as Place, not City`,
+    );
+    assert.deepEqual(
+      business.hasOfferCatalog.itemListElement.map((offer) => ({
+        id: offer.itemOffered["@id"],
+        name: offer.itemOffered.name,
+        url: offer.itemOffered.url,
+      })),
+      [
+        {
+          id: `${publicOrigin}#service`,
+          name: "Cash For Cars Gold Coast",
+          url: publicOrigin,
+        },
+        {
+          id: `${publicOrigin}/car-removal-gold-coast#service`,
+          name: "Car Removal Gold Coast",
+          url: `${publicOrigin}/car-removal-gold-coast`,
+        },
+      ],
+      `${path}: offer catalog must expose only the two pillar services`,
     );
     assert.equal(business.openingHoursSpecification.length, 1, `${path}: opening hours`);
     assert.deepEqual(
@@ -336,22 +383,48 @@ test("structured data is valid, typed per page, and every @id reference resolves
           `${path}: breadcrumb item is not an absolute canonical URL — ${item.item}`,
         );
       }
+      assert.equal(
+        crumbs.itemListElement[0].item,
+        publicOrigin,
+        `${path}: Home breadcrumb must match the root canonical exactly`,
+      );
     }
 
-    if (suburbRoutes.includes(path)) {
-      assert.ok(types.includes("Service"), `${path}: location page emits no Service node`);
+    if (pillarRoutes.includes(path)) {
+      const service = nodes.find((node) => node["@type"] === "Service");
+      assert.ok(service, `${path}: pillar page emits no Service node`);
+      const expectedUrl = path === "/" ? publicOrigin : `${publicOrigin}${path}`;
+      assert.equal(service["@id"], `${expectedUrl}#service`, `${path}: Service @id`);
+      assert.equal(service.url, expectedUrl, `${path}: Service URL`);
+      assert.equal(
+        service.serviceType,
+        path === "/" ? "Cash For Cars Gold Coast" : "Car Removal Gold Coast",
+        `${path}: Service type`,
+      );
     }
 
     if (postRoutes.includes(path)) {
       const article = nodes.find((node) => node["@type"] === "BlogPosting");
       assert.ok(article, `${path}: blog post emits no BlogPosting node`);
-      for (const field of ["headline", "datePublished", "dateModified", "author", "publisher"]) {
+      for (const field of [
+        "headline",
+        "image",
+        "datePublished",
+        "dateModified",
+        "author",
+        "publisher",
+      ]) {
         assert.ok(article[field], `${path}: BlogPosting is missing ${field}`);
       }
       assert.equal(
         article.mainEntityOfPage,
         `${publicOrigin}${path}`,
         `${path}: BlogPosting mainEntityOfPage must be the page's own canonical`,
+      );
+      assert.match(
+        await html(path),
+        /<meta\b[^>]*property="og:type"[^>]*content="article"|<meta\b[^>]*content="article"[^>]*property="og:type"/i,
+        `${path}: article page must emit article Open Graph type`,
       );
     }
 
@@ -369,48 +442,62 @@ test("structured data is valid, typed per page, and every @id reference resolves
   }
 });
 
-test("every legacy location URL either serves a page or redirects permanently", async () => {
+test("retired commercial and location URLs redirect directly to their pillar", async () => {
   const legacyLocationUrls = JSON.parse(
     readFileSync(join(projectPath, "scripts", "legacy-urls.json"), "utf8"),
   ).urls.filter((url) => url.startsWith("/cash-for-cars/"));
 
   /*
-   * This used to assert a fixed count of *retired* URLs, which quietly went
-   * stale: a suburb promoted out of retiredSuburbRedirects into a real page
-   * moves between the two groups, so the number shrinks and the test fails on
-   * a correct change. The floor below guards the filter — that the selector
-   * still matches anything at all — and the loop asserts the invariant that
-   * actually matters, which holds either way.
+   * The floor guards the selector. Every location is intentionally consolidated
+   * into the homepage under the strict two-query architecture.
    */
   assert.ok(
     legacyLocationUrls.length >= 15,
     `found only ${legacyLocationUrls.length} legacy location URLs — filter likely broken`,
   );
 
-  for (const path of legacyLocationUrls) {
-    const response = await get(path);
+  const expectedRedirects = new Map([
+    ...legacyLocationUrls.map((path) => [path, "/"]),
+    ...retiredCommercialRoutes,
+  ]);
 
-    if (suburbRoutes.includes(path)) {
-      // Promoted back to a real page: it has to serve its own content now,
-      // not bounce to a neighbour.
-      assert.equal(
-        response.status,
-        200,
-        `${path} is a live location page but returned ${response.status}`,
+  for (const [path, expectedDestination] of expectedRedirects) {
+    // WordPress emitted trailing slashes. Next performs its built-in slash
+    // normalisation before custom redirects, so that legacy form may take two
+    // permanent hops; the canonical slashless form must remain one hop.
+    for (const variant of [path, `${path}/`]) {
+      let response = await get(variant);
+
+      // 308 is Next's permanent redirect. Google treats 301 and 308 the same for
+      // consolidating signals; a 302 would not pass them on.
+      assert.ok(
+        [301, 308].includes(response.status),
+        `${variant} returned ${response.status}, expected a permanent redirect`,
       );
-      continue;
+
+      let destination = new URL(response.headers.get("location"), origin).pathname;
+
+      if (variant === path) {
+        assert.equal(destination, expectedDestination, `${variant}: wrong consolidation target`);
+      } else if (destination !== expectedDestination) {
+        assert.equal(destination, path, `${variant}: unexpected slash-normalisation target`);
+        response = await get(destination);
+        assert.ok(
+          [301, 308].includes(response.status),
+          `${variant} second hop returned ${response.status}, expected a permanent redirect`,
+        );
+        destination = new URL(response.headers.get("location"), origin).pathname;
+        assert.equal(destination, expectedDestination, `${variant}: wrong final consolidation target`);
+      }
+
+      // The final target itself must be a direct page, not another redirect.
+      const followed = await get(destination);
+      assert.equal(
+        followed.status,
+        200,
+        `${variant} redirects to ${destination}, which returned ${followed.status}`,
+      );
     }
-
-    // 308 is Next's permanent redirect. Google treats 301 and 308 the same for
-    // consolidating signals; a 302 would not pass them on.
-    assert.ok(
-      [301, 308].includes(response.status),
-      `${path} returned ${response.status}, expected a permanent redirect`,
-    );
-
-    const destination = new URL(response.headers.get("location"), origin).pathname;
-    const followed = await get(destination);
-    assert.equal(followed.status, 200, `${path} redirects to ${destination}, which returned ${followed.status}`);
   }
 });
 
@@ -425,13 +512,13 @@ test("the retired Brisbane article redirects to the Gold Coast blog", async () =
 
 test("www URLs redirect permanently to the canonical non-www domain", async () => {
   const response = await getWithHost(
-    "/cash-for-cars",
+    "/car-removal-gold-coast",
     "www.uniquecashforcars.com.au",
   );
   assert.ok([301, 308].includes(response.statusCode));
   assert.equal(
     response.headers.location,
-    "https://uniquecashforcars.com.au/cash-for-cars",
+    "https://uniquecashforcars.com.au/car-removal-gold-coast",
   );
 });
 
@@ -508,13 +595,14 @@ test("no internal link points at a missing page", async () => {
     }
   }
 
-  assert.ok(seen.size >= 15, `only found ${seen.size} internal links — selector likely broken`);
+  assert.ok(seen.size >= 10, `only found ${seen.size} internal links — selector likely broken`);
 
   for (const [href, from] of seen) {
     const response = await get(href);
-    assert.ok(
-      response.status < 400,
-      `${href} (linked from ${from}) returned ${response.status}`,
+    assert.equal(
+      response.status,
+      200,
+      `${href} (linked from ${from}) returned ${response.status}, not a direct 200`,
     );
   }
 });
@@ -603,11 +691,6 @@ test("the current page is marked for assistive tech, not just coloured", async (
   // The active nav item used to be signalled with brand colour alone, which is
   // WCAG 1.4.1 — colour as the only means of conveying information.
   //
-  // Two different values are correct here, so both are checked. A nav entry
-  // that is a real link to the open page takes aria-current="page". A parent
-  // that is a disclosure button — it opens a submenu and navigates nowhere —
-  // takes the generic aria-current="true", because "page" would claim the
-  // button is the page.
   const blog = await html("/blog");
   assert.match(
     blog,
@@ -615,16 +698,11 @@ test("the current page is marked for assistive tech, not just coloured", async (
     "the Blog nav link must be marked as the current page",
   );
 
-  // The regression this really guards: the Services parent has href "#", so the
-  // old startsWith() check could never match a pathname and the parent stayed
-  // inactive on every one of its own child pages.
-  const service = await html("/sell-my-car-gold-coast");
-  const servicesButton = service.match(/<button[^>]*>Services/);
-  assert.ok(servicesButton, "could not find the Services nav button");
+  const service = await html("/car-removal-gold-coast");
   assert.match(
-    servicesButton[0],
-    /aria-current="true"/,
-    "the Services parent must be current on its own child pages",
+    service,
+    /<a[^>]*href="\/car-removal-gold-coast"[^>]*aria-current="page"|<a[^>]*aria-current="page"[^>]*href="\/car-removal-gold-coast"/,
+    "the Car Removal nav link must be marked as the current page",
   );
 });
 
@@ -637,6 +715,33 @@ test("this build is indexable", async () => {
   const home = await html("/");
   assert.match(metaOf(home, "robots"), /index/);
   assert.doesNotMatch(metaOf(home, "robots"), /noindex/);
+});
+
+test("404 and privacy pages stay out of the index without conflicting robots tags", async () => {
+  const missingResponse = await get("/this-page-does-not-exist");
+  assert.equal(missingResponse.status, 404);
+  const missing = await missingResponse.text();
+  assert.equal(titleOf(missing), "Page Not Found | Unique Cash For Cars");
+
+  for (const [path, source] of [
+    ["/this-page-does-not-exist", missing],
+    ["/privacy-policy", await html("/privacy-policy")],
+  ]) {
+    const robotTags = [...source.matchAll(/<meta\b[^>]*\bname=["']robots["'][^>]*>/gi)].map(
+      ([tag]) => attr(tag, /<meta\b[^>]*>/i, "content"),
+    );
+    assert.ok(robotTags.length > 0, `${path}: no robots metadata`);
+    for (const content of robotTags) {
+      assert.match(content, /noindex/i, `${path}: conflicting robots tag — ${content}`);
+      assert.doesNotMatch(
+        content,
+        /(?:^|,\s*)index(?:,|$)/i,
+        `${path}: index directive conflicts with noindex — ${content}`,
+      );
+    }
+  }
+
+  assert.ok(!(await sitemapPaths()).includes("/privacy-policy"));
 });
 
 test("the quote endpoint validates contact details", async () => {
@@ -752,48 +857,42 @@ test("archived posts stay reachable but leave the sitemap", async () => {
   );
 
   const blog = await html("/blog");
-  assert.match(blog, /Archived/);
-});
-
-test("Cash For Cars nav lists every live suburb", async () => {
-  const home = await html("/");
-  for (const path of suburbRoutes) {
-    assert.match(
-      home,
-      new RegExp(`href="${path.replace(/\//g, "\\/")}"`),
-      `nav/footer must link to ${path}`,
-    );
-  }
-});
-
-test("homepage What we buy cards link into service pages", async () => {
-  const home = await html("/");
-  for (const path of serviceRoutes) {
-    assert.match(
-      home,
-      new RegExp(`href="${path.replace(/\//g, "\\/")}"`),
-      `homepage must link to ${path}`,
-    );
-  }
-});
-
-test("suburb nearby pills link live and retired places", async () => {
-  const southport = await html("/cash-for-cars/southport");
-  // Labrador is a live suburb; Ashmore is retired and resolves to Southport.
-  assert.match(southport, /href="\/cash-for-cars\/labrador"/);
-  assert.match(southport, /<a[^>]*>\s*Ashmore\s*<\/a>/);
-});
-
-test("the short Adelaide URL redirects permanently", async () => {
-  const response = await fetch(`${origin}/cash-for-cars/adelaide`, {
-    redirect: "manual",
-  });
-  assert.ok(
-    response.status === 301 || response.status === 308,
-    `expected permanent redirect, got ${response.status}`,
+  assert.doesNotMatch(
+    blog,
+    /href="\/5-best-luxury-eco-friendly-cars-in-australia-2020"/,
+    "the guide hub must not keep promoting an archived article",
   );
-  const location = response.headers.get("location") ?? "";
-  assert.match(location, /\/$/);
+});
+
+test("every indexable page links to both keyword pillars with descriptive anchors", async () => {
+  for (const path of await sitemapPaths()) {
+    const links = linksIn(await html(path));
+    assert.ok(
+      links.some((link) => link.href === "/" && link.text === "Cash For Cars Gold Coast"),
+      `${path}: no descriptive link to the cash-for-cars pillar`,
+    );
+    assert.ok(
+      links.some(
+        (link) =>
+          link.href === "/car-removal-gold-coast" && link.text === "Car Removal Gold Coast",
+      ),
+      `${path}: no descriptive link to the car-removal pillar`,
+    );
+  }
+});
+
+test("indexable pages do not link internally to consolidated URLs", async () => {
+  const retired = new Set([
+    ...retiredCommercialRoutes.keys(),
+    ...JSON.parse(readFileSync(join(projectPath, "scripts", "legacy-urls.json"), "utf8"))
+      .urls.filter((url) => url.startsWith("/cash-for-cars/")),
+  ]);
+
+  for (const path of await sitemapPaths()) {
+    for (const link of linksIn(await html(path))) {
+      assert.ok(!retired.has(link.href), `${path}: internal link still targets ${link.href}`);
+    }
+  }
 });
 
 test("the quote form requires expected price without reintroducing retired fields", async () => {

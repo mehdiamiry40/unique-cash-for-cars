@@ -21,9 +21,8 @@ export function organizationSchema() {
   return {
     "@type": "AutomotiveBusiness",
     "@id": ORG_ID,
-    name: site.legalName,
+    name: site.name,
     legalName: site.registeredEntityName,
-    alternateName: site.name,
     url: site.url,
     telephone: site.phone.e164,
     email: site.email,
@@ -31,13 +30,13 @@ export function organizationSchema() {
     logo: {
       "@type": "ImageObject",
       url: `${site.url}/img/logo.png`,
-      caption: site.legalName,
+      caption: site.name,
     },
     priceRange: "$$",
     currenciesAccepted: "AUD",
-    paymentAccepted: "Cash, Bank Transfer, Cheque",
+    paymentAccepted: "Cash, Bank Transfer",
     areaServed: site.areaServed.map((name) => ({
-      "@type": "City",
+      "@type": name === "Gold Coast" ? "City" : "Place",
       name,
     })),
     openingHoursSpecification: site.openingHours.map((slot) => ({
@@ -46,6 +45,34 @@ export function organizationSchema() {
       opens: slot.opens,
       closes: slot.closes,
     })),
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Gold Coast cash car and removal services",
+      itemListElement: [
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            "@id": `${site.url}#service`,
+            name: "Cash For Cars Gold Coast",
+            serviceType: "Cash For Cars Gold Coast",
+            url: site.url,
+            areaServed: { "@type": "City", name: "Gold Coast" },
+          },
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            "@id": `${site.url}/car-removal-gold-coast#service`,
+            name: "Car Removal Gold Coast",
+            serviceType: "Car Removal Gold Coast",
+            url: `${site.url}/car-removal-gold-coast`,
+            areaServed: { "@type": "City", name: "Gold Coast" },
+          },
+        },
+      ],
+    },
     sameAs: [site.social.facebook].filter(Boolean),
     ...(site.abn ? { taxID: site.abn } : {}),
     ...(site.licenceNumber
@@ -65,7 +92,7 @@ export function websiteSchema() {
     "@type": "WebSite",
     "@id": WEBSITE_ID,
     url: site.url,
-    name: site.legalName,
+    name: site.name,
     description: site.description,
     publisher: { "@id": ORG_ID },
     inLanguage: "en-AU",
@@ -81,7 +108,7 @@ export function breadcrumbSchema(crumbs: readonly Crumb[]) {
       "@type": "ListItem",
       position: i + 1,
       name: crumb.name,
-      item: `${site.url}${crumb.path}`,
+      item: crumb.path === "/" ? site.url : `${site.url}${crumb.path}`,
     })),
   };
 }
@@ -123,6 +150,7 @@ export function articleSchema(opts: {
     url,
     headline: opts.title,
     description: opts.description,
+    image: `${site.url}/img/Best-Cash-for-Cars-Gold-Coast.jpg`,
     datePublished: opts.datePublished,
     dateModified: opts.dateModified ?? opts.datePublished,
     inLanguage: "en-AU",
@@ -131,14 +159,25 @@ export function articleSchema(opts: {
   };
 }
 
-export function serviceSchema(opts: { name: string; description: string; areaServed: string }) {
+export function serviceSchema(opts: {
+  name: string;
+  description: string;
+  areaServed: string;
+  areaType?: "City" | "Place";
+  path: string;
+  serviceType: string;
+}) {
+  const url = opts.path === "/" ? site.url : `${site.url}${opts.path}`;
+
   return {
     "@type": "Service",
+    "@id": `${url}#service`,
+    url,
     name: opts.name,
     description: opts.description,
-    serviceType: "Cash for cars and free car removal",
+    serviceType: opts.serviceType,
     provider: { "@id": ORG_ID },
-    areaServed: { "@type": "City", name: opts.areaServed },
+    areaServed: { "@type": opts.areaType ?? "City", name: opts.areaServed },
   };
 }
 
@@ -151,7 +190,7 @@ export function contactPageSchema() {
     "@type": "ContactPage",
     "@id": `${site.url}/contact-us#webpage`,
     url: `${site.url}/contact-us`,
-    name: `Contact ${site.legalName}`,
+    name: `Contact ${site.name}`,
     about: { "@id": ORG_ID },
     mainEntity: { "@id": ORG_ID },
     inLanguage: "en-AU",
@@ -170,7 +209,7 @@ export function blogSchema(posts: readonly { slug: string; title: string; date: 
     "@type": "Blog",
     "@id": `${site.url}/blog#blog`,
     url: `${site.url}/blog`,
-    name: `${site.legalName} — guides`,
+    name: `${site.name} — guides`,
     publisher: { "@id": ORG_ID },
     inLanguage: "en-AU",
     blogPost: posts.map((post) => ({

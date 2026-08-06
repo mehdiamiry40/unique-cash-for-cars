@@ -1,20 +1,17 @@
 import Link from "next/link";
 import { site } from "@/content/site";
 import { Container } from "@/components/ui";
-import { suburbs } from "@/content/suburbs";
 
 const otherLinks = [
-  { label: "Company", href: "/company-info-cash-for-cars-gold-coast-and-free-car-removal" },
+  { label: "About", href: "/about" },
   { label: "Contact Us", href: "/contact-us" },
   { label: "Blog", href: "/blog" },
   { label: "Privacy Policy", href: "/privacy-policy" },
 ];
 
 const services = [
-  { label: "Sell My Car Gold Coast", href: "/sell-my-car-gold-coast" },
+  { label: "Cash For Cars Gold Coast", href: "/" },
   { label: "Car Removal Gold Coast", href: "/car-removal-gold-coast" },
-  { label: "Unwanted Car Buyer Gold Coast", href: "/unwanted-car-buyer" },
-  { label: "Car Wreckers Gold Coast", href: "/car-wreckers-gold-coast" },
 ];
 
 export function Footer() {
@@ -57,7 +54,13 @@ export function Footer() {
             )}
             {site.licenceNumber && (
               <p className="text-sm text-ink-muted">
-                QLD Licence {site.licenceNumber}
+                QLD Licence {site.licenceNumber} ·{" "}
+                <a
+                  href="https://ftlr.fairtrading.qld.gov.au/home/search?LicenceNumber=4253110&GivenName=&LastName=&CompanyName=&MasterType=MOTOR%20DEALING"
+                  className="underline hover:text-brand"
+                >
+                  check register
+                </a>
               </p>
             )}
           </div>
@@ -103,24 +106,16 @@ export function Footer() {
               Areas We Serve
             </h2>
             <ul className="space-y-2">
-              {suburbs.map((s) => (
-                <li key={s.slug}>
-                  <Link
-                    href={`/cash-for-cars/${s.slug}`}
-                    className="hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                  >
-                    Cash For Cars {s.name}
-                  </Link>
-                </li>
+              {site.areaServed.slice(1).map((area) => (
+                <li key={area}>{area}</li>
               ))}
             </ul>
           </div>
         </div>
 
         <div className="flex flex-col gap-3 border-t border-hairline py-6 text-sm text-ink-muted sm:flex-row sm:items-center sm:justify-between">
-          {/* Trading name must match Google Business Profile exactly. */}
           <p>
-            Copyright {year} © {site.legalName}. All Rights Reserved.
+            Copyright {year} © {site.name}. All Rights Reserved.
           </p>
           <Link
             href="/privacy-policy"

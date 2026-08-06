@@ -9,18 +9,11 @@ import { PhoneIcon } from "@/components/ui";
 const ON_PAGE_QUOTE_PATHS = new Set([
   "/",
   "/contact-us",
-  "/sell-my-car-gold-coast",
   "/car-removal-gold-coast",
-  "/unwanted-car-buyer",
 ]);
 
 function hasOnPageQuote(pathname: string) {
-  if (ON_PAGE_QUOTE_PATHS.has(pathname)) return true;
-  // Every live suburb page mounts <QuoteForm id="quote" />.
-  if (pathname.startsWith("/cash-for-cars/") && pathname !== "/cash-for-cars") {
-    return true;
-  }
-  return false;
+  return ON_PAGE_QUOTE_PATHS.has(pathname);
 }
 
 /**

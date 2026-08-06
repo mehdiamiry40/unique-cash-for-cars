@@ -5,12 +5,13 @@ import { posts } from "@/content/posts";
 import { pageMeta } from "@/lib/seo";
 import { blogSchema, breadcrumbSchema, graph } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
+import { PrimaryServiceLinks } from "@/components/PrimaryServiceLinks";
 import { Section } from "@/components/ui";
 
 export const metadata: Metadata = pageMeta({
-  title: "Gold Coast Car Selling Guides — Scrap, Damage, Paperwork",
+  title: "Gold Coast Car Selling and Removal Guides | Unique",
   description:
-    "Practical guides on selling a damaged car, what scrap cars are worth, and how vehicle disposal actually works in South East Queensland.",
+    "Practical guides supporting Cash For Cars Gold Coast quotes and Car Removal Gold Coast bookings, including value, write-offs, finance and TMR paperwork.",
   path: "/blog",
 });
 
@@ -21,6 +22,8 @@ const formatter = new Intl.DateTimeFormat("en-AU", {
 });
 
 export default function BlogIndex() {
+  const activePosts = posts.filter((post) => !post.archived);
+
   return (
     <>
       <JsonLd
@@ -29,19 +32,19 @@ export default function BlogIndex() {
             { name: "Home", path: "/" },
             { name: "Blog", path: "/blog" },
           ]),
-          blogSchema(posts.filter((p) => !p.archived)),
+          blogSchema(activePosts),
         )}
       />
 
       <Section>
         <div className="mx-auto max-w-3xl">
-          <h1 className="heading-xl mb-4">Gold Coast car selling guides</h1>
+          <h1 className="heading-xl mb-4">Gold Coast car selling and removal guides</h1>
           <p className="mb-10 text-xl">
             Straight answers to the questions people ask before they call us.
           </p>
 
           <ul className="divide-y divide-hairline border-y border-hairline">
-            {posts.map((post) => (
+            {activePosts.map((post) => (
               <li key={post.slug} className="py-6">
                 <article>
                   <p className="mb-1 text-sm text-ink-muted">
@@ -67,6 +70,8 @@ export default function BlogIndex() {
           </ul>
         </div>
       </Section>
+
+      <PrimaryServiceLinks />
     </>
   );
 }

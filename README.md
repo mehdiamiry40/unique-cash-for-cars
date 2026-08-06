@@ -1,291 +1,136 @@
 # uniquecashforcars.com.au
 
-Next.js rebuild of the WordPress site for Unique Cash For Cars.
+Next.js site for Unique Cash For Cars.
 
-Next 16 (App Router) · React 19 · TypeScript · Tailwind v4 · MDX for blog posts · no CMS.
+Next 16 (App Router) · React 19 · TypeScript · Tailwind v4 · MDX guides · no CMS.
 
----
+## SEO architecture
 
-## Getting started
+The site has two commercial search targets and one canonical landing page for
+each:
+
+| Search query | Owner URL | Page role |
+|---|---|---|
+| `cash for cars gold coast` | `/` | Quotes, valuation, vehicle eligibility and payment |
+| `car removal gold coast` | `/car-removal-gold-coast` | Free collection, access, timing and removal preparation |
+
+About, Contact and Guides support those pillars without using either exact
+query in their title or H1. Navigation, footer and contextual CTAs reinforce
+both owners. The former cash-for-cars hub, adjacent commercial pages and every
+location landing page redirect directly to the closest pillar; none appears in
+the sitemap or internal navigation.
+
+See `docs/two-keyword-seo-map.md` for the complete URL map, editorial rules and
+post-deployment checks.
+
+## Local development
 
 ```bash
-npm install
-npm run fetch:assets   # pulls images from the live WordPress site into public/img
+npm ci
 npm run dev
 ```
 
-`public/img` holds the real photographs, restored from the WordPress media
-library and committed. `npm run fetch:assets` re-downloads them from the live
-site and is only needed if one goes missing.
-
-## Verify before every deploy
+The quote endpoint needs either a webhook or Resend configuration:
 
 ```bash
-npm run verify
-```
-
-Runs five checks:
-
-| Check | What it catches |
-|---|---|
-| `typecheck` | Type errors across the app |
-| `lint` | ESLint + Next.js rules |
-| `check:urls` | **Any WordPress URL that would 404 after launch** |
-| `check:duplication` | Location pages drifting back toward duplicate content |
-| `test` | What a crawler actually receives — see below |
-
-`check:urls` is the one that matters most. It reads every URL the old site had
-(`scripts/legacy-urls.json`) and asserts each one resolves to a route or has a
-permanent redirect. A missed URL is a page that dies at launch.
-
-### The test suite
-
-`npm test` builds the site and runs `tests/rendered-html.test.mjs` against a
-real `next start` server. Response headers come from `next.config.ts` and never
-appear in the prerendered HTML, so a live server is the only way to check them.
-
-It asserts, across every page in the sitemap:
-
-- Each sitemap URL returns a direct 200, and its canonical points back at itself
-- Titles and descriptions sit inside what a search result displays, and **no two
-  pages share either** — the specific failure this rebuild exists to prevent
-- One `h1` per page
-- Structured data parses, carries the right types per page (`AutomotiveBusiness`
-  and `WebSite` everywhere, `FAQPage` where FAQs render, `BreadcrumbList`,
-  `Service` on location pages, `BlogPosting` on posts), no `aggregateRating`,
-  and **every `{"@id"}` reference resolves to a node defined on the same page**
-- The retired location URLs return a permanent redirect to a page that exists
-- The security headers are actually on the response — including HSTS and the
-  nonce-free CSP directives — and `x-powered-by` is not
-- Images and the preserved WordPress upload paths are served immutable
-- No internal link 404s, and every referenced image exists in `public/`
-- **The og:image's extension, its `Content-Type` and its actual bytes agree.**
-  It shipped as JPEG behind a `.png` name, which under `nosniff` is how a link
-  preview ends up with no picture
-- **`prose-site` styles the elements the MDX posts use.** Tailwind's preflight
-  resets heading sizes, so a missing `h1` rule silently renders every post
-  title at body-text size — which is what it was doing
-- The current page is marked with `aria-current`, not colour alone
-- This build is indexable — and a `VERCEL_ENV=preview` build is not
-
-`tests/contrast.test.mjs` runs separately and needs no server: it parses the
-design tokens out of `globals.css` and asserts each foreground/background pair
-clears WCAG AA. The brand red and the muted grey are deliberately darker than
-the WordPress originals because the sampled values failed; the test is there so
-nobody "corrects" them back.
-
-That last one builds a second copy into `.next-preview` (gitignored) and checks
-it serves `Disallow: /` and `noindex`. It costs an extra build, which is worth
-it: a preview URL left indexable competes with the live site for its own
-keywords and nobody notices for months.
-
-Each assertion was checked by breaking the thing it guards and confirming the
-test failed — a dropped security header, a dangling schema `@id`, a missing
-image, and an inverted preview-indexing rule.
-
-> **On 308 vs 301:** Next emits `308 Permanent Redirect` for
-> `permanent: true`, not `301`. Google's redirect documentation lists 301 and
-> 308 together as permanent redirects and treats them equivalently for
-> crawling and ranking-signal consolidation, so this is fine — don't let anyone
-> "fix" it.
-
----
-
-## Where things live
-
-```
-src/
-  content/
-    site.ts          Business details — name, phone, address, hours. Single source of truth.
-    suburbs.ts       The 8 location pages + the retired-page redirects.
-    services.ts      The 3 service pages.
-    posts.ts         Blog index metadata.
-  app/
-    (posts)/         Blog posts as .mdx, at their original root-level URLs.
-    cash-for-cars/   Hub page + [suburb] dynamic route.
-    api/quote/       Quote form endpoint.
-    sitemap.ts       Replaces the Yoast sitemap.
-    robots.ts        Replaces the WordPress robots.txt.
-  components/        Header, Footer, QuoteForm, FaqAccordion, shared UI.
-  lib/
-    schema.ts        JSON-LD builders (AutomotiveBusiness, FAQPage, Breadcrumb).
-    seo.ts           pageMeta() — always sets a canonical.
-    deploy.ts        Keeps preview deployments out of search.
-scripts/             Asset fetch + the two pre-deploy checks.
-docs/                SEO audit that prompted this rebuild.
-public/
-  img/               The 8 images the pages currently use.
-  assets/            Hero artwork as webp (3840x1600 landscape, 800x1000 portrait).
-                     Not currently rendered — the hero uses public/img.
-  wp-content/uploads/  116 original WordPress images. See below.
-.github/workflows/   CI: verify + build on push and PR.
-```
-
-### The image library
-
-`public/wp-content/uploads` holds the full original WordPress media library,
-kept at its original paths. Two reasons: old image URLs keep resolving, so
-Google Images results and any external hotlinks survive the move; and it is a
-real photo library where this project otherwise has eight files.
-
-Worth knowing what is in there, because the pages don't use most of it yet:
-
-- **Actual photographs** — `2020/01/cash-for-cars.jpg` is a 1920x660 banner
-  shot, `2023/09/damaged-car.jpg` is 1600x1067, `2022/05/why-choose-us.jpg`,
-  `2020/01/wrecked-vehicles.jpg`, `2022/10/truck-removing-car.jpg`.
-- **15 car-brand logos** under `2020/11/` — Toyota, Mazda, Ford, Holden, BMW,
-  Audi, Mercedes, Nissan, Honda, Subaru, Suzuki, Mitsubishi, Kia, Jeep, Volvo.
-  A "brands we buy" strip is a standard trust element on competitor sites.
-- Thumbnail variants (`-300x230`, `-768x590`) that WordPress generated for
-  srcsets. Kept because they may be indexed; not useful for new work.
-
-**To change business details** — phone, hours, trading name — edit
-`src/content/site.ts` only. It feeds the header, footer, schema, contact page
-and every `tel:` link.
-
----
-
-## What changed from WordPress, and why
-
-Read `docs/seo-audit-uniquecashforcars.md` for the full reasoning. The short list:
-
-**19 location pages → 8.** The old ones were spun from a single template:
-median 45% of sentences identical between any two pages once the suburb name
-was swapped out, worst pair 93%, and 18 of 19 pages within 140 words of the
-same length. Google treats that as doorway pages and suppresses the whole
-domain. The retired pages 301 to the nearest survivor; nothing 404s. Four
-further Gold Coast suburbs were later rewritten with unique local angles.
-
-The pages that remain each lead with something only true of that place —
-basement access in Surfers and salt corrosion in Burleigh, for example.
-`check:duplication` enforces this: current overlap is 0%, and the build fails
-above 15% mean.
-
-**`Organization` → `AutomotiveBusiness` schema.** The old markup had a name, a
-URL and a logo. This one has opening hours and a Gold Coast service area, while
-deliberately omitting a public street address and coordinates. Deliberately no
-`aggregateRating` — Google hasn't shown review snippets for self-serving
-LocalBusiness markup since 2019. Stars come from Google Business Profile.
-
-**Placeholder text removed.** `/sell-my-car-gold-coast` was live and indexed
-with `"Website name" will pay you anywhere from $50 to $9,999` in its FAQ.
-
-**COVID-19 section removed** from the homepage.
-
-**robots.txt rebuilt.** The old one had five malformed lines like
-`Disallow: /https://uniquecashforcars.com.au/]Car`.
-
-**Mobile call bar added.** Most traffic is someone standing next to a car they
-want gone. The old site made them scroll to find a phone number.
-
----
-
-## Before you go live
-
-### 1. Wire up the quote form
-
-`src/app/api/quote/route.ts` needs one of these in your environment:
-
-```bash
-QUOTE_WEBHOOK_URL=...      # Zapier / Make / your CRM
+QUOTE_WEBHOOK_URL=...
 # or
 RESEND_API_KEY=...
 QUOTE_TO_EMAIL=...
 ```
 
-**With neither set, the endpoint answers 503 and tells the caller to phone
-instead.** It does not accept and drop the enquiry, and it does not report
-success it cannot deliver — but nobody can reach you through the form until one
-of these is configured. Don't ship without it.
+With neither configured, it returns 503 and asks the visitor to call. It never
+reports that an undelivered enquiry succeeded.
 
-### 2. Fill in the gaps in `src/content/site.ts`
+## Verify before deployment
 
-`abn` and `licenceNumber` are empty strings. Fill them in and they appear
-automatically in the footer and on the About page.
+```bash
+npm run verify
+```
 
-This one is not cosmetic. The old site called itself "a trustworthy and
-licensed business" on nearly every page while displaying neither number, and
-the rebuild inherited the claim in four places — the hero list, the homepage
-intro, a homepage FAQ and the About page's `<title>`. Those have been reworded
-to things the business can stand behind, because an unsubstantiated licensing
-representation is an Australian Consumer Law exposure, not just weak copy.
+This runs:
 
-Once you have the licence number, put the stronger wording back **with the
-number next to it** — "Licensed QLD vehicle buyer, licence 12345" is worth far
-more than the adjective on its own.
+| Check | Purpose |
+|---|---|
+| `typecheck` | TypeScript errors |
+| `lint` | ESLint and Next.js rules |
+| `check:urls` | Every legacy WordPress URL resolves or redirects |
+| `test` | Production build plus crawler-visible output tests |
 
-### 3. Replace the placeholders in `src/content/suburbs.ts`
+The rendered-output suite starts a real production server. It verifies
+canonicals, unique keyword ownership, title/description uniqueness, one H1 per
+page, two-pillar internal links, direct permanent redirects, sitemap contents,
+structured-data IDs, article metadata, robots directives, 404 behavior,
+security headers, images, accessibility state and preview-deployment noindex.
 
-Search for `NEEDS OWNER INPUT`. Real testimonials with a first name and suburb.
-Don't invent them.
+Next emits `308 Permanent Redirect` for `permanent: true`. Google treats 301
+and 308 as permanent redirects for signal consolidation. Canonical slashless
+legacy URLs reach their owner in one hop. An old WordPress trailing-slash form
+first passes through Next's slash normalisation, so the suite caps that path at
+two permanent hops and verifies the final page is a direct 200.
 
-### 4. Decide on the 2020 blog post
+## Project map
 
-`5-best-luxury-eco-friendly-cars-in-australia-2020` is six years out of date.
-It's currently labelled as an archive — and the label is now actually visible,
-which it wasn't: the callout is a blockquote and `prose-site` had no blockquote
-rule, so it rendered as ordinary prose. Either rewrite the post or add a
-redirect in `next.config.ts`.
+```text
+src/
+  app/
+    (posts)/                         Supporting guides at legacy root URLs
+    car-removal-gold-coast/          Removal keyword pillar
+    api/quote/                       Quote endpoint
+    page.tsx                         Cash-for-cars keyword pillar
+    sitemap.ts                       Indexable URL inventory
+    robots.ts                        Production/preview crawl rules
+  components/
+    PrimaryServiceLinks.tsx          Shared two-pillar contextual links
+  content/
+    site.ts                          Brand, contact and service-area details
+    services.ts                      Car-removal pillar content
+    suburbs.ts                       Direct redirects for retired locations
+    posts.ts                         Guide metadata
+  lib/
+    schema.ts                        JSON-LD graph builders
+    seo.ts                           Canonical and social metadata
+scripts/
+  check-urls.mjs                     Legacy URL parity guard
+  legacy-urls.json                  WordPress URL inventory
+tests/
+  rendered-html.test.mjs             Crawler-visible regression suite
+docs/
+  two-keyword-seo-map.md             SEO ownership and migration record
+public/
+  img/ and assets/                    Current image assets
+  wp-content/uploads/                Preserved legacy media URLs
+```
 
-If you redirect it, delete the `.mdx` file in the same commit. `check:urls`
-will fail if you don't — a page file shadowed by a redirect is built on every
-deploy and served to nobody, which is exactly what happened to the retired
-Brisbane post.
+## Business data and trust
 
-### 5. Replace the service-card photographs
+`src/content/site.ts` is the single source of truth for the public brand,
+registered entity, phone, hours, ABN, licence number and service area. Keep it
+aligned with the official registers and the Google Business Profile.
 
-The six images on the homepage are 460×345, and that is the largest copy that
-exists anywhere in `public/wp-content/uploads`. A modern phone at 2× wants
-roughly 780px across, so the cards are soft on most devices and no code change
-can fix it. The header logo is now 800×348 PNG (retina-ready at `h-14`); the
-hero banner is 3840×1600.
+The website describes the operator as serving the Gold Coast; it does not
+invent a Gold Coast storefront or street address. Do not add a local address,
+reviews, ratings, pickup counts, same-day guarantees or licence claims without
+current evidence.
 
----
+At the time of the August 2026 audit, the official ABN record showed A Plus Car
+Removal Pty Ltd as active, but did not show Unique Cash For Cars as a current
+registered business name. Resolve the trading-name status before strengthening
+brand/legal claims. Queensland motor-dealer licence 4253110 was current on 5
+August 2026 and expires on 20 November 2026; recheck it before and after renewal.
 
-## A note on the Next version
+## Deployment follow-up
 
-Pinned to Next 16, and verified on it: `npm run verify` passes end to end under
-Next 16 with Turbopack — all routes, redirects, schema, sitemap and the full
-rendered-output suite. An earlier revision of this file warned that the build
-had only ever been checked under Next 15 with webpack; that is no longer true.
+After production deploy:
 
-If Turbopack ever gives you trouble, `npm run build -- --webpack` is the
-escape hatch.
+1. Submit `/sitemap.xml` in Google Search Console.
+2. Request indexing for `/` and `/car-removal-gold-coast`.
+3. Confirm retired URLs return one 308 hop to the intended owner.
+4. Monitor query-to-page mapping so each phrase keeps its single owner.
+5. Update the Google Business Profile and citations to the same brand, phone,
+   service area and legal entity.
+6. Add genuine Gold Coast proof: consented pickup photos, verified reviews and
+   accurate collection examples.
 
-## Launch day
-
-1. `npm run verify` — must pass clean.
-2. `npm run build && npm start` — click through every page locally.
-3. Deploy to production (`VERCEL_ENV=production`). The production site is
-   already the Next.js rebuild — WordPress is gone.
-4. **Search Console:** submit `https://uniquecashforcars.com.au/sitemap.xml`.
-   The old `/sitemap_index.xml` 301s to it, so existing submissions keep working.
-5. Google Ads conversion / call measurement is already in the production build
-   (`GoogleAdsTracking`, production-only). GA4, GTM and Clarity are still
-   optional — add them only if you want them, and update the privacy policy
-   in the same change.
-6. Use Search Console's URL Inspection on the eight location pages and the
-   homepage to confirm the canonical and schema are read correctly.
-7. Watch Coverage in Search Console daily for the first fortnight. A spike in
-   404s means a URL was missed — `check:urls` should have caught it, so add the
-   URL to `scripts/legacy-urls.json` and fix it.
-8. Fill `site.abn` and `site.licenceNumber`, replace suburb testimonial
-   placeholders, and set up the Google Business Profile — none of those are
-   code problems.
-
-Expect a ranking dip for two to four weeks while Google reprocesses the
-redirects. That's normal for a migration. What isn't normal is a dip that
-doesn't recover — if you see that after six weeks, check Coverage for 404s and
-Search Console's Manual Actions report.
-
----
-
-## The thing this rebuild doesn't fix
-
-The audit in `docs/` is blunt about this: the site was never the main problem.
-There is no Google Business Profile, and for "cash for cars \[suburb\]"
-searches the map pack takes most of the clicks. A faster site with better
-markup helps at the margin. Being in the map pack with 25 reviews changes the
-phone volume.
-
-Do that too.
+Do not recreate keyword-swapped suburb pages. If a new page is proposed, it
+needs a distinct user purpose and evidence that cannot live on either pillar.
