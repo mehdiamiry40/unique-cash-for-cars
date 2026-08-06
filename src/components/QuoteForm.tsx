@@ -9,7 +9,7 @@ type Status = "idle" | "submitting" | "success" | "error";
 /**
  * Quote enquiry form.
  *
- * Posts to /api/quote. Name + phone only — we call back; no email field.
+ * Posts to /api/quote. Name + phone only are required — we call back; no email field.
  * Includes a honeypot field — the WordPress form was getting hit by bots and
  * Contact Form 7 has no built-in protection.
  */
@@ -160,6 +160,20 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
             name="vehicle"
             autoComplete="off"
             placeholder="Toyota Corolla 2012…"
+            className={inputClass}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="q-price" className={labelClass}>
+            Expected price <span className="font-normal text-ink-muted">(optional)</span>
+          </label>
+          <input
+            id="q-price"
+            name="expectedPrice"
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder="$1,500…"
             className={inputClass}
           />
         </div>

@@ -205,7 +205,6 @@ export async function POST(request: Request) {
     phone,
     suburb: text(body.suburb, 120) || "—",
     vehicle: text(body.vehicle, 160) || "—",
-    // Kept for older clients / CRM mappings; the public form no longer asks.
     expectedPrice: text(body.expectedPrice, 60) || "—",
     condition: text(body.condition, 500) || "—",
     receivedAt: new Date().toISOString(),

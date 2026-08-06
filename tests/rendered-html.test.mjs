@@ -777,11 +777,15 @@ test("the short Adelaide URL redirects permanently", async () => {
   assert.match(location, /\/$/);
 });
 
-test("the quote form does not collect email", async () => {
+test("the quote form collects expected price without reintroducing retired fields", async () => {
   const home = await html("/");
   assert.doesNotMatch(home, /name="email"|id="q-email"/);
   assert.doesNotMatch(home, /type="email"/);
   assert.match(home, /name="vehicle"/);
+  const expectedPriceInput = home.match(/<input[^>]*name="expectedPrice"[^>]*>/)?.[0];
+  assert.ok(expectedPriceInput, "quote form must include an expected-price input");
+  assert.match(expectedPriceInput, /inputMode="numeric"/);
+  assert.doesNotMatch(expectedPriceInput, /\srequired(?:=|\s|>)/);
   assert.doesNotMatch(home, /name="make"|name="model"|name="year"/);
   assert.doesNotMatch(home, /name="fuel"|Fuel type/);
 
