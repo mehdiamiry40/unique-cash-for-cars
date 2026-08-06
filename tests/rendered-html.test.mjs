@@ -288,6 +288,11 @@ test("each target keyword has exactly one title-and-H1 owner", async () => {
   assert.deepEqual(owners.get("car removal gold coast"), ["/car-removal-gold-coast"]);
 });
 
+test("contact page displays the confirmed seven-day opening hours", async () => {
+  const text = plainText(await html("/contact-us"));
+  assert.match(text, /Mon–Sun 08:00 – 17:00/);
+});
+
 test("structured data is valid, typed per page, and every @id reference resolves", async () => {
   for (const path of await sitemapPaths()) {
     const nodes = schemaNodes(await html(path));
@@ -349,11 +354,15 @@ test("structured data is valid, typed per page, and every @id reference resolves
     assert.equal(business.openingHoursSpecification.length, 1, `${path}: opening hours`);
     assert.deepEqual(
       business.openingHoursSpecification[0].dayOfWeek,
-      ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
       `${path}: business days`,
     );
-    assert.equal(business.openingHoursSpecification[0].opens, "09:00", `${path}: opening time`);
+    assert.equal(business.openingHoursSpecification[0].opens, "08:00", `${path}: opening time`);
     assert.equal(business.openingHoursSpecification[0].closes, "17:00", `${path}: closing time`);
+    // This business pays vehicle sellers. Consumer-facing payment and price
+    // fields would misleadingly imply that sellers pay the business.
+    assert.equal(business.priceRange, undefined, `${path}: priceRange must not be emitted`);
+    assert.equal(business.paymentAccepted, undefined, `${path}: paymentAccepted must not be emitted`);
     // Self-serving review markup earns no rich result on LocalBusiness types
     // and risks a manual action. See the note in src/lib/schema.ts.
     assert.equal(business.aggregateRating, undefined, `${path}: aggregateRating must not be emitted`);
