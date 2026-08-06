@@ -32,9 +32,7 @@ export function organizationSchema() {
       url: `${site.url}/img/logo.png`,
       caption: site.name,
     },
-    priceRange: "$$",
     currenciesAccepted: "AUD",
-    paymentAccepted: "Cash, Bank Transfer",
     areaServed: site.areaServed.map((name) => ({
       "@type": name === "Gold Coast" ? "City" : "Place",
       name,
