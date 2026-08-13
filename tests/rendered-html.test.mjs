@@ -582,6 +582,33 @@ test("static image paths are served with a long immutable cache", async () => {
   }
 });
 
+test("the homepage trust proof links its business claims to public registers", async () => {
+  const home = await html("/");
+  const proof = home.match(/<section\b[^>]*id="business-proof"[^>]*>[\s\S]*?<\/section>/i)?.[0];
+  assert.ok(proof, "homepage does not render the business-proof section");
+  const proofText = plainText(proof);
+
+  assert.match(proofText, /Proof you can check/);
+  assert.match(proofText, /Know who is buying your car/);
+  assert.match(proofText, /A Plus Car Removal Pty Ltd/);
+  assert.match(proofText, /ABN 39 627 952 916/);
+  assert.match(proofText, /Licence 4253110/);
+
+  const links = linksIn(proof);
+  assert.ok(
+    links.some((link) => link.href === "https://abr.business.gov.au/ABN/View?id=39627952916"),
+    "homepage does not link its ABN to ABN Lookup",
+  );
+  assert.ok(
+    links.some(
+      (link) =>
+        link.href.startsWith("https://ftlr.fairtrading.qld.gov.au/home/search?") &&
+        link.href.includes("LicenceNumber=4253110"),
+    ),
+    "homepage does not link its licence to the QLD register",
+  );
+});
+
 test("the preserved WordPress image URLs still resolve", async () => {
   // These paths are kept so old image URLs, Google Images results and any
   // external hotlinks survive the move off WordPress.
