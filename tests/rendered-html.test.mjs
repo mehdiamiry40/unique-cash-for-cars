@@ -54,6 +54,9 @@ const retiredCommercialRoutes = new Map([
   ["/sell-my-car-gold-coast", "/"],
   ["/unwanted-car-buyer", "/"],
   ["/car-wreckers-gold-coast", "/car-removal-gold-coast"],
+  ["/car-disposals", "/car-removal-gold-coast"],
+  ["/services/car-disposals", "/car-removal-gold-coast"],
+  ["/car-recyclers", "/car-removal-gold-coast"],
   ["/company-info-cash-for-cars-gold-coast-and-free-car-removal", "/about"],
 ]);
 const postRoutes = [
