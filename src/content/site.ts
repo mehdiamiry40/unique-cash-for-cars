@@ -13,7 +13,7 @@ export const site = {
   registeredEntityName: "A Plus Car Removal Pty Ltd",
   url: "https://uniquecashforcars.com.au",
   description:
-    "Get a Cash For Cars Gold Coast quote up to $9,999 for any make or condition, with free car removal across the city. Call for an offer.",
+    "Get a quote from a licensed Queensland car buyer for any make or condition, with cash paid and free car removal across the Gold Coast, 7 days.",
 
   phone: {
     /**

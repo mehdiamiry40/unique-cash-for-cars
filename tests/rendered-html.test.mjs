@@ -57,6 +57,7 @@ const retiredCommercialRoutes = new Map([
   ["/company-info-cash-for-cars-gold-coast-and-free-car-removal", "/about"],
 ]);
 const postRoutes = [
+  "/cancel-car-registration-queensland-after-sale",
   "/what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide",
   "/where-do-old-junk-cars-go-in-gold-coast-car-selling-options-in-gold-coast-qld",
   "/5-best-luxury-eco-friendly-cars-in-australia-2020",
@@ -666,6 +667,47 @@ test("MDX prose styles the elements the posts actually use", async () => {
   const post = await html(postRoutes[0]);
   assert.match(post, /<article class="[^"]*prose-site/, "post is not wrapped in prose-site");
   assert.match(post, /<h1[^>]*>/, "post has no h1");
+});
+
+test("guides show authorship and the same dates declared in BlogPosting schema", async () => {
+  const dateFormatter = new Intl.DateTimeFormat("en-AU", {
+    day: "numeric",
+    month: "long",
+    timeZone: "Australia/Brisbane",
+    year: "numeric",
+  });
+
+  for (const path of postRoutes) {
+    const source = await html(path);
+    assert.match(source, /<p class="post-details">/, `${path}: no visible guide details`);
+    assert.match(
+      source,
+      /<a[^>]*href="\/about"[^>]*rel="author"|<a[^>]*rel="author"[^>]*href="\/about"/,
+      `${path}: no visible author link`,
+    );
+
+    const article = schemaNodes(source).find((node) => node["@type"] === "BlogPosting");
+    assert.ok(article, `${path}: no BlogPosting schema`);
+    const visibleDates = [...source.matchAll(/<time[^>]*datetime="([^"]+)"/gi)].map(
+      ([, value]) => value,
+    );
+    assert.ok(
+      visibleDates.includes(article.datePublished),
+      `${path}: published date is only present in schema`,
+    );
+    assert.ok(
+      visibleDates.includes(article.dateModified),
+      `${path}: modified date is only present in schema`,
+    );
+    for (const date of new Set([article.datePublished, article.dateModified])) {
+      const expected = dateFormatter.format(new Date(`${date}T00:00:00+10:00`));
+      assert.match(
+        source,
+        new RegExp(`<time[^>]*datetime="${date}"[^>]*>${expected}<\\/time>`, "i"),
+        `${path}: ${date} renders as a different calendar day`,
+      );
+    }
+  }
 });
 
 test("the social image is served as the type its extension claims", async () => {

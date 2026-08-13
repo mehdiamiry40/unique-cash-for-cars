@@ -128,6 +128,7 @@ export const servicePages: ServicePage[] = [
       },
     ],
     related: [
+      "cancel-car-registration-queensland-after-sale",
       "how-much-is-my-scrap-car-worth-gold-coast",
       "transferring-car-registration-in-queensland",
       "statutory-vs-repairable-write-off-queensland",

@@ -18,6 +18,7 @@ export const metadata: Metadata = pageMeta({
 const formatter = new Intl.DateTimeFormat("en-AU", {
   day: "numeric",
   month: "long",
+  timeZone: "Australia/Brisbane",
   year: "numeric",
 });
 

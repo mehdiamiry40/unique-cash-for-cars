@@ -18,7 +18,7 @@ import {
 } from "@/components/ui";
 
 export const metadata: Metadata = pageMeta({
-  title: `Cash For Cars Gold Coast — Up to ${site.maxPayout}, Free Removal`,
+  title: "Cash For Cars Gold Coast | Licensed Buyer, Free Removal",
   description: site.description,
   path: "/",
 });
@@ -29,7 +29,7 @@ const heroPoints = [
   "Serving homes, workplaces and vehicle yards across the Gold Coast",
   `Offers up to ${site.maxPayout}, based on the specific vehicle`,
   "Free car removal with no separate towing deduction",
-  `Operated by ${site.registeredEntityName} · ABN ${site.abn}`,
+  `QLD motor dealer licence ${site.licenceNumber} · ABN ${site.abn}`,
   "Any make, any model, any condition",
   "Quick phone or online quote",
 ] as const;
