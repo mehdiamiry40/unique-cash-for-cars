@@ -879,15 +879,46 @@ test("a honeypot hit answers 200 without a leadId", async () => {
   assert.equal(result.leadId, undefined);
 });
 
-test("the privacy policy describes the Google Ads tags that production loads", async () => {
+test("the privacy policy describes the Google measurement tags that production loads", async () => {
   // The policy previously claimed "no third-party analytics or advertising"
   // while the root layout loaded googletagmanager.com. Keep the two in sync.
   const source = await html("/privacy-policy");
   assert.match(source, /Google Ads/i);
+  assert.match(source, /Google Analytics 4/i);
   assert.doesNotMatch(
     source,
     /loads no third-party analytics/i,
-    "privacy policy must not deny the Ads tags the layout loads",
+    "privacy policy must not deny the measurement tags the layout loads",
+  );
+});
+
+test("conversion tracking separates delivered leads from phone-click intent", () => {
+  const tracking = readFileSync(
+    join(projectPath, "src", "components", "GoogleAdsTracking.tsx"),
+    "utf8",
+  );
+  const quoteForm = readFileSync(
+    join(projectPath, "src", "components", "QuoteForm.tsx"),
+    "utf8",
+  );
+
+  assert.match(tracking, /G-VZT8S8WXDH/, "GA4 stream is not configured");
+  assert.match(tracking, /sendAnalyticsEvent\("generate_lead"/, "no GA4 lead event");
+  assert.match(tracking, /sendAnalyticsEvent\("click_to_call"/, "no GA4 call-click event");
+  assert.match(
+    tracking,
+    /sendConversion\(quoteConversionLabel/,
+    "delivered quote enquiries do not fire the native Google Ads conversion",
+  );
+  assert.match(
+    quoteForm,
+    /if \(result\.leadId\) trackQuoteConversion\(result\.leadId\)/,
+    "quote conversion is not gated by the server-issued lead ID",
+  );
+  assert.doesNotMatch(
+    tracking,
+    /sendConversion\(phoneConversionLabel/,
+    "phone taps must not duplicate connected-call conversions in Google Ads",
   );
 });
 
@@ -1019,11 +1050,11 @@ test("a preview deployment is not indexable", { timeout: 600_000 }, async () => 
   // Both matter, so both are checked.
   assert.match(metaOf(built("index.html"), "robots"), /noindex/);
 
-  // Production conversion tags must not ship on preview URLs — they would
-  // pollute the live Google Ads account with clicks from branch deploys.
+  // Production measurement tags must not ship on preview URLs — they would
+  // pollute the live Google Ads and Analytics properties with QA traffic.
   assert.doesNotMatch(
     built("index.html"),
     /googletagmanager\.com/,
-    "a preview build must not load Google Ads",
+    "a preview build must not load Google measurement tags",
   );
 });
