@@ -19,11 +19,11 @@
 export const isSearchVisible = process.env.VERCEL_ENV !== "preview";
 
 /**
- * Whether Google Ads conversion / call-measurement tags should load.
+ * Whether Google Ads and GA4 measurement tags should load.
  *
  * Stricter than `isSearchVisible`: only the production deployment loads Ads.
- * Preview URLs and local `next build` must not fire production conversion tags
- * into the live ad account. There is no "count a local test click" mode —
- * point a separate Ads account at a preview via env vars if you need that.
+ * Preview URLs and local `next build` must not fire production measurement
+ * events into the live properties. There is no "count a local test click"
+ * mode — point separate properties at a preview via env vars if you need that.
  */
 export const isAdsEnabled = process.env.VERCEL_ENV === "production";

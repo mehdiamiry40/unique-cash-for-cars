@@ -22,7 +22,7 @@ export default function PrivacyPolicyPage() {
   // Hardcoded on purpose. This is the date the policy was last reviewed, not
   // the date the site was last deployed — a build-time date would silently
   // claim a review that never happened. Bump it when you change the text.
-  const updated = "6 August 2026";
+  const updated = "13 August 2026";
 
   return (
     <Section>
@@ -54,23 +54,24 @@ export default function PrivacyPolicyPage() {
 
         {/*
           Keep this section honest about every third-party script the layout
-          actually loads. Google Ads conversion / call measurement was added in
-          July 2026; the previous "no tracking" wording became false that day.
-          If you add GA4, GTM, Clarity or a CRM pixel, update this section and
-          bump `updated` in the same change.
+          actually loads. If you add GTM, Clarity or a CRM pixel, update this
+          section and bump `updated` in the same change.
         */}
         <h2>Analytics, advertising and cookies</h2>
         <p>
-          This site loads Google Ads conversion and call-measurement tags so we
-          can tell which ads led to a quote enquiry or a phone call. Google may
-          set or read cookies and similar technologies for that purpose, and
-          receive technical details about the page visit (such as the page URL
-          and a truncated IP address) when the tags run.
+          This site loads Google Ads conversion and call-measurement tags, plus
+          Google Analytics 4, so we can understand visits and tell which ads led
+          to a delivered quote enquiry or phone call. Analytics records page
+          views and interactions such as scrolls, outbound links and phone-link
+          clicks. It also records a lead event after the quote system confirms
+          delivery. We do not send the name, phone number, expected price or
+          vehicle details entered in the form to Google Analytics.
         </p>
         <p>
-          We do not use those tags to show you remarketing ads across the web,
-          and we do not load Google Analytics, Meta Pixel or Microsoft Clarity
-          on this site today. If that changes, this policy will be updated first.
+          Google may set or read cookies and similar technologies for measurement
+          and receive technical details about the visit, such as the page URL,
+          browser and a truncated IP address. We do not use these tags to show
+          remarketing ads, and we do not load Meta Pixel or Microsoft Clarity.
         </p>
         <p>
           Our hosting provider keeps standard server logs — the requested page,

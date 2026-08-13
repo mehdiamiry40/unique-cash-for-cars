@@ -68,8 +68,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en-AU" className={openSans.variable}>
       <body className="flex min-h-full flex-col font-sans antialiased">
-        {/* Ads only on the production deployment — preview URLs must not fire
-            production conversion tags against real ad accounts. */}
+        {/* Measurement only on the production deployment — preview URLs must
+            not pollute the real Google Ads or Analytics properties. */}
         {isAdsEnabled ? <GoogleAdsTracking /> : null}
 
         {/* Site-wide schema: emitted once, referenced by @id from every page. */}
