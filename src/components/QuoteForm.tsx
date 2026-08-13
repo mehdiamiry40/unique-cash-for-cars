@@ -1,10 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { site } from "@/content/site";
-import { trackQuoteConversion } from "@/components/GoogleAdsTracking";
+import {
+  trackQuoteConversion,
+  trackQuoteFormError,
+  trackQuoteFormStart,
+  type QuoteFormErrorCategory,
+} from "@/components/GoogleAdsTracking";
 
 type Status = "idle" | "submitting" | "success" | "error";
+
+function responseErrorCategory(status: number): QuoteFormErrorCategory {
+  if (status === 429) return "rate_limited";
+  if (status === 502 || status === 503) return "delivery_unavailable";
+  return "request_rejected";
+}
 
 /**
  * Quote enquiry form.
@@ -16,9 +27,57 @@ type Status = "idle" | "submitting" | "success" | "error";
 export function QuoteForm({ id = "quote" }: { id?: string }) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
+  const hasStartedRef = useRef(false);
+  const nativeValidationPendingRef = useRef(false);
+
+  function trackFormStartOnce() {
+    if (hasStartedRef.current) return;
+    hasStartedRef.current = true;
+    trackQuoteFormStart();
+  }
+
+  function handleFormStart(event: React.SyntheticEvent<HTMLFormElement>) {
+    const field = event.target;
+    if (
+      !(field instanceof HTMLInputElement) ||
+      field.name === "contactRef"
+    ) {
+      return;
+    }
+
+    trackFormStartOnce();
+  }
+
+  function handleInvalid(event: React.InvalidEvent<HTMLFormElement>) {
+    const field = event.target;
+    if (
+      nativeValidationPendingRef.current ||
+      !(field instanceof HTMLInputElement) ||
+      field.name === "contactRef"
+    ) {
+      return;
+    }
+
+    const errorCategory: QuoteFormErrorCategory =
+      field.name === "name"
+        ? "validation_name"
+        : field.name === "phone"
+          ? "validation_phone"
+          : "validation_expected_price";
+
+    // Browsers can emit one invalid event per empty required field. Keep that
+    // validation cycle to a single analytics event, then allow a later attempt.
+    trackFormStartOnce();
+    nativeValidationPendingRef.current = true;
+    trackQuoteFormError(errorCategory);
+    queueMicrotask(() => {
+      nativeValidationPendingRef.current = false;
+    });
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    trackFormStartOnce();
     setStatus("submitting");
     setError(null);
 
@@ -29,6 +88,13 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
     const phone = String(data.phone ?? "").trim();
     const expectedPrice = String(data.expectedPrice ?? "").trim();
     if (!name || phone.replace(/\D/g, "").length < 8 || !expectedPrice) {
+      trackQuoteFormError(
+        !name
+          ? "validation_name"
+          : phone.replace(/\D/g, "").length < 8
+            ? "validation_phone"
+            : "validation_expected_price",
+      );
       setStatus("error");
       setError(
         !name
@@ -52,7 +118,10 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         leadId?: string;
       };
       if (!res.ok) {
-        throw new Error(result.error || `Request failed (${res.status})`);
+        trackQuoteFormError(responseErrorCategory(res.status));
+        setStatus("error");
+        setError(result.error || `Request failed (${res.status})`);
+        return;
       }
 
       // Only count a conversion when the server issued a lead ID — honeypot
@@ -61,6 +130,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
       setStatus("success");
       form.reset();
     } catch (caught) {
+      trackQuoteFormError("network_error");
       setStatus("error");
       setError(
         caught instanceof Error
@@ -104,6 +174,9 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
     <form
       id={id}
       onSubmit={handleSubmit}
+      onFocusCapture={handleFormStart}
+      onInputCapture={handleFormStart}
+      onInvalidCapture={handleInvalid}
       className="scroll-mt-28 rounded-lg border border-hairline bg-surface p-6 shadow-lg sm:p-8"
     >
       <h2 className="mb-6 text-2xl font-normal uppercase tracking-wide text-ink-heading">

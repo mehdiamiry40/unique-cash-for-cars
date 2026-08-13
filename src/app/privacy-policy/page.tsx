@@ -63,9 +63,11 @@ export default function PrivacyPolicyPage() {
           Google Analytics 4, so we can understand visits and tell which ads led
           to a delivered quote enquiry or phone call. Analytics records page
           views and interactions such as scrolls, outbound links and phone-link
-          clicks. It also records a lead event after the quote system confirms
-          delivery. We do not send the name, phone number, expected price or
-          vehicle details entered in the form to Google Analytics.
+          clicks. It also records quote-button clicks, the first interaction with
+          the quote form, broad error categories such as validation or network
+          failure, and a lead event after the quote system confirms delivery. We
+          do not send error messages or the name, phone number, expected price,
+          suburb or vehicle details entered in the form to Google Analytics.
         </p>
         <p>
           Google may set or read cookies and similar technologies for measurement

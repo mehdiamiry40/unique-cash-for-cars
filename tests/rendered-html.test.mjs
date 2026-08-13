@@ -919,7 +919,7 @@ test("the privacy policy describes the Google measurement tags that production l
   );
 });
 
-test("conversion tracking separates delivered leads from phone-click intent", () => {
+test("conversion tracking separates delivered leads from funnel intent", () => {
   const tracking = readFileSync(
     join(projectPath, "src", "components", "GoogleAdsTracking.tsx"),
     "utf8",
@@ -934,6 +934,41 @@ test("conversion tracking separates delivered leads from phone-click intent", ()
   assert.match(tracking, /sendAnalyticsEvent\("click_to_call"/, "no GA4 call-click event");
   assert.match(
     tracking,
+    /sendAnalyticsEvent\("quote_cta_click"/,
+    "no GA4 quote-CTA event",
+  );
+  assert.match(
+    tracking,
+    /sendAnalyticsEvent\("quote_form_start"/,
+    "no GA4 quote-form-start event",
+  );
+  assert.match(
+    tracking,
+    /sendAnalyticsEvent\("quote_form_error"/,
+    "no GA4 quote-form-error event",
+  );
+  assert.match(
+    tracking,
+    /\[data-cta\^="quote-"\]/,
+    "quote CTA tracking is not delegated from stable data attributes",
+  );
+  for (const category of [
+    "validation_name",
+    "validation_phone",
+    "validation_expected_price",
+    "rate_limited",
+    "request_rejected",
+    "delivery_unavailable",
+    "network_error",
+  ]) {
+    assert.match(
+      tracking,
+      new RegExp(`\\|?\\s*"${category}"`),
+      `quote-form error category is not allowlisted: ${category}`,
+    );
+  }
+  assert.match(
+    tracking,
     /sendConversion\(quoteConversionLabel/,
     "delivered quote enquiries do not fire the native Google Ads conversion",
   );
@@ -942,11 +977,55 @@ test("conversion tracking separates delivered leads from phone-click intent", ()
     /if \(result\.leadId\) trackQuoteConversion\(result\.leadId\)/,
     "quote conversion is not gated by the server-issued lead ID",
   );
+  assert.match(
+    quoteForm,
+    /trackQuoteFormStart\(\)/,
+    "the quote form does not record its first interaction",
+  );
+  assert.match(
+    quoteForm,
+    /trackQuoteFormError\(\s*!name[\s\S]*?"validation_name"/,
+    "the quote form does not classify validation failures",
+  );
+  assert.match(
+    quoteForm,
+    /trackQuoteFormError\(responseErrorCategory\(res\.status\)\)/,
+    "the quote form does not classify delivery failures",
+  );
+  assert.match(
+    quoteForm,
+    /if \(hasStartedRef\.current\) return;/,
+    "the quote form can emit duplicate start events",
+  );
+  assert.doesNotMatch(
+    quoteForm,
+    /trackQuoteFormError\((?:result\.error|caught\.message|data|name|phone|expectedPrice)\)/,
+    "quote-form error tracking must not receive form values or error messages",
+  );
   assert.doesNotMatch(
     tracking,
     /sendConversion\(phoneConversionLabel/,
     "phone taps must not duplicate connected-call conversions in Google Ads",
   );
+});
+
+test("rendered quote CTAs expose stable analytics locations", async () => {
+  for (const path of ["/", "/contact-us", "/car-removal-gold-coast"]) {
+    const source = await html(path);
+    const form = source.match(/<form\b[^>]*id="quote"[^>]*>[\s\S]*?<\/form>/i)?.[0];
+    assert.ok(form, `${path} does not render its quote form`);
+    assert.match(form, /data-cta="quote-submit"/, `${path} has no tracked submit CTA`);
+  }
+
+  const home = await html("/");
+  assert.match(home, /href="#quote"[^>]*data-cta="quote-home-intro"/);
+
+  const guide = await html("/blog");
+  const mobileQuote = guide.match(
+    /<a\b[^>]*data-cta="quote-mobile-bar"[^>]*>/i,
+  )?.[0];
+  assert.ok(mobileQuote, "the mobile quote CTA has no stable analytics location");
+  assert.match(mobileQuote, /href="\/#quote"/);
 });
 
 test("archived posts stay reachable but leave the sitemap", async () => {

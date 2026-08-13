@@ -235,7 +235,11 @@ export default function HomePage() {
                 {site.phone.display}
               </a>{" "}
               or{" "}
-              <a href="#quote" className="font-bold text-brand hover:underline">
+              <a
+                href="#quote"
+                data-cta="quote-home-intro"
+                className="font-bold text-brand hover:underline"
+              >
                 fill in the quote form
               </a>
               .
