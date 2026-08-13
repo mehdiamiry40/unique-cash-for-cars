@@ -77,11 +77,38 @@ function sendAnalyticsEvent(
   });
 }
 
+export type QuoteFormErrorCategory =
+  | "validation_name"
+  | "validation_phone"
+  | "validation_expected_price"
+  | "rate_limited"
+  | "request_rejected"
+  | "delivery_unavailable"
+  | "network_error";
+
+/** Records the first meaningful interaction with a quote form. */
+export function trackQuoteFormStart() {
+  sendAnalyticsEvent("quote_form_start", {
+    form_name: "quote_form",
+  });
+}
+
+/**
+ * Records only a broad failure category. Error messages and form field values
+ * can contain personal information and must never be sent to GA4.
+ */
+export function trackQuoteFormError(errorCategory: QuoteFormErrorCategory) {
+  sendAnalyticsEvent("quote_form_error", {
+    form_name: "quote_form",
+    error_category: errorCategory,
+  });
+}
+
 /**
  * Records a delivered quote enquiry, not a button click or an attempted form
  * submission. Requires the server-issued lead ID — honeypot responses and
  * failed deliveries must not count. That ID becomes Google Ads' transaction ID
- * so a retry cannot count the same customer twice.
+ * so replaying the same delivered response cannot count it twice.
  */
 export function trackQuoteConversion(transactionId?: string) {
   if (!transactionId) return;
@@ -111,19 +138,27 @@ export function trackQuoteConversion(transactionId?: string) {
  */
 export function GoogleAdsTracking() {
   useEffect(() => {
-    function trackPhoneClick(event: MouseEvent) {
+    function trackIntentClick(event: MouseEvent) {
       if (!(event.target instanceof Element)) return;
 
-      const link = event.target.closest<HTMLAnchorElement>('a[href^="tel:"]');
-      if (!link) return;
+      const phoneLink = event.target.closest<HTMLAnchorElement>('a[href^="tel:"]');
+      if (phoneLink) {
+        sendAnalyticsEvent("click_to_call", {
+          cta_location: phoneLink.dataset.cta || "phone-link",
+        });
+        return;
+      }
 
-      sendAnalyticsEvent("click_to_call", {
-        cta_location: link.dataset.cta || "phone-link",
+      const quoteCta = event.target.closest<HTMLElement>('[data-cta^="quote-"]');
+      if (!quoteCta) return;
+
+      sendAnalyticsEvent("quote_cta_click", {
+        cta_location: quoteCta.dataset.cta || "quote-link",
       });
     }
 
-    document.addEventListener("click", trackPhoneClick);
-    return () => document.removeEventListener("click", trackPhoneClick);
+    document.addEventListener("click", trackIntentClick);
+    return () => document.removeEventListener("click", trackIntentClick);
   }, []);
 
   const tagId = validAdsId || validAnalyticsId;
