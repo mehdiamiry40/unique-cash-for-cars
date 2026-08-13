@@ -60,6 +60,7 @@ const retiredCommercialRoutes = new Map([
   ["/company-info-cash-for-cars-gold-coast-and-free-car-removal", "/about"],
 ]);
 const postRoutes = [
+  "/sell-car-without-roadworthy-qld",
   "/cancel-car-registration-queensland-after-sale",
   "/what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide",
   "/where-do-old-junk-cars-go-in-gold-coast-car-selling-options-in-gold-coast-qld",
@@ -70,7 +71,7 @@ const postRoutes = [
   "/transferring-car-registration-in-queensland",
 ];
 /** Pages that render an FAQ block, and so must carry FAQPage. */
-const faqRoutes = ["/", ...serviceRoutes];
+const faqRoutes = ["/", ...serviceRoutes, "/sell-car-without-roadworthy-qld"];
 /**
  * Everything except the privacy policy shows a breadcrumb trail.
  *
@@ -737,6 +738,22 @@ test("guides show authorship and the same dates declared in BlogPosting schema",
         `${path}: ${date} renders as a different calendar day`,
       );
     }
+  }
+});
+
+test("the roadworthy guide's visible FAQs match its FAQPage schema", async () => {
+  const source = await html("/sell-car-without-roadworthy-qld");
+  const text = plainText(source);
+  const faq = schemaNodes(source).find((node) => node["@type"] === "FAQPage");
+
+  assert.ok(faq, "roadworthy guide emits no FAQPage schema");
+  assert.equal(faq.mainEntity.length, 6, "roadworthy guide FAQ count");
+  for (const question of faq.mainEntity) {
+    assert.ok(text.includes(question.name), `FAQ question is schema-only: ${question.name}`);
+    assert.ok(
+      text.includes(question.acceptedAnswer.text),
+      `FAQ answer is schema-only: ${question.name}`,
+    );
   }
 });
 
