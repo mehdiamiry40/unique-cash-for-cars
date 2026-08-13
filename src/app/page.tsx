@@ -245,34 +245,101 @@ export default function HomePage() {
       </Section>
 
       <Section>
-        <div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-2">
-          <div>
-            <SectionHeading align="left">When a direct cash sale makes sense</SectionHeading>
-            <div className="space-y-4 text-lg">
-              <p>
-                If a car is registered, roadworthy, reasonably modern and you have time,
-                a private sale may return more. Our service is designed for the cases where
-                speed, certainty or vehicle condition matters more than running listings and
-                arranging inspections.
+        <div className="mx-auto max-w-5xl">
+          {/*
+            Credential proof is intentionally separate from customer proof.
+            Legacy photos and old copy have no documented customer consent or
+            job provenance, so they must not be presented as reviews or case studies.
+          */}
+          <section id="business-proof" className="mx-auto max-w-4xl">
+            <div>
+              <p className="mb-2 text-sm font-extrabold tracking-widest text-brand uppercase">
+                Proof you can check
               </p>
-              <p>
-                Non-runners, failed safety inspections, repair bills above the car&apos;s value,
-                write-offs, unwanted projects and vehicles that must leave a property by a
-                deadline are all suitable for a direct quote.
+              <SectionHeading align="left">Know who is buying your car</SectionHeading>
+              <p className="mb-6 text-lg">
+                Before you hand over a vehicle, you should be able to confirm the company
+                and licence behind the service. Unique Cash For Cars is operated by{" "}
+                <strong>{site.registeredEntityName}</strong>; the public-register links
+                below let you check the details yourself.
               </p>
+
+              <dl className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded border border-hairline bg-surface-alt p-4">
+                  <dt className="mb-1 text-sm font-bold text-ink-muted">Registered entity</dt>
+                  <dd className="font-bold text-ink-heading">{site.registeredEntityName}</dd>
+                </div>
+                <div className="rounded border border-hairline bg-surface-alt p-4">
+                  <dt className="mb-1 text-sm font-bold text-ink-muted">Service model</dt>
+                  <dd className="font-bold text-ink-heading">Gold Coast service-area operator</dd>
+                </div>
+                <div className="rounded border border-hairline bg-surface-alt p-4">
+                  <dt className="mb-1 text-sm font-bold text-ink-muted">Australian Business Number</dt>
+                  <dd>
+                    <a
+                      href="https://abr.business.gov.au/ABN/View?id=39627952916"
+                      className="font-bold text-brand underline underline-offset-2"
+                    >
+                      ABN {site.abn}
+                    </a>
+                  </dd>
+                </div>
+                <div className="rounded border border-hairline bg-surface-alt p-4">
+                  <dt className="mb-1 text-sm font-bold text-ink-muted">QLD motor dealer licence</dt>
+                  <dd>
+                    <a
+                      href="https://ftlr.fairtrading.qld.gov.au/home/search?LicenceNumber=4253110&GivenName=&LastName=&CompanyName=&MasterType=MOTOR%20DEALING"
+                      className="font-bold text-brand underline underline-offset-2"
+                    >
+                      Licence {site.licenceNumber}
+                    </a>
+                  </dd>
+                </div>
+              </dl>
+
+              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3">
+                <Link href="/about" className="font-bold text-brand hover:underline">
+                  See operator and licence details
+                </Link>
+                <Link
+                  href="/car-removal-gold-coast"
+                  className="font-bold text-brand hover:underline"
+                >
+                  See the collection process
+                </Link>
+              </div>
             </div>
-          </div>
-          <div>
-            <SectionHeading align="left">What makes an accurate quote</SectionHeading>
-            <CheckList
-              items={[
-                "Make, model and year",
-                "Running condition and known damage",
-                "Whether the engine, gearbox, wheels and key are present",
-                "Exact Gold Coast pickup location and access",
-                "Registration, ownership and finance status",
-              ]}
-            />
+          </section>
+
+          <div className="mt-16 grid gap-10 border-t border-hairline pt-16 lg:grid-cols-2">
+            <div>
+              <SectionHeading align="left">When a direct cash sale makes sense</SectionHeading>
+              <div className="space-y-4 text-lg">
+                <p>
+                  If a car is registered, roadworthy, reasonably modern and you have time,
+                  a private sale may return more. Our service is designed for the cases where
+                  speed, certainty or vehicle condition matters more than running listings and
+                  arranging inspections.
+                </p>
+                <p>
+                  Non-runners, failed safety inspections, repair bills above the car&apos;s value,
+                  write-offs, unwanted projects and vehicles that must leave a property by a
+                  deadline are all suitable for a direct quote.
+                </p>
+              </div>
+            </div>
+            <div>
+              <SectionHeading align="left">What makes an accurate quote</SectionHeading>
+              <CheckList
+                items={[
+                  "Make, model and year",
+                  "Running condition and known damage",
+                  "Whether the engine, gearbox, wheels and key are present",
+                  "Exact Gold Coast pickup location and access",
+                  "Registration, ownership and finance status",
+                ]}
+              />
+            </div>
           </div>
         </div>
       </Section>
