@@ -35,6 +35,14 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    slug: "cancel-car-registration-queensland-after-sale",
+    title: "How to cancel car registration in Queensland after a sale",
+    description:
+      "A practical TMR-based checklist for cancelling Queensland registration, surrendering plates and claiming an eligible refund after a vehicle sale.",
+    date: "2026-08-13",
+    readingMinutes: 6,
+  },
+  {
     slug: "how-much-is-my-scrap-car-worth-gold-coast",
     title: "How much is my scrap car worth on the Gold Coast?",
     description:
