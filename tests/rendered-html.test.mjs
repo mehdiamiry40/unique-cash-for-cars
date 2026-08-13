@@ -670,6 +670,13 @@ test("MDX prose styles the elements the posts actually use", async () => {
 });
 
 test("guides show authorship and the same dates declared in BlogPosting schema", async () => {
+  const dateFormatter = new Intl.DateTimeFormat("en-AU", {
+    day: "numeric",
+    month: "long",
+    timeZone: "Australia/Brisbane",
+    year: "numeric",
+  });
+
   for (const path of postRoutes) {
     const source = await html(path);
     assert.match(source, /<p class="post-details">/, `${path}: no visible guide details`);
@@ -692,6 +699,14 @@ test("guides show authorship and the same dates declared in BlogPosting schema",
       visibleDates.includes(article.dateModified),
       `${path}: modified date is only present in schema`,
     );
+    for (const date of new Set([article.datePublished, article.dateModified])) {
+      const expected = dateFormatter.format(new Date(`${date}T00:00:00+10:00`));
+      assert.match(
+        source,
+        new RegExp(`<time[^>]*datetime="${date}"[^>]*>${expected}<\\/time>`, "i"),
+        `${path}: ${date} renders as a different calendar day`,
+      );
+    }
   }
 });
 
