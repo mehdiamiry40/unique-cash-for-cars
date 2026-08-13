@@ -114,7 +114,7 @@ export const servicePages: ServicePage[] = [
       {
         question: "Do I need a Queensland safety certificate?",
         answer:
-          "Queensland generally does not require a safety certificate for an unregistered vehicle or when a registered vehicle is traded to a licensed motor dealer. A registered vehicle being sold for parts must first be de-registered. Check the current TMR rules for your situation rather than relying on the vehicle simply being removed from the road.",
+          "It depends on the registration status and buyer. A registered private sale generally needs a current safety certificate before disposal; an unregistered sale or trade to a licensed motor dealer does not. A registered vehicle sold for parts must first be de-registered. See our Queensland roadworthy guide and confirm the current TMR rules for your circumstances.",
       },
       {
         question: "What happens to the number plates?",
@@ -128,6 +128,7 @@ export const servicePages: ServicePage[] = [
       },
     ],
     related: [
+      "sell-car-without-roadworthy-qld",
       "cancel-car-registration-queensland-after-sale",
       "how-much-is-my-scrap-car-worth-gold-coast",
       "transferring-car-registration-in-queensland",

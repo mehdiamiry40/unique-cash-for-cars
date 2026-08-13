@@ -35,6 +35,14 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    slug: "sell-car-without-roadworthy-qld",
+    title: "Can you sell a car without a roadworthy in Queensland?",
+    description:
+      "When a Queensland safety certificate is required, when it is not, and the lawful sale paths for an unregistered, damaged or dealer-traded car.",
+    date: "2026-08-13",
+    readingMinutes: 6,
+  },
+  {
     slug: "cancel-car-registration-queensland-after-sale",
     title: "How to cancel car registration in Queensland after a sale",
     description:
@@ -75,7 +83,7 @@ export const posts: Post[] = [
     description:
       "Who lodges what, when a safety certificate is required, and the three ownership situations that hold up a collection.",
     date: "2026-07-28",
-    updated: "2026-08-06",
+    updated: "2026-08-13",
     readingMinutes: 6,
   },
   {

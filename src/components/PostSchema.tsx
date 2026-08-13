@@ -1,5 +1,11 @@
 import { getPost } from "@/content/posts";
-import { articleSchema, breadcrumbSchema, graph } from "@/lib/schema";
+import {
+  articleSchema,
+  breadcrumbSchema,
+  faqSchema,
+  graph,
+  type Faq,
+} from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
 
 /**
@@ -13,7 +19,13 @@ import { JsonLd } from "@/components/JsonLd";
  * always rendered a Home / Blog breadcrumb with no markup behind it) and
  * BreadcrumbList.
  */
-export function PostSchema({ slug }: { slug: string }) {
+export function PostSchema({
+  slug,
+  faqs,
+}: {
+  slug: string;
+  faqs?: readonly Faq[];
+}) {
   const post = getPost(slug);
 
   // A slug that isn't in posts.ts means the post is missing from the blog index
@@ -21,22 +33,22 @@ export function PostSchema({ slug }: { slug: string }) {
   // still succeeds, and the page renders.
   if (!post) return null;
 
-  return (
-    <JsonLd
-      data={graph(
-        breadcrumbSchema([
-          { name: "Home", path: "/" },
-          { name: "Blog", path: "/blog" },
-          { name: post.title, path: `/${post.slug}` },
-        ]),
-        articleSchema({
-          slug: post.slug,
-          title: post.title,
-          description: post.description,
-          datePublished: post.date,
-          dateModified: post.updated,
-        }),
-      )}
-    />
-  );
+  const nodes: object[] = [
+    breadcrumbSchema([
+      { name: "Home", path: "/" },
+      { name: "Blog", path: "/blog" },
+      { name: post.title, path: `/${post.slug}` },
+    ]),
+    articleSchema({
+      slug: post.slug,
+      title: post.title,
+      description: post.description,
+      datePublished: post.date,
+      dateModified: post.updated,
+    }),
+  ];
+
+  if (faqs?.length) nodes.push(faqSchema(faqs));
+
+  return <JsonLd data={graph(...nodes)} />;
 }
