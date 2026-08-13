@@ -1,9 +1,11 @@
 {
-  "_comment": "Every URL that existed on the WordPress site, pulled from its page-sitemap.xml and post-sitemap.xml on 28 July 2026. Trailing slashes stripped. scripts/check-urls.mjs asserts each one still resolves or redirects. Do not edit by hand.",
+  "_comment": "Every known legacy URL from the WordPress sitemaps and Search Console migration reports. Trailing slashes stripped. scripts/check-urls.mjs asserts each one still resolves or redirects.",
   "urls": [
     "/",
     "/5-best-luxury-eco-friendly-cars-in-australia-2020",
     "/blog",
+    "/car-disposals",
+    "/car-recyclers",
     "/car-removal-gold-coast",
     "/cash-for-cars",
     "/cash-for-cars/ashmore",
@@ -30,6 +32,7 @@
     "/contact-us",
     "/privacy-policy",
     "/sell-my-car-gold-coast",
+    "/services/car-disposals",
     "/top-5-reasons-to-sell-your-car-for-cash-in-brisbane",
     "/unwanted-car-buyer",
     "/what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide",

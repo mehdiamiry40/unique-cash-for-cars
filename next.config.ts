@@ -65,6 +65,21 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/car-disposals",
+        destination: "/car-removal-gold-coast",
+        permanent: true,
+      },
+      {
+        source: "/services/car-disposals",
+        destination: "/car-removal-gold-coast",
+        permanent: true,
+      },
+      {
+        source: "/car-recyclers",
+        destination: "/car-removal-gold-coast",
+        permanent: true,
+      },
+      {
         source: "/company-info-cash-for-cars-gold-coast-and-free-car-removal",
         destination: "/about",
         permanent: true,
