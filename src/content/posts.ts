@@ -45,8 +45,8 @@ export const posts: Post[] = [
     description:
       "When a Queensland safety certificate is required, when it is not, and the lawful sale paths for an unregistered, damaged or dealer-traded car.",
     category: "QLD paperwork",
-    image: "/img/used-car-gold-coast.jpg",
-    imageAlt: "A used hatchback parked and ready to be sold on the Gold Coast",
+    image: "/wp-content/uploads/2020/01/cash-for-cars.jpg",
+    imageAlt: "Close view of a car ready for a Queensland sale and roadworthy check",
     date: "2026-08-13",
     readingMinutes: 6,
   },
@@ -91,9 +91,8 @@ export const posts: Post[] = [
     description:
       "You can sell an encumbered car. How the payout figure, the PPSR and negative equity actually work, and what delays a sale.",
     category: "Selling options",
-    image:
-      "/wp-content/uploads/2023/09/Car-Selling-Optionn-in-Gold-Coast-QLD.jpg",
-    imageAlt: "A used car being assessed before a sale on the Gold Coast",
+    image: "/img/Best-Cash-for-Cars-Gold-Coast.jpg",
+    imageAlt: "Several vehicles and Australian cash representing a financed car sale",
     date: "2026-07-28",
     updated: "2026-08-06",
     readingMinutes: 6,

@@ -58,6 +58,49 @@ function GuideMeta({ post }: { post: Post }) {
   );
 }
 
+function GuideCard({ post, wide = false }: { post: Post; wide?: boolean }) {
+  return (
+    <article className="h-full">
+      <Link
+        href={`/${post.slug}`}
+        className={`group flex h-full flex-col overflow-hidden rounded border border-hairline bg-surface shadow-[0_2px_12px_rgba(51,72,98,0.06)] transition-[border-color,box-shadow] hover:border-brand hover:shadow-[0_8px_24px_rgba(51,72,98,0.10)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand ${
+          wide ? "md:grid md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]" : ""
+        }`}
+      >
+        <div
+          className={`relative aspect-[16/10] overflow-hidden bg-surface-alt ${
+            wide ? "md:aspect-auto md:min-h-72" : ""
+          }`}
+        >
+          <Image
+            src={post.image}
+            alt={post.imageAlt}
+            fill
+            sizes={
+              wide
+                ? "(max-width: 768px) 100vw, 44vw"
+                : "(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+            }
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.025]"
+          />
+        </div>
+        <div className="flex flex-1 flex-col p-6 sm:p-7">
+          <p className="mb-3 text-xs font-extrabold uppercase tracking-[0.14em] text-brand">
+            {post.category}
+          </p>
+          <h3 className="heading-md mb-3 transition-colors group-hover:text-brand">
+            {post.title}
+          </h3>
+          <p className="mb-6">{post.description}</p>
+          <div className="mt-auto border-t border-hairline pt-4">
+            <GuideMeta post={post} />
+          </div>
+        </div>
+      </Link>
+    </article>
+  );
+}
+
 export default function BlogIndex() {
   const activePosts = posts.filter((post) => !post.archived);
   const [featuredPost, ...otherPosts] = activePosts;
@@ -226,36 +269,16 @@ export default function BlogIndex() {
           </div>
 
           <ul className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {otherPosts.map((post) => (
-              <li key={post.slug}>
-                <article className="h-full">
-                  <Link
-                    href={`/${post.slug}`}
-                    className="group flex h-full flex-col overflow-hidden rounded border border-hairline bg-surface shadow-[0_2px_12px_rgba(51,72,98,0.06)] transition-[border-color,box-shadow] hover:border-brand hover:shadow-[0_8px_24px_rgba(51,72,98,0.10)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-                  >
-                    <div className="relative aspect-[16/10] overflow-hidden bg-surface-alt">
-                      <Image
-                        src={post.image}
-                        alt={post.imageAlt}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-                        className="object-cover transition-transform duration-500 group-hover:scale-[1.025]"
-                      />
-                    </div>
-                    <div className="flex flex-1 flex-col p-6">
-                      <p className="mb-3 text-xs font-extrabold uppercase tracking-[0.14em] text-brand">
-                        {post.category}
-                      </p>
-                      <h3 className="heading-md mb-3 transition-colors group-hover:text-brand">
-                        {post.title}
-                      </h3>
-                      <p className="mb-6">{post.description}</p>
-                      <div className="mt-auto border-t border-hairline pt-4">
-                        <GuideMeta post={post} />
-                      </div>
-                    </div>
-                  </Link>
-                </article>
+            {otherPosts.map((post, index) => (
+              <li
+                key={post.slug}
+                className={
+                  index === otherPosts.length - 1
+                    ? "md:col-span-2 xl:col-span-3"
+                    : undefined
+                }
+              >
+                <GuideCard post={post} wide={index === otherPosts.length - 1} />
               </li>
             ))}
           </ul>
