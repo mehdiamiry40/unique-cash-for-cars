@@ -21,6 +21,11 @@ export type Post = {
   slug: string;
   title: string;
   description: string;
+  /** Short, reader-facing topic label used on the guide hub. */
+  category: string;
+  /** Existing local asset used by the guide hub and Blog schema. */
+  image: string;
+  imageAlt: string;
   /** ISO date. Used for sitemap lastmod and the Article schema. */
   date: string;
   /** Set when the post has been meaningfully rewritten, not for typo fixes. */
@@ -39,6 +44,9 @@ export const posts: Post[] = [
     title: "Can you sell a car without a roadworthy in Queensland?",
     description:
       "When a Queensland safety certificate is required, when it is not, and the lawful sale paths for an unregistered, damaged or dealer-traded car.",
+    category: "QLD paperwork",
+    image: "/wp-content/uploads/2020/01/cash-for-cars.jpg",
+    imageAlt: "Close view of a car ready for a Queensland sale and roadworthy check",
     date: "2026-08-13",
     readingMinutes: 6,
   },
@@ -47,6 +55,9 @@ export const posts: Post[] = [
     title: "How to cancel car registration in Queensland after a sale",
     description:
       "A practical TMR-based checklist for cancelling Queensland registration, surrendering plates and claiming an eligible refund after a vehicle sale.",
+    category: "QLD paperwork",
+    image: "/wp-content/uploads/2022/10/receive-cash-for-cars.jpg",
+    imageAlt: "A vehicle owner completing the handover after selling a car",
     date: "2026-08-13",
     readingMinutes: 6,
   },
@@ -55,6 +66,9 @@ export const posts: Post[] = [
     title: "How much is my scrap car worth on the Gold Coast?",
     description:
       "What a dismantler is actually paying for, the five things that move the number, and when scrapping is the wrong answer.",
+    category: "Car value",
+    image: "/img/old-car-gold-coast.jpg",
+    imageAlt: "An old car awaiting valuation and removal on the Gold Coast",
     date: "2026-07-28",
     updated: "2026-08-06",
     readingMinutes: 6,
@@ -64,6 +78,9 @@ export const posts: Post[] = [
     title: "Statutory vs repairable write-off in Queensland",
     description:
       "Which classification you have decides whether the car can ever be driven again — and it changes the value less than most owners expect.",
+    category: "Write-offs",
+    image: "/img/car-front-damaged.jpg",
+    imageAlt: "A car with severe front-end damage after a collision",
     date: "2026-07-28",
     updated: "2026-08-06",
     readingMinutes: 7,
@@ -73,6 +90,9 @@ export const posts: Post[] = [
     title: "Selling a car with finance owing in Queensland",
     description:
       "You can sell an encumbered car. How the payout figure, the PPSR and negative equity actually work, and what delays a sale.",
+    category: "Selling options",
+    image: "/img/Best-Cash-for-Cars-Gold-Coast.jpg",
+    imageAlt: "Several vehicles and Australian cash representing a financed car sale",
     date: "2026-07-28",
     updated: "2026-08-06",
     readingMinutes: 6,
@@ -82,6 +102,9 @@ export const posts: Post[] = [
     title: "Transferring car registration in Queensland",
     description:
       "Who lodges what, when a safety certificate is required, and the three ownership situations that hold up a collection.",
+    category: "QLD paperwork",
+    image: "/wp-content/uploads/2022/10/truck-removing-car.jpg",
+    imageAlt: "A vehicle being collected after its ownership paperwork is completed",
     date: "2026-07-28",
     updated: "2026-08-13",
     readingMinutes: 6,
@@ -91,6 +114,9 @@ export const posts: Post[] = [
     title: "What to do with a damaged car on the Gold Coast",
     description:
       "Repair, claim, part out or sell — how to work out which option actually leaves you better off after an accident or a failed roadworthy.",
+    category: "Damaged cars",
+    image: "/img/accident-damaged-car.jpg",
+    imageAlt: "An accident-damaged car waiting to be assessed on the Gold Coast",
     date: "2024-06-18",
     updated: "2026-08-06",
     readingMinutes: 7,
@@ -100,6 +126,9 @@ export const posts: Post[] = [
     title: "Where do old junk cars go on the Gold Coast?",
     description:
       "What actually happens to a car after it leaves your driveway, and what each disposal route is worth to you.",
+    category: "Car recycling",
+    image: "/img/car-abandoned.jpg",
+    imageAlt: "An end-of-life car ready for dismantling and recycling",
     date: "2024-03-12",
     readingMinutes: 6,
   },
@@ -108,6 +137,9 @@ export const posts: Post[] = [
     title: "5 best luxury eco-friendly cars in Australia (2020)",
     description:
       "An archived look at the luxury hybrid and electric models available in Australia in 2020.",
+    category: "Archived",
+    image: "/wp-content/uploads/2020/09/Luxury-cars-Australia.jpeg",
+    imageAlt: "A luxury car from the Australian market in 2020",
     date: "2020-02-14",
     readingMinutes: 4,
     archived: true,

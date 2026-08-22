@@ -202,20 +202,42 @@ export function contactPageSchema() {
  * the posts themselves are defined on their own pages, not this one — a bare
  * {"@id"} here would dangle.
  */
-export function blogSchema(posts: readonly { slug: string; title: string; date: string }[]) {
+export function blogSchema(
+  posts: readonly {
+    slug: string;
+    title: string;
+    description: string;
+    date: string;
+    updated?: string;
+    image: string;
+  }[],
+) {
   return {
     "@type": "Blog",
     "@id": `${site.url}/blog#blog`,
     url: `${site.url}/blog`,
     name: `${site.name} — guides`,
+    description:
+      "Practical Queensland guides about selling, valuing and removing vehicles on the Gold Coast.",
     publisher: { "@id": ORG_ID },
     inLanguage: "en-AU",
-    blogPost: posts.map((post) => ({
-      "@type": "BlogPosting",
-      headline: post.title,
-      url: `${site.url}/${post.slug}`,
-      datePublished: post.date,
-    })),
+    blogPost: posts.map((post) => {
+      const url = `${site.url}/${post.slug}`;
+
+      return {
+        "@type": "BlogPosting",
+        "@id": `${url}#article`,
+        headline: post.title,
+        description: post.description,
+        url,
+        image: `${site.url}${post.image}`,
+        datePublished: post.date,
+        dateModified: post.updated ?? post.date,
+        inLanguage: "en-AU",
+        author: { "@id": ORG_ID },
+        publisher: { "@id": ORG_ID },
+      };
+    }),
   };
 }
 
