@@ -71,12 +71,8 @@ export function buildQuoteEmail(lead: QuoteEmailLead): QuoteEmail {
   const expectedPrice = displayPrice(lead.expectedPrice);
   const received = receivedTime(lead.receivedAt);
   const reference = oneLine(lead.leadId).split("-", 1)[0].slice(0, 8).toUpperCase();
-  const subjectVehicle = vehicle === "—" ? name : vehicle;
-  const subjectParts = [
-    truncate(subjectVehicle, 56),
-    suburb === "—" ? "" : truncate(suburb, 32),
-  ].filter(Boolean);
-  const subject = truncate(`New quote: ${subjectParts.join(" — ")}`, 100);
+  const subjectCustomer = suburb === "—" ? name : `${name} (${suburb})`;
+  const subject = truncate(`New car quote enquiry — ${subjectCustomer}`, 120);
 
   const text = [
     "New quote enquiry",
