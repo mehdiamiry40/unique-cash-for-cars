@@ -61,7 +61,7 @@ function phoneUri(value: string) {
   const digits = raw.replace(/\D/g, "");
 
   if (raw.startsWith("+")) return `+${digits}`;
-  if (/^04\d{8}$/.test(digits)) return `+61${digits.slice(1)}`;
+  if (/^0[23478]\d{8}$/.test(digits)) return `+61${digits.slice(1)}`;
   if (/^61\d{9}$/.test(digits)) return `+${digits}`;
   return digits;
 }
@@ -103,6 +103,7 @@ export function buildQuoteEmail(lead: QuoteEmailLead): QuoteEmail {
   const condition = oneLine(lead.condition);
   const expectedPrice = displayPrice(lead.expectedPrice);
   const phoneTarget = phoneUri(phone);
+  const canSendSms = /^\+614\d{8}$/.test(phoneTarget);
   const received = receivedTime(lead.receivedAt);
   const reference = oneLine(lead.leadId).split("-", 1)[0].slice(0, 8).toUpperCase();
   const subjectVehicle = vehicle === "—" ? name : vehicle;
@@ -113,6 +114,16 @@ export function buildQuoteEmail(lead: QuoteEmailLead): QuoteEmail {
   ].filter(Boolean);
   const subject = truncate(`New quote: ${subjectParts.join(" · ")}`, 120);
   const preheader = `${name} — ${vehicle} — ${suburb} — ${expectedPrice}`;
+  const actionLines = [
+    `Call: tel:${phoneTarget}`,
+    ...(canSendSms ? [`Text: sms:${phoneTarget}`] : []),
+  ];
+  const smsButton = canSendSms
+    ? `
+                    <td class="quote-action-cell" width="50%" style="width: 50%; padding: 0 0 10px 6px;">
+                      <a href="sms:${escapeHtml(phoneTarget)}" style="display: block; padding: 12px 16px; border: 1px solid ${BRAND_COLOUR}; border-radius: 6px; background: #ffffff; color: ${BRAND_DARK}; font-size: 15px; font-weight: 700; line-height: 20px; text-align: center; text-decoration: none;">Send a text</a>
+                    </td>`
+    : "";
 
   const text = [
     "NEW QUOTE ENQUIRY",
@@ -128,8 +139,7 @@ export function buildQuoteEmail(lead: QuoteEmailLead): QuoteEmail {
     `Customer's expected price: ${expectedPrice}`,
     `Condition: ${condition}`,
     "",
-    `Call: tel:${phoneTarget}`,
-    `Text: sms:${phoneTarget}`,
+    ...actionLines,
     "",
     `Received: ${received}`,
     `Reference: ${reference}`,
@@ -144,6 +154,16 @@ export function buildQuoteEmail(lead: QuoteEmailLead): QuoteEmail {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>${escapeHtml(subject)}</title>
+    <style>
+      @media only screen and (max-width: 480px) {
+        .quote-action-cell {
+          display: block !important;
+          width: 100% !important;
+          padding-right: 0 !important;
+          padding-left: 0 !important;
+        }
+      }
+    </style>
   </head>
   <body style="margin: 0; padding: 0; background: #f1f1f1; color: #333333; font-family: Arial, Helvetica, sans-serif;">
     <div style="display: none; max-height: 0; overflow: hidden; opacity: 0; color: transparent; mso-hide: all;">${escapeHtml(preheader)}</div>
@@ -165,12 +185,10 @@ export function buildQuoteEmail(lead: QuoteEmailLead): QuoteEmail {
 
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width: 100%; margin-top: 20px;">
                   <tr>
-                    <td style="padding: 0 6px 10px 0;">
+                    <td class="quote-action-cell" width="${canSendSms ? "50%" : "100%"}" style="width: ${canSendSms ? "50%" : "100%"}; padding: 0 ${canSendSms ? "6px" : "0"} 10px 0;">
                       <a href="tel:${escapeHtml(phoneTarget)}" style="display: block; padding: 13px 16px; border-radius: 6px; background: ${BRAND_COLOUR}; color: #ffffff; font-size: 15px; font-weight: 700; line-height: 20px; text-align: center; text-decoration: none;">Call ${escapeHtml(phone)}</a>
                     </td>
-                    <td style="padding: 0 0 10px 6px;">
-                      <a href="sms:${escapeHtml(phoneTarget)}" style="display: block; padding: 12px 16px; border: 1px solid ${BRAND_COLOUR}; border-radius: 6px; background: #ffffff; color: ${BRAND_DARK}; font-size: 15px; font-weight: 700; line-height: 20px; text-align: center; text-decoration: none;">Send a text</a>
-                    </td>
+                    ${smsButton}
                   </tr>
                 </table>
 
