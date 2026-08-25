@@ -44,10 +44,11 @@ function displayPrice(value: string) {
   const numeric = cleaned.replace(/[$,\s]/g, "");
 
   if (/^\d+(?:\.\d{1,2})?$/.test(numeric)) {
+    const hasFraction = numeric.includes(".");
     return new Intl.NumberFormat("en-AU", {
       style: "currency",
       currency: "AUD",
-      minimumFractionDigits: 0,
+      minimumFractionDigits: hasFraction ? 2 : 0,
       maximumFractionDigits: 2,
     }).format(Number(numeric));
   }
@@ -124,7 +125,7 @@ export function buildQuoteEmail(lead: QuoteEmailLead): QuoteEmail {
     "",
     "VEHICLE",
     `Vehicle: ${vehicle}`,
-    `Expected price: ${expectedPrice}`,
+    `Customer's expected price: ${expectedPrice}`,
     `Condition: ${condition}`,
     "",
     `Call: tel:${phoneTarget}`,
@@ -176,7 +177,7 @@ export function buildQuoteEmail(lead: QuoteEmailLead): QuoteEmail {
                 <div style="margin-top: 17px; color: #696969; font-size: 12px; font-weight: 700; letter-spacing: 1px; line-height: 18px; text-transform: uppercase;">Vehicle details</div>
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width: 100%; margin-top: 8px; border: 1px solid #e5e5e5; border-radius: 7px; border-collapse: separate; border-spacing: 0;">
                   ${detailRow("Vehicle", vehicle)}
-                  ${detailRow("Expected price", expectedPrice, true)}
+                  ${detailRow("Customer's expected price", expectedPrice, true)}
                   ${detailRow("Condition", condition)}
                 </table>
 
