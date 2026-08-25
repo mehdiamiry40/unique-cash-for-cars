@@ -43,7 +43,10 @@ const lead = {
 test("quote email stays readable without HTML or link-heavy content", () => {
   const email = buildQuoteEmail(lead);
 
-  assert.equal(email.subject, "New quote: 2016 Example Sedan — Exampleville");
+  assert.equal(
+    email.subject,
+    "New car quote enquiry — Test Customer (Exampleville)",
+  );
   assert.equal(
     email.text,
     [
@@ -76,13 +79,13 @@ test("Resend receives text only at the transport boundary", () => {
 test("subject values are collapsed to one line and capped", () => {
   const email = buildQuoteEmail({
     ...lead,
-    vehicle: `Test\r\nVehicle ${"x".repeat(100)}`,
+    name: `Test\r\nCustomer ${"x".repeat(150)}`,
     suburb: "Example\nville",
   });
 
   assert.doesNotMatch(email.subject, /[\r\n]/);
-  assert.ok(email.subject.length <= 100);
-  assert.match(email.subject, /^New quote: Test Vehicle/);
+  assert.ok(email.subject.length <= 120);
+  assert.match(email.subject, /^New car quote enquiry — Test Customer/);
 });
 
 test("numeric prices are formatted without changing free-form answers", () => {
