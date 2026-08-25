@@ -87,6 +87,22 @@ test("local Australian mobile numbers become portable call and SMS links", () =>
   assert.doesNotMatch(email.text, /\$2,500\.00/);
 });
 
+test("Australian landlines get a portable call link without an SMS action", () => {
+  const email = buildQuoteEmail({ ...lead, phone: "07 0000 0000" });
+
+  assert.match(email.html, /href="tel:\+61700000000"/);
+  assert.doesNotMatch(email.html, /href="sms:/);
+  assert.match(email.text, /Call: tel:\+61700000000/);
+  assert.doesNotMatch(email.text, /Text: sms:/);
+});
+
+test("mobile actions stack on narrow email screens", () => {
+  const email = buildQuoteEmail(lead);
+
+  assert.match(email.html, /@media only screen and \(max-width: 480px\)/);
+  assert.match(email.html, /\.quote-action-cell[\s\S]*display: block !important/);
+});
+
 test("numeric prices are formatted without changing free-form answers", () => {
   const cases = [
     ["500", "$500"],
