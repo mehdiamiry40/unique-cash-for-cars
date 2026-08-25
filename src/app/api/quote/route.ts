@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { site } from "@/content/site";
+import { buildQuoteEmail } from "@/lib/quote-email";
 
 /**
  * Quote enquiry endpoint.
@@ -241,6 +242,7 @@ export async function POST(request: Request) {
       });
       if (!res.ok) throw new Error(`Webhook responded ${res.status}`);
     } else if (resendKey && toEmail) {
+      const email = buildQuoteEmail(lead);
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -250,10 +252,9 @@ export async function POST(request: Request) {
         body: JSON.stringify({
           from: fromEmail,
           to: [toEmail],
-          subject: `New car quote enquiry — ${name} (${lead.suburb})`,
-          text: Object.entries(lead)
-            .map(([k, v]) => `${k}: ${v}`)
-            .join("\n"),
+          subject: email.subject,
+          text: email.text,
+          html: email.html,
         }),
         signal: AbortSignal.timeout(DELIVERY_TIMEOUT_MS),
       });
