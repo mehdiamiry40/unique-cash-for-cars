@@ -36,71 +36,44 @@ const lead = {
   receivedAt: "2026-06-01T03:47:00.000Z",
 };
 
-test("quote email is scannable and uses Brisbane-local details", () => {
+test("quote email stays readable without HTML or link-heavy content", () => {
   const email = buildQuoteEmail(lead);
 
-  assert.equal(email.subject, "New quote: 2016 Example Sedan · Exampleville · $1,500");
-  assert.match(email.html, /New quote enquiry/);
-  assert.match(email.html, /href="tel:\+61400000000"/);
-  assert.match(email.html, /href="sms:\+61400000000"/);
-  assert.match(email.html, /Mon, 1 June 2026 at 1:47 pm AEST/);
-  assert.match(email.html, /Customer&#39;s expected price[\s\S]*\$1,500/);
-  assert.match(email.html, /Reference[\s\S]*00000000/);
-  assert.match(email.text, /CUSTOMER\nName: Test Customer\nPhone: 0400 000 000/);
-  assert.match(
-    email.text,
-    /VEHICLE\nVehicle: 2016 Example Sedan\nCustomer's expected price: \$1,500/,
-  );
-});
-
-test("customer input is escaped before it reaches the HTML email", () => {
-  const email = buildQuoteEmail({
-    ...lead,
-    name: 'Test <script>alert("x")</script> & Co',
-    phone: '0400 000 000" onclick="evil()',
-    condition: '<img src=x onerror="alert(1)">',
-  });
-
-  assert.doesNotMatch(email.html, /<script>|<img src=x/);
-  assert.match(
-    email.html,
-    /Test &lt;script&gt;alert\(&quot;x&quot;\)&lt;\/script&gt; &amp; Co/,
-  );
-  assert.match(email.html, /&lt;img src=x onerror=&quot;alert\(1\)&quot;&gt;/);
-  const telTarget = email.html.match(/href="(tel:[^"]+)"/)?.[1];
-  assert.equal(telTarget, "tel:+61400000000");
-});
-
-test("local Australian mobile numbers become portable call and SMS links", () => {
-  const email = buildQuoteEmail({
-    ...lead,
-    phone: "+61 400 000 000",
-    expectedPrice: "$2,500",
-  });
-
-  assert.match(email.html, /href="tel:\+61400000000"/);
-  assert.match(email.html, /href="sms:\+61400000000"/);
+  assert.equal(email.subject, "New quote: 2016 Example Sedan — Exampleville");
   assert.equal(
-    email.subject,
-    "New quote: 2016 Example Sedan · Exampleville · $2,500",
+    email.text,
+    [
+      "New quote enquiry",
+      "",
+      "Customer",
+      "Name: Test Customer",
+      "Phone: 0400 000 000",
+      "Suburb: Exampleville",
+      "",
+      "Vehicle",
+      "Vehicle: 2016 Example Sedan",
+      "Customer's expected price: $1,500",
+      "Condition: Runs",
+      "",
+      "Received: Mon, 1 June 2026 at 1:47 pm AEST",
+      "Reference: 00000000",
+    ].join("\n"),
   );
-  assert.doesNotMatch(email.text, /\$2,500\.00/);
+  assert.equal(email.html, undefined);
+  assert.doesNotMatch(email.text, /https?:|tel:|sms:|<html/i);
+  assert.doesNotMatch(email.subject, /\$/);
 });
 
-test("Australian landlines get a portable call link without an SMS action", () => {
-  const email = buildQuoteEmail({ ...lead, phone: "07 0000 0000" });
+test("subject values are collapsed to one line and capped", () => {
+  const email = buildQuoteEmail({
+    ...lead,
+    vehicle: `Test\r\nVehicle ${"x".repeat(100)}`,
+    suburb: "Example\nville",
+  });
 
-  assert.match(email.html, /href="tel:\+61700000000"/);
-  assert.doesNotMatch(email.html, /href="sms:/);
-  assert.match(email.text, /Call: tel:\+61700000000/);
-  assert.doesNotMatch(email.text, /Text: sms:/);
-});
-
-test("mobile actions stack on narrow email screens", () => {
-  const email = buildQuoteEmail(lead);
-
-  assert.match(email.html, /@media only screen and \(max-width: 480px\)/);
-  assert.match(email.html, /\.quote-action-cell[\s\S]*display: block !important/);
+  assert.doesNotMatch(email.subject, /[\r\n]/);
+  assert.ok(email.subject.length <= 100);
+  assert.match(email.subject, /^New quote: Test Vehicle/);
 });
 
 test("numeric prices are formatted without changing free-form answers", () => {
