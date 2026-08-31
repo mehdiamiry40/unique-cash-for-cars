@@ -13,6 +13,7 @@ export type QuoteDeliveryFailureReason =
   | "missing_configuration"
   | "ambiguous_configuration"
   | "incomplete_resend_configuration"
+  | "invalid_idempotency_key"
   | "http_error"
   | "timeout"
   | "fetch_error";
@@ -46,12 +47,18 @@ type ResolvedDelivery =
     }>;
 
 export type QuoteDeliveryResult =
-  | Readonly<{ ok: true; provider: QuoteDeliveryProvider }>
+  | Readonly<{
+      ok: true;
+      provider: QuoteDeliveryProvider;
+      status: number;
+      providerReceiptId?: string;
+    }>
   | Readonly<{
       ok: false;
       provider: QuoteDeliveryProvider | "configuration";
       reason: QuoteDeliveryFailureReason;
       status?: number;
+      retryAfterSeconds?: number;
     }>;
 
 type QuoteDeliveryDependencies = Readonly<{
@@ -141,11 +148,38 @@ function leadReference(leadId: string) {
   return leadId.split("-", 1)[0].slice(0, 8).toUpperCase();
 }
 
+function validIdempotencyKey(value: string) {
+  return /^[A-Za-z0-9_./:-]{1,128}$/.test(value);
+}
+
+function retryAfterSeconds(response: Response) {
+  const value = response.headers.get("retry-after")?.trim();
+  if (!value || !/^\d+$/.test(value)) return undefined;
+  const seconds = Number(value);
+  return Number.isSafeInteger(seconds) && seconds > 0
+    ? Math.min(3_600, seconds)
+    : undefined;
+}
+
+async function resendReceiptId(response: Response) {
+  try {
+    const value: unknown = await response.json();
+    if (!value || typeof value !== "object" || !("id" in value)) return undefined;
+    const id = (value as { id?: unknown }).id;
+    return typeof id === "string" && /^[A-Za-z0-9_-]{1,255}$/.test(id)
+      ? id
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function deliverQuote(
   input: Readonly<{
     settings: QuoteDeliverySettings;
     lead: QuoteEmailLead;
     email: Readonly<{ subject: string; text: string }>;
+    idempotencyKey: string;
     timeoutMs?: number;
   }>,
   dependencyOverrides: Partial<QuoteDeliveryDependencies> = {},
@@ -175,12 +209,33 @@ export async function deliverQuote(
     return resolved;
   }
 
+  if (!validIdempotencyKey(input.idempotencyKey)) {
+    const result = {
+      ok: false,
+      provider: resolved.provider,
+      reason: "invalid_idempotency_key",
+    } as const;
+    dependencies.report({
+      event: "quote_delivery",
+      provider: resolved.provider,
+      outcome: "failure",
+      durationMs: Math.max(0, dependencies.now() - startedAt),
+      reference,
+      reason: result.reason,
+    });
+    return result;
+  }
+
   try {
     const response =
       resolved.provider === "webhook"
         ? await dependencies.fetch(resolved.webhookUrl, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              "Idempotency-Key": input.idempotencyKey,
+              "X-Quote-Lead-Id": input.lead.leadId,
+            },
             body: JSON.stringify(input.lead),
             signal: dependencies.timeoutSignal(
               input.timeoutMs ?? DEFAULT_TIMEOUT_MS,
@@ -191,6 +246,7 @@ export async function deliverQuote(
             headers: {
               Authorization: `Bearer ${resolved.resendApiKey}`,
               "Content-Type": "application/json",
+              "Idempotency-Key": input.idempotencyKey,
             },
             body: JSON.stringify({
               from: resolved.fromEmail,
@@ -219,8 +275,14 @@ export async function deliverQuote(
         provider: resolved.provider,
         reason: "http_error",
         status: response.status,
+        retryAfterSeconds: retryAfterSeconds(response),
       };
     }
+
+    const providerReceiptId =
+      resolved.provider === "resend"
+        ? await resendReceiptId(response)
+        : undefined;
 
     dependencies.report({
       event: "quote_delivery",
@@ -229,7 +291,12 @@ export async function deliverQuote(
       durationMs: Math.max(0, dependencies.now() - startedAt),
       reference,
     });
-    return { ok: true, provider: resolved.provider };
+    return {
+      ok: true,
+      provider: resolved.provider,
+      status: response.status,
+      ...(providerReceiptId ? { providerReceiptId } : {}),
+    };
   } catch (error) {
     const reason = failureReason(error);
     dependencies.report({

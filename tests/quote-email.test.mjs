@@ -7,8 +7,8 @@ const source = readFileSync(
   new URL("../src/lib/quote-email.ts", import.meta.url),
   "utf8",
 );
-const routeSource = readFileSync(
-  new URL("../src/app/api/quote/route.ts", import.meta.url),
+const deliverySource = readFileSync(
+  new URL("../src/lib/quote-delivery.ts", import.meta.url),
   "utf8",
 );
 const compiled = ts.transpileModule(source, {
@@ -72,8 +72,8 @@ test("quote email stays readable without HTML or link-heavy content", () => {
 });
 
 test("Resend receives text only at the transport boundary", () => {
-  assert.match(routeSource, /text: email\.text/);
-  assert.doesNotMatch(routeSource, /html:\s*email\.html/);
+  assert.match(deliverySource, /text: input\.email\.text/);
+  assert.doesNotMatch(deliverySource, /html:\s*input\.email\.html/);
 });
 
 test("subject values are collapsed to one line and capped", () => {

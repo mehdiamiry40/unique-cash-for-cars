@@ -38,15 +38,34 @@ QUOTE_WEBHOOK_URL=...
 RESEND_API_KEY=...
 QUOTE_TO_EMAIL=...
 QUOTE_FROM_EMAIL="Unique Cash For Cars <quotes@uniquecashforcars.com.au>"
+DATABASE_URL=...
+CRON_SECRET=...
 ```
 
 `QUOTE_FROM_EMAIL` must use a sending domain verified in Resend. Missing,
 incomplete or ambiguous configuration returns 503 and asks the visitor to call;
-it never reports that an undelivered enquiry succeeded. Vercel Git production
-builds fail before deployment when this contract is invalid. For a prebuilt
-deployment, use `vercel build --prod` with the production environment pulled—do
-not substitute a plain local `next build`, where `VERCEL_ENV` is intentionally
-unset.
+it never reports that an enquiry was captured unless the database commit
+succeeded. The validated lead and one delivery outbox event are committed
+atomically, then the route makes an immediate delivery attempt. Provider
+timeouts, 429s and 5xx responses remain in the outbox for bounded retries from
+the authenticated `/api/cron/quote-delivery` job. Browser, database and Resend
+retries reuse the same opaque submission ID so an ambiguous response cannot
+silently create another email.
+
+Apply tracked schema changes before deploying code that uses them:
+
+```bash
+vercel env pull .env.local --environment=development --yes
+npm run db:migrate
+```
+
+Vercel Git production builds fail before deployment when delivery, database or
+cron configuration is invalid. For a prebuilt deployment, use `vercel build
+--prod` with the production environment pulled—do not substitute a plain local
+`next build`, where `VERCEL_ENV` is intentionally unset.
+
+Operational states, alert fields, triage queries and guarded manual recovery are
+documented in `docs/quote-delivery-runbook.md`.
 
 ## Verify before deployment
 
