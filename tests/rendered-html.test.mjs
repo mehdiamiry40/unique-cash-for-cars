@@ -700,6 +700,20 @@ test("MDX prose styles the elements the posts actually use", async () => {
   assert.match(post, /<h1[^>]*>/, "post has no h1");
 });
 
+test("MDX web links do not unexpectedly force a new tab", async () => {
+  let externalLinkCount = 0;
+
+  for (const path of postRoutes) {
+    const source = await html(path);
+    for (const [anchor] of source.matchAll(/<a\b[^>]*href="https?:\/\/[^>]*>/gi)) {
+      externalLinkCount += 1;
+      assert.doesNotMatch(anchor, /\btarget="_blank"/i, `${path}: ${anchor}`);
+    }
+  }
+
+  assert.ok(externalLinkCount > 0, "no external MDX links found — assertion is not exercising anything");
+});
+
 test("guides show authorship and the same dates declared in BlogPosting schema", async () => {
   const dateFormatter = new Intl.DateTimeFormat("en-AU", {
     day: "numeric",
@@ -861,22 +875,156 @@ test("the quote endpoint validates contact details", async () => {
   assert.equal(response.headers.get("cache-control"), "no-store");
 });
 
-test("the quote endpoint requires an expected price", async () => {
-  const response = await fetch(`${origin}/api/quote`, {
+test("the quote endpoint requires location and vehicle details, not an expected price", async () => {
+  const cases = [
+    [
+      "192.0.2.14",
+      { name: "Jamie Example", phone: "0400 000 000", vehicle: "2016 Toyota Corolla" },
+      /suburb is required/i,
+    ],
+    [
+      "192.0.2.15",
+      { name: "Jamie Example", phone: "0400 000 000", suburb: "Southport" },
+      /vehicle details are required/i,
+    ],
+  ];
+
+  for (const [ip, body, expectedError] of cases) {
+    const response = await fetch(`${origin}/api/quote`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-forwarded-for": ip },
+      body: JSON.stringify(body),
+    });
+    const result = await response.json();
+    assert.equal(response.status, 400);
+    assert.match(result.error, expectedError);
+  }
+
+  const withoutPrice = await fetch(`${origin}/api/quote`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      "x-forwarded-for": "192.0.2.14",
+      "x-forwarded-for": "192.0.2.16",
     },
     body: JSON.stringify({
       name: "Jamie Example",
       phone: "0400 000 000",
+      suburb: "Southport",
+      vehicle: "2016 Toyota Corolla",
     }),
   });
-  const result = await response.json();
+  assert.equal(withoutPrice.status, 503, "optional price must pass field validation");
+});
 
-  assert.equal(response.status, 400);
-  assert.match(result.error, /expected price is required/i);
+test("the quote endpoint rejects non-object JSON with a controlled 400", async () => {
+  for (const [index, body] of [null, [], "quote", 42, true].entries()) {
+    const response = await fetch(`${origin}/api/quote`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-forwarded-for": `192.0.2.${30 + index}`,
+      },
+      body: JSON.stringify(body),
+    });
+    const result = await response.json();
+
+    assert.equal(response.status, 400);
+    assert.match(result.error, /could not be read/i);
+    assert.equal(response.headers.get("cache-control"), "no-store");
+  }
+});
+
+test("the quote endpoint rejects non-string field representations", async () => {
+  const base = {
+    name: "Jamie Example",
+    phone: "0400 000 000",
+    suburb: "Southport",
+    vehicle: "2016 Toyota Corolla",
+  };
+  const bodies = [
+    { ...base, expectedPrice: {} },
+    { ...base, condition: [] },
+    { ...base, contactRef: {} },
+  ];
+
+  for (const [index, body] of bodies.entries()) {
+    const response = await fetch(`${origin}/api/quote`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-forwarded-for": `192.0.2.${60 + index}`,
+      },
+      body: JSON.stringify(body),
+    });
+    assert.equal(response.status, 400);
+  }
+});
+
+test("the quote endpoint enforces media type and body size", async () => {
+  const wrongType = await fetch(`${origin}/api/quote`, {
+    method: "POST",
+    headers: { "content-type": "text/plain", "x-forwarded-for": "192.0.2.40" },
+    body: "{}",
+  });
+  assert.equal(wrongType.status, 415);
+
+  const caseInsensitiveJson = await fetch(`${origin}/api/quote`, {
+    method: "POST",
+    headers: {
+      "content-type": "Application/JSON; charset=UTF-8",
+      "x-forwarded-for": "192.0.2.42",
+    },
+    body: JSON.stringify({
+      name: "Jamie Example",
+      phone: "0400 000 000",
+      suburb: "Southport",
+      vehicle: "2016 Toyota Corolla",
+    }),
+  });
+  assert.equal(caseInsensitiveJson.status, 503);
+
+  const tooLarge = await fetch(`${origin}/api/quote`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-forwarded-for": "192.0.2.41",
+    },
+    body: JSON.stringify({ condition: "x".repeat(33_000) }),
+  });
+  assert.equal(tooLarge.status, 413);
+});
+
+test("the local quote brake is bounded and returns Retry-After", async () => {
+  const ip = "192.0.2.50";
+  const rejectedOrigin = await fetch(`${origin}/api/quote`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-forwarded-for": ip,
+      origin: "https://untrusted.example",
+    },
+    body: "{}",
+  });
+  assert.equal(rejectedOrigin.status, 403, "cross-origin rejection must happen before quota");
+
+  for (let attempt = 1; attempt <= 5; attempt += 1) {
+    const response = await fetch(`${origin}/api/quote`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-forwarded-for": ip },
+      body: JSON.stringify({ contactRef: "bot" }),
+    });
+    assert.equal(response.status, 200, `attempt ${attempt} should fit the local burst`);
+  }
+
+  for (let attempt = 6; attempt <= 10; attempt += 1) {
+    const response = await fetch(`${origin}/api/quote`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-forwarded-for": ip },
+      body: JSON.stringify({ contactRef: "bot" }),
+    });
+    assert.equal(response.status, 429, `attempt ${attempt} should be limited`);
+    assert.match(response.headers.get("retry-after") ?? "", /^\d+$/);
+  }
 });
 
 test("the quote endpoint never reports success without a delivery service", async () => {
@@ -934,6 +1082,13 @@ test("the privacy policy describes the Google measurement tags that production l
     /loads no third-party analytics/i,
     "privacy policy must not deny the measurement tags the layout loads",
   );
+  assert.match(source, /do not send the values entered in the quote form to Google/i);
+  assert.doesNotMatch(source, /truncated IP address/i);
+
+  const home = await html("/");
+  const form = home.match(/<form\b[^>]*id="quote"[^>]*>[\s\S]*?<\/form>/i)?.[0] ?? "";
+  assert.match(form, /href="\/privacy-policy"/);
+  assert.doesNotMatch(form, /we never share your number/i);
 });
 
 test("conversion tracking separates delivered leads from funnel intent", () => {
@@ -972,7 +1127,8 @@ test("conversion tracking separates delivered leads from funnel intent", () => {
   for (const category of [
     "validation_name",
     "validation_phone",
-    "validation_expected_price",
+    "validation_suburb",
+    "validation_vehicle",
     "rate_limited",
     "request_rejected",
     "delivery_unavailable",
@@ -991,7 +1147,7 @@ test("conversion tracking separates delivered leads from funnel intent", () => {
   );
   assert.match(
     quoteForm,
-    /if \(result\.leadId\) trackQuoteConversion\(result\.leadId\)/,
+    /if \(result\.leadId\)[\s\S]*?trackQuoteConversion\(result\.leadId\)/,
     "quote conversion is not gated by the server-issued lead ID",
   );
   assert.match(
@@ -1001,7 +1157,7 @@ test("conversion tracking separates delivered leads from funnel intent", () => {
   );
   assert.match(
     quoteForm,
-    /trackQuoteFormError\(\s*!name[\s\S]*?"validation_name"/,
+    /trackQuoteFormError\(validationCategories\[firstInvalidField\]\)/,
     "the quote form does not classify validation failures",
   );
   assert.match(
@@ -1016,7 +1172,7 @@ test("conversion tracking separates delivered leads from funnel intent", () => {
   );
   assert.doesNotMatch(
     quoteForm,
-    /trackQuoteFormError\((?:result\.error|caught\.message|data|name|phone|expectedPrice)\)/,
+    /trackQuoteFormError\((?:result\.error|caught\.message|data|name|phone|suburb|vehicle|expectedPrice)\)/,
     "quote-form error tracking must not receive form values or error messages",
   );
   assert.doesNotMatch(
@@ -1043,6 +1199,24 @@ test("rendered quote CTAs expose stable analytics locations", async () => {
   )?.[0];
   assert.ok(mobileQuote, "the mobile quote CTA has no stable analytics location");
   assert.match(mobileQuote, /href="\/#quote"/);
+});
+
+test("mobile conversion chrome reserves safe space and the skip link has a focus target", async () => {
+  const home = await html("/");
+  assert.match(home, /<main[^>]*id="main"[^>]*tabindex="-1"/i);
+  assert.match(home, /safe-area-inset-bottom/g);
+  assert.match(home, /<form[^>]*id="quote"[^>]*novalidate=""/i);
+
+  const quoteForm = readFileSync(
+    join(projectPath, "src", "components", "QuoteForm.tsx"),
+    "utf8",
+  );
+  for (const field of ["name", "phone", "suburb", "vehicle"]) {
+    assert.match(quoteForm, new RegExp(`aria-invalid=\\{Boolean\\(fieldErrors\\.${field}\\)\\}`));
+    assert.match(quoteForm, new RegExp(`${field}-error`));
+  }
+  assert.match(quoteForm, /firstInvalidFieldRef/);
+  assert.match(quoteForm, /\.focus\(\)/);
 });
 
 test("archived posts stay reachable but leave the sitemap", async () => {
@@ -1103,15 +1277,19 @@ test("indexable pages do not link internally to consolidated URLs", async () => 
   }
 });
 
-test("the quote form requires expected price without reintroducing retired fields", async () => {
+test("the quote form prioritises contact, location and vehicle details", async () => {
   const home = await html("/");
   assert.doesNotMatch(home, /name="email"|id="q-email"/);
   assert.doesNotMatch(home, /type="email"/);
-  assert.match(home, /name="vehicle"/);
+  for (const name of ["name", "phone", "suburb", "vehicle"]) {
+    const input = home.match(new RegExp(`<input[^>]*name="${name}"[^>]*>`))?.[0];
+    assert.ok(input, `quote form must include ${name}`);
+    assert.match(input, /\srequired=""/, `${name} must be required`);
+  }
   const expectedPriceInput = home.match(/<input[^>]*name="expectedPrice"[^>]*>/)?.[0];
   assert.ok(expectedPriceInput, "quote form must include an expected-price input");
   assert.match(expectedPriceInput, /inputMode="numeric"/);
-  assert.match(expectedPriceInput, /\srequired=""/);
+  assert.doesNotMatch(expectedPriceInput, /\srequired=""/);
   assert.doesNotMatch(home, /name="make"|name="model"|name="year"/);
   assert.doesNotMatch(home, /name="fuel"|Fuel type/);
 
@@ -1126,13 +1304,12 @@ test("the quote form requires expected price without reintroducing retired field
       phone: "0400 000 000",
       suburb: "Southport",
       vehicle: "2016 Toyota Corolla",
-      expectedPrice: "$3,000",
       condition: "Running",
     }),
   });
   const result = await response.json();
 
-  // No delivery configured in tests → 503 after name/phone validation.
+  // No delivery configured in tests → 503 after required-field validation.
   assert.equal(response.status, 503);
   assert.match(result.error, /0423 476 111/);
 });

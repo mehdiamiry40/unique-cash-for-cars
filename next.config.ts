@@ -1,18 +1,44 @@
 import type { NextConfig } from "next";
 import createMDX from "@next/mdx";
 import { retiredSuburbRedirects } from "./src/content/suburbs";
+import { resolveQuoteDelivery } from "./src/lib/quote-delivery";
 
 /**
  * URL preservation is the highest-risk part of this migration.
  *
  * Rules:
- *  1. Every URL that ranked on WordPress either resolves here or 301s to the
+ *  1. Every URL that ranked on WordPress either resolves here or permanently
+ *     redirects to the
  *     closest equivalent. Nothing 404s.
  *  2. WordPress served trailing slashes (/cash-for-cars/southport/). Next
  *     serves without by default and redirects — that's fine and expected, but
  *     the canonical tags in src/lib/seo.ts must match the non-slash form.
- *  3. Redirects are permanent (301). Temporary redirects don't pass link equity.
+ *  3. Redirects are permanent. Temporary redirects don't pass link equity.
  */
+
+if (process.env.VERCEL_ENV === "production") {
+  const quoteDelivery = resolveQuoteDelivery({
+    webhookUrl: process.env.QUOTE_WEBHOOK_URL,
+    resendApiKey: process.env.RESEND_API_KEY,
+    toEmail: process.env.QUOTE_TO_EMAIL,
+    fromEmail: process.env.QUOTE_FROM_EMAIL,
+  });
+
+  if (!quoteDelivery.ok) {
+    throw new Error(
+      `Production quote delivery configuration is invalid (${quoteDelivery.reason}). Configure exactly one complete delivery method.`,
+    );
+  }
+
+  if (
+    quoteDelivery.provider === "resend" &&
+    !process.env.QUOTE_FROM_EMAIL?.trim()
+  ) {
+    throw new Error(
+      "Production Resend delivery requires QUOTE_FROM_EMAIL on a verified sending domain.",
+    );
+  }
+}
 
 const nextConfig: NextConfig = {
   pageExtensions: ["ts", "tsx", "mdx"],

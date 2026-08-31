@@ -38,7 +38,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # typecheck, lint, check:urls, check:duplication, then npm test — which
+      # typecheck, lint, check:urls, then npm test — which
       # builds the site and runs tests/ against a real next start server. No
       # separate build step: the suite cannot run without one.
       - name: Verify

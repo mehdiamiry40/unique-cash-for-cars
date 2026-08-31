@@ -33,8 +33,8 @@ export default function CompanyPage() {
             <p>
               We buy cars nobody else wants. Scrap, damaged, flood-affected,
               unregistered, half-finished, or simply surplus to a household that has
-              one car too many. We pay cash, we tow for free, and we recycle what&apos;s
-              left properly.
+              one car too many. We agree the offer and payment method before pickup,
+              tow for free, and recycle what&apos;s left properly.
             </p>
             <p>
               We service Gold Coast residents and arrange collection directly from
@@ -68,9 +68,10 @@ export default function CompanyPage() {
             </p>
             <p>
               It&apos;s also why we&apos;d rather you told us about the damage up
-              front. A quote based on accurate information is one we can honour. A
-              quote based on an optimistic description is one that gets revised in your
-              driveway, which is a bad experience for everyone.
+              front. We confirm the offer and payment method before pickup. The offer
+              applies when the vehicle, condition, completeness, pickup location and
+              access match the details supplied; if something material differs, we
+              discuss it with you before the sale proceeds. Towing remains free.
             </p>
           </div>
         </div>

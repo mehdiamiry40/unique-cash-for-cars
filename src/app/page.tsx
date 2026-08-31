@@ -96,7 +96,7 @@ const faqs = [
   {
     question: "How do you buy my car for cash on the Gold Coast?",
     answer:
-      "Three steps: you tell us about the car and we quote over the phone, we agree a pickup time, then we check the paperwork, arrange payment and tow it away free. Same-day collection may be available when the route, access and paperwork allow it.",
+      "Three steps: you tell us about the car, we confirm the offer, pickup time and payment method, then we check the paperwork and tow it away free. Same-day collection may be available when the route, access and paperwork allow it.",
   },
   {
     question: "What types of vehicle do you buy?",
@@ -110,7 +110,7 @@ const faqs = [
   {
     question: "Is the towing really free?",
     answer:
-      "Yes. Removal is included in the price we quote, everywhere we service. There is no callout fee, no towing charge and nothing deducted at pickup.",
+      "Yes. For a vehicle we agree to buy within the confirmed service area, removal is included in the offer. There is no separate callout fee or towing charge, and no towing cost is deducted at pickup.",
   },
   {
     question: "Do I need a roadworthy certificate to sell you my car?",
@@ -215,7 +215,8 @@ export default function HomePage() {
               <strong>Unique Cash For Cars</strong> is operated by a Queensland company
               serving vehicle owners across the Gold Coast. We give local residents
               a quick, straightforward way to get rid of a car they no longer want — a
-              vehicle-specific offer, payment on collection, and free towing built in.
+              vehicle-specific offer and payment method confirmed before pickup, with
+              free towing built in.
             </p>
             <p className="mb-4 text-lg">
               Scrap, damaged, flood-affected, unregistered or simply unwanted: we buy
@@ -317,7 +318,7 @@ export default function HomePage() {
 
           <div className="mt-16 grid gap-10 border-t border-hairline pt-16 lg:grid-cols-2">
             <div>
-              <SectionHeading align="left">When a direct cash sale makes sense</SectionHeading>
+              <SectionHeading align="left">When a direct vehicle sale makes sense</SectionHeading>
               <div className="space-y-4 text-lg">
                 <p>
                   If a car is registered, roadworthy, reasonably modern and you have time,
@@ -439,8 +440,9 @@ export default function HomePage() {
             Find out what your car is worth
           </h2>
           <p className="mx-auto mb-7 max-w-2xl text-lg text-white">
-            No obligation, no callout fee, and the number we quote is the number you
-            get paid.
+            No obligation and no towing fee. The confirmed offer applies when the
+            vehicle, condition, completeness, pickup location and access match the
+            details you supplied.
           </p>
           <a
             href={site.phone.href}

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { nav, site } from "@/content/site";
 import { Container, PhoneIcon } from "@/components/ui";
@@ -11,6 +11,7 @@ import { Container, PhoneIcon } from "@/components/ui";
 export function Header() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
 
   // Close everything on route change. Adjusting state during render (rather
   // than in an effect) is the recommended pattern — it avoids the extra
@@ -23,14 +24,18 @@ export function Header() {
 
   // Close the mobile navigation on Escape.
   useEffect(() => {
+    if (!mobileOpen) return;
+
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
+        e.preventDefault();
         setMobileOpen(false);
+        menuTriggerRef.current?.focus();
       }
     }
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [mobileOpen]);
 
   const matches = (href: string) => {
     return href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -85,6 +90,7 @@ export function Header() {
           </a>
 
           <button
+            ref={menuTriggerRef}
             type="button"
             onClick={() => setMobileOpen((v) => !v)}
             aria-expanded={mobileOpen}

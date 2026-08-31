@@ -80,7 +80,8 @@ function sendAnalyticsEvent(
 export type QuoteFormErrorCategory =
   | "validation_name"
   | "validation_phone"
-  | "validation_expected_price"
+  | "validation_suburb"
+  | "validation_vehicle"
   | "rate_limited"
   | "request_rejected"
   | "delivery_unavailable"

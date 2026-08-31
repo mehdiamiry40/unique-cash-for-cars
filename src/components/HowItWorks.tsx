@@ -13,8 +13,8 @@ const steps = [
   },
   {
     n: "03",
-    title: "Paperwork, cash, gone",
-    body: "We verify identity, ownership and the correct registration or cancellation path, then arrange payment and tow the car away free. The agreed quote is not reduced by a towing fee.",
+    title: "Paperwork, payment, gone",
+    body: "We verify identity and ownership, then confirm the offer and payment method before pickup. When the vehicle, condition, completeness, location and access match the details supplied, the offer stands and no towing fee is deducted.",
   },
 ] as const;
 

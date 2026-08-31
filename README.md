@@ -30,17 +30,23 @@ npm ci
 npm run dev
 ```
 
-The quote endpoint needs either a webhook or Resend configuration:
+The quote endpoint needs exactly one complete delivery configuration:
 
 ```bash
 QUOTE_WEBHOOK_URL=...
 # or
 RESEND_API_KEY=...
 QUOTE_TO_EMAIL=...
+QUOTE_FROM_EMAIL="Unique Cash For Cars <quotes@uniquecashforcars.com.au>"
 ```
 
-With neither configured, it returns 503 and asks the visitor to call. It never
-reports that an undelivered enquiry succeeded.
+`QUOTE_FROM_EMAIL` must use a sending domain verified in Resend. Missing,
+incomplete or ambiguous configuration returns 503 and asks the visitor to call;
+it never reports that an undelivered enquiry succeeded. Vercel Git production
+builds fail before deployment when this contract is invalid. For a prebuilt
+deployment, use `vercel build --prod` with the production environment pulled—do
+not substitute a plain local `next build`, where `VERCEL_ENV` is intentionally
+unset.
 
 ## Verify before deployment
 

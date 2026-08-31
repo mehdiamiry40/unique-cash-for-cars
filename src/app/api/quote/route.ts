@@ -1,16 +1,19 @@
 import { NextResponse } from "next/server";
 import { site } from "@/content/site";
+import { deliverQuote } from "@/lib/quote-delivery";
 import { buildQuoteEmail } from "@/lib/quote-email";
+import { createFixedWindowLimiter } from "@/lib/quote-rate-limit";
 
 /**
  * Quote enquiry endpoint.
  *
- * TODO before launch — pick one delivery method and set the matching env var:
+ * Configure exactly one delivery method with the matching environment variables:
  *   RESEND_API_KEY + QUOTE_TO_EMAIL   → email via Resend
  *   QUOTE_WEBHOOK_URL                 → POST to Zapier / Make / your CRM
  *
- * With neither set, the endpoint returns an error instead of pretending that
- * the enquiry was delivered.
+ * Invalid, incomplete or ambiguous configuration returns an error instead of
+ * pretending that the enquiry was delivered. Vercel production builds fail
+ * early on the same configuration contract in next.config.ts.
  */
 
 export const runtime = "nodejs";
@@ -35,26 +38,35 @@ type QuotePayload = {
 };
 
 /**
- * Naive in-memory rate limit.
+ * Bounded in-memory burst brake.
  *
  * On Vercel each serverless isolate has its own Map, so this is a soft brake
  * against accidental double-submits on a warm instance — not a hard ceiling
- * under load. Swap for Upstash / Vercel KV if abuse becomes an issue.
+ * under load. A platform WAF or shared limiter must supply deployment-wide
+ * enforcement.
  */
-const recent = new Map<string, number[]>();
 const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 5;
 const MAX_BODY_BYTES = 32_000;
 /** Cap on distinct IPs tracked, so a spray of unique sources cannot grow the map without bound. */
 const MAX_TRACKED_IPS = 10_000;
-const DELIVERY_TIMEOUT_MS = 10_000;
+const rateLimiter = createFixedWindowLimiter({
+  maxKeys: MAX_TRACKED_IPS,
+  maxRequests: MAX_PER_WINDOW,
+  windowMs: WINDOW_MS,
+});
 
-function json(body: Record<string, unknown>, status = 200) {
+function json(
+  body: Record<string, unknown>,
+  status = 200,
+  headers: Record<string, string> = {},
+) {
   return NextResponse.json(body, {
     status,
     headers: {
       "Cache-Control": "no-store",
       "X-Content-Type-Options": "nosniff",
+      ...headers,
     },
   });
 }
@@ -80,37 +92,21 @@ function text(value: unknown, maxLength: number) {
     : "";
 }
 
-/**
- * Drops IPs whose window has emptied.
- *
- * Without this the map only ever grows: every distinct IP left a permanent
- * key, including ones whose timestamps had long since aged out. On a warm
- * serverless instance that is an unbounded leak.
- */
-function sweep(now: number) {
-  for (const [ip, hits] of recent) {
-    if (hits.length === 0 || now - hits[hits.length - 1] >= WINDOW_MS) {
-      recent.delete(ip);
-    }
-  }
-}
-
-function rateLimited(ip: string) {
-  const now = Date.now();
-
-  // Sweep stale keys every request. The previous "only at 10k" threshold left
-  // aged IPs sitting in memory on long-lived isolates until the ceiling hit.
-  if (recent.size > 0) sweep(now);
-  if (recent.size >= MAX_TRACKED_IPS) {
-    // Still full after a sweep — drop the oldest tracked IP rather than grow.
-    const oldest = recent.keys().next().value;
-    if (oldest !== undefined) recent.delete(oldest);
+function isQuotePayload(value: unknown): value is QuotePayload {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
   }
 
-  const hits = (recent.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
-  hits.push(now);
-  recent.set(ip, hits);
-  return hits.length > MAX_PER_WINDOW;
+  const payload = value as Record<string, unknown>;
+  return [
+    "name",
+    "phone",
+    "suburb",
+    "vehicle",
+    "expectedPrice",
+    "condition",
+    "contactRef",
+  ].every((key) => payload[key] === undefined || typeof payload[key] === "string");
 }
 
 /**
@@ -143,14 +139,13 @@ async function readBody(request: Request): Promise<string | null> {
     reader.releaseLock();
   }
 
-  return new TextDecoder().decode(
-    chunks.reduce<Uint8Array>((acc, chunk) => {
-      const merged = new Uint8Array(acc.length + chunk.length);
-      merged.set(acc);
-      merged.set(chunk, acc.length);
-      return merged;
-    }, new Uint8Array()),
-  );
+  const merged = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    merged.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return new TextDecoder().decode(merged);
 }
 
 export async function POST(request: Request) {
@@ -161,14 +156,28 @@ export async function POST(request: Request) {
     );
   }
 
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const forwardedIp = request.headers
+    .get("x-forwarded-for")
+    ?.split(",")[0]
+    ?.trim();
+  const ip = (forwardedIp || "unknown").slice(0, 128);
 
-  if (rateLimited(ip)) {
+  const rate = rateLimiter.check(ip);
+  if (rate.limited) {
     return json(
       { error: "Too many enquiries were sent. Please wait a minute and try again." },
       429,
+      { "Retry-After": String(rate.retryAfterSeconds) },
     );
+  }
+
+  const contentType = request.headers
+    .get("content-type")
+    ?.split(";", 1)[0]
+    ?.trim()
+    .toLowerCase();
+  if (contentType !== "application/json") {
+    return json({ error: "This enquiry must be sent as JSON." }, 415);
   }
 
   const raw = await readBody(request);
@@ -176,12 +185,17 @@ export async function POST(request: Request) {
     return json({ error: "This enquiry is too large." }, 413);
   }
 
-  let body: QuotePayload;
+  let parsed: unknown;
   try {
-    body = JSON.parse(raw);
+    parsed = JSON.parse(raw);
   } catch {
     return json({ error: "The enquiry could not be read." }, 400);
   }
+
+  if (!isQuotePayload(parsed)) {
+    return json({ error: "The enquiry could not be read." }, 400);
+  }
+  const body = parsed;
 
   // Honeypot tripped — accept silently so the bot doesn't learn.
   // No `leadId`: the client must not treat this as a delivered conversion.
@@ -189,7 +203,9 @@ export async function POST(request: Request) {
 
   const name = text(body.name, 100);
   const phone = text(body.phone, 40);
-  const expectedPrice = text(body.expectedPrice, 60);
+  const suburb = text(body.suburb, 120);
+  const vehicle = text(body.vehicle, 160);
+  const expectedPrice = text(body.expectedPrice, 60) || "Not sure";
 
   // Phone-only contact. The public form does not collect email — we call back.
   if (!name || !phone) {
@@ -198,8 +214,11 @@ export async function POST(request: Request) {
   if (phone.replace(/\D/g, "").length < 8) {
     return json({ error: "Please enter a valid phone number." }, 400);
   }
-  if (!expectedPrice) {
-    return json({ error: "Expected price is required." }, 400);
+  if (!suburb) {
+    return json({ error: "Suburb is required." }, 400);
+  }
+  if (!vehicle) {
+    return json({ error: "Vehicle details are required." }, 400);
   }
 
   const leadId = crypto.randomUUID();
@@ -208,65 +227,38 @@ export async function POST(request: Request) {
     leadId,
     name,
     phone,
-    suburb: text(body.suburb, 120) || "—",
-    vehicle: text(body.vehicle, 160) || "—",
+    suburb,
+    vehicle,
     expectedPrice,
     condition: text(body.condition, 500) || "—",
     receivedAt: new Date().toISOString(),
   };
 
-  const webhook = process.env.QUOTE_WEBHOOK_URL;
-  const resendKey = process.env.RESEND_API_KEY;
-  const toEmail = process.env.QUOTE_TO_EMAIL;
-  const fromEmail =
-    process.env.QUOTE_FROM_EMAIL ??
-    "Unique Cash for Cars <onboarding@resend.dev>";
+  const email = buildQuoteEmail(lead);
+  const delivery = await deliverQuote({
+    settings: {
+      webhookUrl: process.env.QUOTE_WEBHOOK_URL,
+      resendApiKey: process.env.RESEND_API_KEY,
+      toEmail: process.env.QUOTE_TO_EMAIL,
+      fromEmail: process.env.QUOTE_FROM_EMAIL,
+    },
+    lead,
+    email: {
+      subject: email.subject,
+      text: email.text,
+    },
+  });
 
-  if (!webhook && (!resendKey || !toEmail)) {
+  if (!delivery.ok) {
+    const configurationFailure = delivery.provider === "configuration";
     return json(
       {
         error:
-          `Online enquiries are temporarily unavailable. Please call ${site.phone.display}.`,
+          configurationFailure
+            ? `Online enquiries are temporarily unavailable. Please call ${site.phone.display}.`
+            : `Your enquiry could not be sent. Please try again or call ${site.phone.display}.`,
       },
-      503,
-    );
-  }
-
-  try {
-    if (webhook) {
-      const res = await fetch(webhook, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(lead),
-        signal: AbortSignal.timeout(DELIVERY_TIMEOUT_MS),
-      });
-      if (!res.ok) throw new Error(`Webhook responded ${res.status}`);
-    } else if (resendKey && toEmail) {
-      const email = buildQuoteEmail(lead);
-      const res = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${resendKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: fromEmail,
-          to: [toEmail],
-          subject: email.subject,
-          text: email.text,
-        }),
-        signal: AbortSignal.timeout(DELIVERY_TIMEOUT_MS),
-      });
-      if (!res.ok) throw new Error(`Resend responded ${res.status}`);
-    }
-  } catch (err) {
-    console.error("[quote] Delivery failed:", err);
-    return json(
-      {
-        error:
-          `Your enquiry could not be sent. Please try again or call ${site.phone.display}.`,
-      },
-      502,
+      configurationFailure ? 503 : 502,
     );
   }
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { site } from "@/content/site";
 import {
   trackQuoteConversion,
@@ -10,6 +11,26 @@ import {
 } from "@/components/GoogleAdsTracking";
 
 type Status = "idle" | "submitting" | "success" | "error";
+type RequiredFieldName = "name" | "phone" | "suburb" | "vehicle";
+type FieldErrors = Partial<Record<RequiredFieldName, string>>;
+
+const requiredFieldOrder: RequiredFieldName[] = [
+  "name",
+  "phone",
+  "suburb",
+  "vehicle",
+];
+
+const validationCategories: Record<RequiredFieldName, QuoteFormErrorCategory> = {
+  name: "validation_name",
+  phone: "validation_phone",
+  suburb: "validation_suburb",
+  vehicle: "validation_vehicle",
+};
+
+function isRequiredFieldName(name: string): name is RequiredFieldName {
+  return requiredFieldOrder.includes(name as RequiredFieldName);
+}
 
 function responseErrorCategory(status: number): QuoteFormErrorCategory {
   if (status === 429) return "rate_limited";
@@ -17,18 +38,47 @@ function responseErrorCategory(status: number): QuoteFormErrorCategory {
   return "request_rejected";
 }
 
+function responseErrorMessage(status: number) {
+  if (status === 429) {
+    return `Please wait a moment before trying again, or call ${site.name} on ${site.phone.display}.`;
+  }
+  if (status === 502 || status === 503) {
+    return `${site.name} couldn’t deliver your quote request right now. Please try again shortly or call ${site.phone.display}.`;
+  }
+  return `${site.name} couldn’t submit your quote request. Please try again or call ${site.phone.display}.`;
+}
+
 /**
  * Quote enquiry form.
  *
- * Posts to /api/quote. Name, phone and expected price are required; no email field.
+ * Posts to /api/quote. Name, phone, suburb and vehicle are required; no email field.
  * Includes a honeypot field — the WordPress form was getting hit by bots and
  * Contact Form 7 has no built-in protection.
  */
 export function QuoteForm({ id = "quote" }: { id?: string }) {
   const [status, setStatus] = useState<Status>("idle");
-  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [leadReference, setLeadReference] = useState<string | null>(null);
   const hasStartedRef = useRef(false);
-  const nativeValidationPendingRef = useRef(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const firstInvalidFieldRef = useRef<RequiredFieldName | null>(null);
+
+  const fieldErrorIds: Record<RequiredFieldName, string> = {
+    name: `${id}-name-error`,
+    phone: `${id}-phone-error`,
+    suburb: `${id}-suburb-error`,
+    vehicle: `${id}-vehicle-error`,
+  };
+
+  useEffect(() => {
+    const fieldName = firstInvalidFieldRef.current;
+    if (!fieldName) return;
+
+    firstInvalidFieldRef.current = null;
+    const field = formRef.current?.elements.namedItem(fieldName);
+    if (field instanceof HTMLElement) field.focus();
+  }, [fieldErrors]);
 
   function trackFormStartOnce() {
     if (hasStartedRef.current) return;
@@ -48,63 +98,67 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
     trackFormStartOnce();
   }
 
-  function handleInvalid(event: React.InvalidEvent<HTMLFormElement>) {
+  function handleInput(event: React.FormEvent<HTMLFormElement>) {
+    handleFormStart(event);
+
     const field = event.target;
     if (
-      nativeValidationPendingRef.current ||
       !(field instanceof HTMLInputElement) ||
-      field.name === "contactRef"
+      !isRequiredFieldName(field.name)
     ) {
       return;
     }
 
-    const errorCategory: QuoteFormErrorCategory =
-      field.name === "name"
-        ? "validation_name"
-        : field.name === "phone"
-          ? "validation_phone"
-          : "validation_expected_price";
+    const fieldName = field.name;
+    setFieldErrors((currentErrors) => {
+      if (!currentErrors[fieldName]) return currentErrors;
 
-    // Browsers can emit one invalid event per empty required field. Keep that
-    // validation cycle to a single analytics event, then allow a later attempt.
-    trackFormStartOnce();
-    nativeValidationPendingRef.current = true;
-    trackQuoteFormError(errorCategory);
-    queueMicrotask(() => {
-      nativeValidationPendingRef.current = false;
+      const nextErrors = { ...currentErrors };
+      delete nextErrors[fieldName];
+      return nextErrors;
     });
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     trackFormStartOnce();
-    setStatus("submitting");
-    setError(null);
+    setServerError(null);
 
     const form = event.currentTarget;
     const data = Object.fromEntries(new FormData(form).entries());
 
     const name = String(data.name ?? "").trim();
     const phone = String(data.phone ?? "").trim();
-    const expectedPrice = String(data.expectedPrice ?? "").trim();
-    if (!name || phone.replace(/\D/g, "").length < 8 || !expectedPrice) {
-      trackQuoteFormError(
-        !name
-          ? "validation_name"
-          : phone.replace(/\D/g, "").length < 8
-            ? "validation_phone"
-            : "validation_expected_price",
-      );
+    const suburb = String(data.suburb ?? "").trim();
+    const vehicle = String(data.vehicle ?? "").trim();
+    const validationErrors: FieldErrors = {};
+
+    if (!name) validationErrors.name = "Please enter your name.";
+    if (phone.replace(/\D/g, "").length < 8) {
+      validationErrors.phone =
+        "Please enter a valid phone number so we can call you back.";
+    }
+    if (!suburb) {
+      validationErrors.suburb =
+        "Please enter the suburb where the vehicle is located.";
+    }
+    if (!vehicle) {
+      validationErrors.vehicle = "Please enter the vehicle’s make, model and year.";
+    }
+
+    const firstInvalidField = requiredFieldOrder.find(
+      (fieldName) => validationErrors[fieldName],
+    );
+    if (firstInvalidField) {
+      firstInvalidFieldRef.current = firstInvalidField;
+      trackQuoteFormError(validationCategories[firstInvalidField]);
+      setFieldErrors(validationErrors);
       setStatus("error");
-      setError(
-        !name
-          ? "Please enter your name."
-          : phone.replace(/\D/g, "").length < 8
-            ? "Please enter a valid phone number so we can call you back."
-            : "Please enter your expected price.",
-      );
       return;
     }
+
+    setFieldErrors({});
+    setStatus("submitting");
 
     try {
       const res = await fetch("/api/quote", {
@@ -113,29 +167,31 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         body: JSON.stringify(data),
       });
 
-      const result = (await res.json().catch(() => ({}))) as {
-        error?: string;
-        leadId?: string;
-      };
+      const result = (await res.json().catch(() => ({}))) as { leadId?: string };
       if (!res.ok) {
         trackQuoteFormError(responseErrorCategory(res.status));
         setStatus("error");
-        setError(result.error || `Request failed (${res.status})`);
+        setServerError(responseErrorMessage(res.status));
         return;
       }
 
       // Only count a conversion when the server issued a lead ID — honeypot
       // replies are `{ ok: true }` with no id and must not fire Ads events.
-      if (result.leadId) trackQuoteConversion(result.leadId);
+      if (result.leadId) {
+        trackQuoteConversion(result.leadId);
+        setLeadReference(
+          result.leadId.split("-", 1)[0].slice(0, 8).toUpperCase(),
+        );
+      } else {
+        setLeadReference(null);
+      }
       setStatus("success");
       form.reset();
-    } catch (caught) {
+    } catch {
       trackQuoteFormError("network_error");
       setStatus("error");
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : `Something went wrong sending your enquiry. Please call us on ${site.phone.display}.`,
+      setServerError(
+        `${site.name} couldn’t connect to the quote service. Please check your connection, try again, or call ${site.phone.display}.`,
       );
     }
   }
@@ -160,6 +216,12 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
           We&apos;ll call you back with a quote shortly. If you&apos;d rather not wait,
           ring us now and we&apos;ll price it on the spot.
         </p>
+        {leadReference ? (
+          <p className="mb-6 rounded bg-surface-alt px-4 py-3 text-sm text-ink-heading">
+            Your enquiry reference is{" "}
+            <strong className="font-bold">{leadReference}</strong>.
+          </p>
+        ) : null}
         <a
           href={site.phone.href}
           className="inline-flex items-center gap-2 rounded bg-brand px-6 py-3 font-bold text-white transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
@@ -172,11 +234,12 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
 
   return (
     <form
+      ref={formRef}
       id={id}
+      noValidate
       onSubmit={handleSubmit}
       onFocusCapture={handleFormStart}
-      onInputCapture={handleFormStart}
-      onInvalidCapture={handleInvalid}
+      onInputCapture={handleInput}
       className="scroll-mt-28 rounded-lg border border-hairline bg-surface p-6 shadow-lg sm:p-8"
     >
       <h2 className="mb-6 text-2xl font-normal uppercase tracking-wide text-ink-heading">
@@ -192,10 +255,20 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
             id="q-name"
             name="name"
             required
+            aria-invalid={Boolean(fieldErrors.name)}
+            aria-describedby={fieldErrors.name ? fieldErrorIds.name : undefined}
             autoComplete="name"
             placeholder="Jane Smith…"
             className={inputClass}
           />
+          {fieldErrors.name ? (
+            <p
+              id={fieldErrorIds.name}
+              className="mt-1.5 text-sm font-semibold text-brand-dark"
+            >
+              {fieldErrors.name}
+            </p>
+          ) : null}
         </div>
 
         <div>
@@ -207,11 +280,21 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
             name="phone"
             type="tel"
             required
+            aria-invalid={Boolean(fieldErrors.phone)}
+            aria-describedby={fieldErrors.phone ? fieldErrorIds.phone : undefined}
             autoComplete="tel"
             inputMode="tel"
             placeholder="0423 000 000…"
             className={inputClass}
           />
+          {fieldErrors.phone ? (
+            <p
+              id={fieldErrorIds.phone}
+              className="mt-1.5 text-sm font-semibold text-brand-dark"
+            >
+              {fieldErrors.phone}
+            </p>
+          ) : null}
         </div>
 
         <div>
@@ -221,10 +304,23 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
           <input
             id="q-suburb"
             name="suburb"
+            required
+            aria-invalid={Boolean(fieldErrors.suburb)}
+            aria-describedby={
+              fieldErrors.suburb ? fieldErrorIds.suburb : undefined
+            }
             autoComplete="address-level2"
             placeholder="Southport…"
             className={inputClass}
           />
+          {fieldErrors.suburb ? (
+            <p
+              id={fieldErrorIds.suburb}
+              className="mt-1.5 text-sm font-semibold text-brand-dark"
+            >
+              {fieldErrors.suburb}
+            </p>
+          ) : null}
         </div>
 
         <div>
@@ -234,23 +330,36 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
           <input
             id="q-vehicle"
             name="vehicle"
+            required
+            aria-invalid={Boolean(fieldErrors.vehicle)}
+            aria-describedby={
+              fieldErrors.vehicle ? fieldErrorIds.vehicle : undefined
+            }
             autoComplete="off"
             placeholder="Toyota Corolla 2012…"
             className={inputClass}
           />
+          {fieldErrors.vehicle ? (
+            <p
+              id={fieldErrorIds.vehicle}
+              className="mt-1.5 text-sm font-semibold text-brand-dark"
+            >
+              {fieldErrors.vehicle}
+            </p>
+          ) : null}
         </div>
 
         <div>
           <label htmlFor="q-price" className={labelClass}>
-            Expected price
+            Expected price{" "}
+            <span className="font-normal text-ink-muted">(optional)</span>
           </label>
           <input
             id="q-price"
             name="expectedPrice"
-            required
             inputMode="numeric"
             autoComplete="off"
-            placeholder="$1,500…"
+            placeholder="$1,500 or leave blank…"
             className={inputClass}
           />
         </div>
@@ -281,11 +390,11 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
           <input id="q-contact-ref" name="contactRef" tabIndex={-1} autoComplete="off" />
         </div>
 
-        {error && (
+        {serverError ? (
           <p role="alert" className="rounded border border-brand bg-brand/5 px-4 py-3 text-sm text-brand-dark">
-            {error}
+            {serverError}
           </p>
-        )}
+        ) : null}
 
         <button
           type="submit"
@@ -297,7 +406,16 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </button>
 
         <p className="text-center text-xs text-ink-muted">
-          Free, no-obligation quote. We&apos;ll call you back — we never share your number.
+          Free, no-obligation quote. Our form-delivery provider processes your
+          details, and we may share them with a towing operator to arrange
+          collection. Read our{" "}
+          <Link
+            href="/privacy-policy"
+            className="font-semibold text-brand underline underline-offset-2 hover:text-brand-dark"
+          >
+            privacy policy
+          </Link>
+          .
         </p>
       </div>
     </form>
