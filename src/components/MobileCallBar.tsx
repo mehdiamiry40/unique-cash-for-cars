@@ -32,7 +32,7 @@ export function MobileCallBar() {
       <a
         href={site.phone.href}
         data-cta="call-mobile-bar"
-        className="flex items-center justify-center gap-2 bg-brand py-3.5 text-base font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-white"
+        className="flex items-center justify-center gap-2 bg-brand pt-3.5 pb-[calc(0.875rem+env(safe-area-inset-bottom))] text-base font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-white"
       >
         <PhoneIcon className="size-4" />
         Call Now
@@ -40,7 +40,7 @@ export function MobileCallBar() {
       <Link
         href={quoteHref}
         data-cta="quote-mobile-bar"
-        className="flex items-center justify-center bg-navy py-3.5 text-base font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-white"
+        className="flex items-center justify-center bg-navy pt-3.5 pb-[calc(0.875rem+env(safe-area-inset-bottom))] text-base font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-white"
       >
         Free Quote
       </Link>

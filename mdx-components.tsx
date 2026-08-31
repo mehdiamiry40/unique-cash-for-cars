@@ -14,13 +14,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
           {children}
         </Link>
       ) : (
-        <a
-          href={href}
-          {...(href.startsWith("http")
-            ? { target: "_blank", rel: "noopener noreferrer" }
-            : {})}
-          {...props}
-        >
+        <a href={href} {...props}>
           {children}
         </a>
       ),

@@ -22,7 +22,7 @@ export default function PrivacyPolicyPage() {
   // Hardcoded on purpose. This is the date the policy was last reviewed, not
   // the date the site was last deployed — a build-time date would silently
   // claim a review that never happened. Bump it when you change the text.
-  const updated = "13 August 2026";
+  const updated = "31 August 2026";
 
   return (
     <Section>
@@ -33,10 +33,17 @@ export default function PrivacyPolicyPage() {
         <h2>What we collect</h2>
         <p>
           When you submit a quote request we collect your name, phone number, the
-          suburb where the vehicle is located, and the details you give us about
-          the vehicle itself. When you call us we record the same information so
-          we can quote and arrange collection. The online form does not ask for
-          an email address — we call you back on the number you provide.
+          suburb where the vehicle is located, the details you give us about the
+          vehicle itself and, if you choose to provide it, your expected price.
+          When you call us we record the same information so we can quote and
+          arrange collection. The online form does not ask for an email address —
+          we call you back on the number you provide.
+        </p>
+        <p>
+          When you submit the online form, we temporarily use the request&apos;s IP
+          address in server memory to limit repeated submissions and protect the
+          form from abuse. Our hosting provider may separately retain standard
+          request logs as described below.
         </p>
         <p>
           When you complete a sale we additionally sight your photo identification
@@ -66,14 +73,18 @@ export default function PrivacyPolicyPage() {
           clicks. It also records quote-button clicks, the first interaction with
           the quote form, broad error categories such as validation or network
           failure, and a lead event after the quote system confirms delivery. We
-          do not send error messages or the name, phone number, expected price,
-          suburb or vehicle details entered in the form to Google Analytics.
+          do not send error messages or the values entered in the quote form —
+          including your name, phone number, optional expected price, suburb,
+          vehicle or condition details — to Google through these measurement
+          events.
         </p>
         <p>
           Google may set or read cookies and similar technologies for measurement
           and receive technical details about the visit, such as the page URL,
-          browser and a truncated IP address. We do not use these tags to show
-          remarketing ads, and we do not load Meta Pixel or Microsoft Clarity.
+          browser and IP address. We intend to use these tags for measurement rather
+          than remarketing; the features that are active depend on the Google Ads and
+          Analytics account and tag settings in force. We do not load Meta Pixel or
+          Microsoft Clarity.
         </p>
         <p>
           Our hosting provider keeps standard server logs — the requested page,
@@ -84,12 +95,17 @@ export default function PrivacyPolicyPage() {
 
         <h2>Who we share it with</h2>
         <p>
-          Your details are shared only where necessary to complete the transaction
-          or run the site: with the Queensland Department of Transport and Main
-          Roads for a registration transfer or cancellation, with our towing operator to arrange
-          collection, with Google for the advertising measurement described above,
-          with our email or form-delivery provider when you submit a quote online,
-          and with our accountant or auditor where required by law.
+          The personal details and vehicle information you provide are shared only
+          where necessary: with our email or form-delivery provider so we can receive
+          an online enquiry; with our towing operator to arrange a collection you
+          accept; with the Queensland Department of Transport and Main Roads for an
+          applicable registration transfer or cancellation; and with our accountant
+          or auditor where required by law.
+        </p>
+        <p>
+          Google receives the separate website-measurement data described above. We
+          do not send the values entered in the quote form to Google as part of those
+          measurement events.
         </p>
 
         <h2>How long we keep it</h2>
@@ -97,6 +113,11 @@ export default function PrivacyPolicyPage() {
           Quote enquiries that don&apos;t proceed are kept for up to 12 months.
           Completed transaction records are kept for the period required under
           Queensland law for vehicle dealers and for tax purposes.
+        </p>
+        <p>
+          The in-memory IP record used by the quote form covers a short anti-abuse
+          window and is not added to the quote details. Standard hosting logs are
+          retained according to the hosting provider&apos;s settings.
         </p>
 
         <h2>Accessing or correcting your information</h2>

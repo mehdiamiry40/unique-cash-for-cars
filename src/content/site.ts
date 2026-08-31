@@ -13,7 +13,7 @@ export const site = {
   registeredEntityName: "A Plus Car Removal Pty Ltd",
   url: "https://uniquecashforcars.com.au",
   description:
-    "Get a quote from a licensed Queensland car buyer for any make or condition, with cash paid and free car removal across the Gold Coast, 7 days.",
+    "Get a quote from a licensed Queensland car buyer for any make or condition, with payment confirmed before free car removal across the Gold Coast, 7 days.",
 
   phone: {
     /**

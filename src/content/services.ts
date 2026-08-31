@@ -26,9 +26,9 @@ export type ServicePage = {
 export const servicePages: ServicePage[] = [
   {
     slug: "car-removal-gold-coast",
-    title: "Car Removal Gold Coast | Free Pickup + Cash Paid",
+    title: "Car Removal Gold Coast | Free Pickup + Vehicle Offers",
     metaDescription:
-      "Car removal Gold Coast service with free towing from homes, basements, roadsides and yards. Same-day pickup is often available, with cash paid for your car.",
+      "Free car removal across the Gold Coast from homes, basements, roadsides and yards. Same-day pickup may be available, with payment confirmed before collection.",
     h1: "Car Removal Gold Coast",
     serviceType: "Car Removal Gold Coast",
     intro:
@@ -37,8 +37,8 @@ export const servicePages: ServicePage[] = [
       {
         heading: "Free car removal with no hidden towing deduction",
         body: [
-          "There is no separate callout fee or towing charge inside our Gold Coast service area. The removal cost is not taken back out of the vehicle offer when the truck arrives.",
-          "This is different from booking an ordinary tow. We are collecting a vehicle we have agreed to buy, so the quote covers both the vehicle and the cost of getting it to us. If the location or condition could change the job, we discuss that before you accept the offer.",
+          "There is no separate callout fee or towing charge inside our confirmed Gold Coast service area for a vehicle we agree to buy. The removal cost is not deducted from the vehicle offer.",
+          "This is different from booking an ordinary tow. The confirmed offer includes removal. It applies when the vehicle, condition, completeness, pickup location and access match the details supplied; if something material differs, we discuss it before the sale proceeds.",
         ],
       },
       {
@@ -86,7 +86,7 @@ export const servicePages: ServicePage[] = [
         heading: "Same-day collection when the route allows",
         body: [
           "Same-day pickup is often possible when you call early and the vehicle is ready, but it is not a blanket promise. Truck availability, access, distance and ownership paperwork all affect the booking window.",
-          "We confirm the time and the quote before collection. Describe the car and its location accurately so the offer and recovery plan are based on the job that is actually waiting for us.",
+          "We confirm the pickup time, offer and payment method before collection. Describe the car and its location accurately so the offer and recovery plan are based on the job that is actually waiting for us.",
         ],
       },
     ],
@@ -124,7 +124,7 @@ export const servicePages: ServicePage[] = [
       {
         question: "Will you pay me as well as remove the car?",
         answer:
-          "Yes, when we agree to buy it. The offer depends on make, model, year, condition, completeness and current salvage value. Cash or bank transfer is arranged as part of the collection, and any condition that could affect the quote is discussed before booking.",
+          "Yes, when we agree to buy it. We confirm the offer and payment method before pickup. The offer applies when the make, model, year, condition, completeness, location and access match the details supplied, and no towing fee is deducted.",
       },
     ],
     related: [

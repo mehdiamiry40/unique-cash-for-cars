@@ -67,7 +67,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-AU" className={openSans.variable}>
-      <body className="flex min-h-full flex-col font-sans antialiased">
+      <body className="flex min-h-full flex-col pb-[calc(3.5rem+env(safe-area-inset-bottom))] font-sans antialiased lg:pb-0">
         {/* Measurement only on the production deployment — preview URLs must
             not pollute the real Google Ads or Analytics properties. */}
         {isAdsEnabled ? <GoogleAdsTracking /> : null}
@@ -77,14 +77,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-brand focus:outline-2 focus:outline-offset-2 focus:outline-white"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-brand focus:px-4 focus:py-2 focus:font-bold focus:text-white focus:outline-2 focus:outline-offset-2 focus:outline-brand-dark"
         >
           Skip to content
         </a>
 
         <Header />
-        {/* Bottom padding leaves room for the mobile call bar. */}
-        <main id="main" className="flex-1 pb-16 lg:pb-0">
+        <main id="main" tabIndex={-1} className="flex-1">
           {children}
         </main>
         <Footer />
