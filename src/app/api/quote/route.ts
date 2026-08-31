@@ -254,7 +254,6 @@ export async function POST(request: Request) {
           to: [toEmail],
           subject: email.subject,
           text: email.text,
-          html: email.html,
         }),
         signal: AbortSignal.timeout(DELIVERY_TIMEOUT_MS),
       });
