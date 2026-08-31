@@ -905,6 +905,7 @@ test("the quote endpoint requires location and vehicle details, not an expected 
     headers: {
       "content-type": "application/json",
       "x-forwarded-for": "192.0.2.16",
+      "idempotency-key": "16000000-0000-4000-8000-000000000016",
     },
     body: JSON.stringify({
       name: "Jamie Example",
@@ -973,6 +974,7 @@ test("the quote endpoint enforces media type and body size", async () => {
     headers: {
       "content-type": "Application/JSON; charset=UTF-8",
       "x-forwarded-for": "192.0.2.42",
+      "idempotency-key": "42000000-0000-4000-8000-000000000042",
     },
     body: JSON.stringify({
       name: "Jamie Example",
@@ -1033,6 +1035,7 @@ test("the quote endpoint never reports success without a delivery service", asyn
     headers: {
       "content-type": "application/json",
       "x-forwarded-for": "192.0.2.11",
+      "idempotency-key": "11000000-0000-4000-8000-000000000011",
     },
     body: JSON.stringify({
       name: "Jamie Example",
@@ -1047,6 +1050,26 @@ test("the quote endpoint never reports success without a delivery service", asyn
 
   assert.equal(response.status, 503);
   assert.match(result.error, /0423 476 111/);
+});
+
+test("valid quote submissions require a stable idempotency key", async () => {
+  const response = await fetch(`${origin}/api/quote`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-forwarded-for": "192.0.2.17",
+    },
+    body: JSON.stringify({
+      name: "Jamie Example",
+      phone: "0400 000 000",
+      suburb: "Southport",
+      vehicle: "2016 Toyota Corolla",
+    }),
+  });
+  const result = await response.json();
+
+  assert.equal(response.status, 428);
+  assert.match(result.error, /refresh this page/i);
 });
 
 test("a honeypot hit answers 200 without a leadId", async () => {
@@ -1091,7 +1114,7 @@ test("the privacy policy describes the Google measurement tags that production l
   assert.doesNotMatch(form, /we never share your number/i);
 });
 
-test("conversion tracking separates delivered leads from funnel intent", () => {
+test("conversion tracking separates durably captured leads from funnel intent", () => {
   const tracking = readFileSync(
     join(projectPath, "src", "components", "GoogleAdsTracking.tsx"),
     "utf8",
@@ -1143,7 +1166,7 @@ test("conversion tracking separates delivered leads from funnel intent", () => {
   assert.match(
     tracking,
     /sendConversion\(quoteConversionLabel/,
-    "delivered quote enquiries do not fire the native Google Ads conversion",
+    "durably captured quote enquiries do not fire the native Google Ads conversion",
   );
   assert.match(
     quoteForm,
@@ -1298,6 +1321,7 @@ test("the quote form prioritises contact, location and vehicle details", async (
     headers: {
       "content-type": "application/json",
       "x-forwarded-for": "192.0.2.13",
+      "idempotency-key": "13000000-0000-4000-8000-000000000013",
     },
     body: JSON.stringify({
       name: "Jamie Example",

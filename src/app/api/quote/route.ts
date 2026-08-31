@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { site } from "@/content/site";
-import { deliverQuote } from "@/lib/quote-delivery";
-import { buildQuoteEmail } from "@/lib/quote-email";
+import { resolveQuoteDelivery } from "@/lib/quote-delivery";
+import {
+  persistQuote,
+  QuoteStorageConfigurationError,
+} from "@/lib/quote-lead-store";
+import { processQuoteLeadNow } from "@/lib/quote-outbox";
 import { createFixedWindowLimiter } from "@/lib/quote-rate-limit";
 
 /**
@@ -48,6 +52,8 @@ type QuotePayload = {
 const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 5;
 const MAX_BODY_BYTES = 32_000;
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 /** Cap on distinct IPs tracked, so a spray of unique sources cannot grow the map without bound. */
 const MAX_TRACKED_IPS = 10_000;
 const rateLimiter = createFixedWindowLimiter({
@@ -90,6 +96,13 @@ function text(value: unknown, maxLength: number) {
   return typeof value === "string"
     ? value.trim().replace(/\s+/g, " ").slice(0, maxLength)
     : "";
+}
+
+function submissionKey(request: Request) {
+  const supplied = request.headers.get("idempotency-key")?.trim();
+  if (!supplied) return { ok: false, reason: "missing" } as const;
+  if (!UUID_PATTERN.test(supplied)) return { ok: false, reason: "invalid" } as const;
+  return { ok: true, value: supplied.toLowerCase() } as const;
 }
 
 function isQuotePayload(value: unknown): value is QuotePayload {
@@ -198,7 +211,7 @@ export async function POST(request: Request) {
   const body = parsed;
 
   // Honeypot tripped — accept silently so the bot doesn't learn.
-  // No `leadId`: the client must not treat this as a delivered conversion.
+  // No `leadId`: the client must not treat this as a captured conversion.
   if (body.contactRef) return json({ ok: true });
 
   const name = text(body.name, 100);
@@ -221,7 +234,19 @@ export async function POST(request: Request) {
     return json({ error: "Vehicle details are required." }, 400);
   }
 
-  const leadId = crypto.randomUUID();
+  const key = submissionKey(request);
+  if (!key.ok) {
+    return json(
+      {
+        error:
+          key.reason === "missing"
+            ? "Please refresh this page before submitting your enquiry."
+            : "This enquiry could not be identified safely.",
+      },
+      key.reason === "missing" ? 428 : 400,
+    );
+  }
+  const leadId = key.value;
 
   const lead = {
     leadId,
@@ -234,33 +259,96 @@ export async function POST(request: Request) {
     receivedAt: new Date().toISOString(),
   };
 
-  const email = buildQuoteEmail(lead);
-  const delivery = await deliverQuote({
-    settings: {
-      webhookUrl: process.env.QUOTE_WEBHOOK_URL,
-      resendApiKey: process.env.RESEND_API_KEY,
-      toEmail: process.env.QUOTE_TO_EMAIL,
-      fromEmail: process.env.QUOTE_FROM_EMAIL,
-    },
-    lead,
-    email: {
-      subject: email.subject,
-      text: email.text,
-    },
+  const delivery = resolveQuoteDelivery({
+    webhookUrl: process.env.QUOTE_WEBHOOK_URL,
+    resendApiKey: process.env.RESEND_API_KEY,
+    toEmail: process.env.QUOTE_TO_EMAIL,
+    fromEmail: process.env.QUOTE_FROM_EMAIL,
   });
 
   if (!delivery.ok) {
-    const configurationFailure = delivery.provider === "configuration";
     return json(
       {
-        error:
-          configurationFailure
-            ? `Online enquiries are temporarily unavailable. Please call ${site.phone.display}.`
-            : `Your enquiry could not be sent. Please try again or call ${site.phone.display}.`,
+        error: `Online enquiries are temporarily unavailable. Please call ${site.phone.display}.`,
       },
-      configurationFailure ? 503 : 502,
+      503,
     );
   }
 
-  return json({ ok: true, leadId });
+  let persisted;
+  try {
+    persisted = await persistQuote(lead, delivery.provider);
+  } catch (error) {
+    console.error(
+      JSON.stringify({
+        event: "quote_persistence",
+        outcome: "failure",
+        reference: leadId.slice(0, 8).toUpperCase(),
+        reason:
+          error instanceof QuoteStorageConfigurationError
+            ? "missing_configuration"
+            : "database_error",
+      }),
+    );
+    return json(
+      {
+        error: `Your enquiry could not be saved. Please try again or call ${site.phone.display}.`,
+      },
+      503,
+    );
+  }
+
+  if (!persisted.ok) {
+    return json(
+      {
+        error:
+          "This submission reference was already used for different details. Please try again.",
+      },
+      409,
+    );
+  }
+
+  if (persisted.quote.state === "dead") {
+    return json(
+      {
+        error: `Your enquiry was saved but could not be delivered automatically. Please call ${site.phone.display} and quote reference ${leadId.slice(0, 8).toUpperCase()}.`,
+      },
+      502,
+    );
+  }
+
+  let processingOutcome: Awaited<ReturnType<typeof processQuoteLeadNow>> =
+    "not_claimed";
+  if (persisted.quote.state !== "succeeded") {
+    try {
+      processingOutcome = await processQuoteLeadNow(leadId);
+    } catch {
+      console.error(
+        JSON.stringify({
+          event: "quote_outbox",
+          outcome: "immediate_worker_error",
+          reference: leadId.slice(0, 8).toUpperCase(),
+        }),
+      );
+    }
+  }
+
+  const providerAccepted =
+    persisted.quote.state === "succeeded" || processingOutcome === "accepted";
+  if (processingOutcome === "dead_lettered") {
+    return json(
+      {
+        error: `Your enquiry was saved but could not be delivered automatically. Please call ${site.phone.display} and quote reference ${leadId.slice(0, 8).toUpperCase()}.`,
+      },
+      502,
+    );
+  }
+  return json(
+    {
+      ok: true,
+      leadId,
+      delivery: providerAccepted ? "accepted" : "stored",
+    },
+    providerAccepted ? 200 : 202,
+  );
 }

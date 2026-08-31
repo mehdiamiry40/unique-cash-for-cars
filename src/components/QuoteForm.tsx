@@ -13,6 +13,7 @@ import {
 type Status = "idle" | "submitting" | "success" | "error";
 type RequiredFieldName = "name" | "phone" | "suburb" | "vehicle";
 type FieldErrors = Partial<Record<RequiredFieldName, string>>;
+type SubmissionIdentity = Readonly<{ fingerprint: string; key: string }>;
 
 const requiredFieldOrder: RequiredFieldName[] = [
   "name",
@@ -20,6 +21,32 @@ const requiredFieldOrder: RequiredFieldName[] = [
   "suburb",
   "vehicle",
 ];
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function normalizedSubmissionValue(value: FormDataEntryValue | undefined) {
+  return String(value ?? "").trim().replace(/\s+/g, " ");
+}
+
+async function submissionFingerprint(
+  data: Record<string, FormDataEntryValue>,
+) {
+  const canonical = JSON.stringify([
+    normalizedSubmissionValue(data.name),
+    normalizedSubmissionValue(data.phone),
+    normalizedSubmissionValue(data.suburb),
+    normalizedSubmissionValue(data.vehicle),
+    normalizedSubmissionValue(data.expectedPrice) || "Not sure",
+    normalizedSubmissionValue(data.condition) || "—",
+  ]);
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(canonical),
+  );
+  return Array.from(new Uint8Array(digest), (byte) =>
+    byte.toString(16).padStart(2, "0"),
+  ).join("");
+}
 
 const validationCategories: Record<RequiredFieldName, QuoteFormErrorCategory> = {
   name: "validation_name",
@@ -45,6 +72,9 @@ function responseErrorMessage(status: number) {
   if (status === 502 || status === 503) {
     return `${site.name} couldn’t deliver your quote request right now. Please try again shortly or call ${site.phone.display}.`;
   }
+  if (status === 409) {
+    return "Your details changed while this enquiry was being submitted. Please submit them once more.";
+  }
   return `${site.name} couldn’t submit your quote request. Please try again or call ${site.phone.display}.`;
 }
 
@@ -61,6 +91,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
   const [serverError, setServerError] = useState<string | null>(null);
   const [leadReference, setLeadReference] = useState<string | null>(null);
   const hasStartedRef = useRef(false);
+  const submissionIdentityRef = useRef<SubmissionIdentity | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const firstInvalidFieldRef = useRef<RequiredFieldName | null>(null);
 
@@ -161,14 +192,56 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
     setStatus("submitting");
 
     try {
+      const fingerprint = await submissionFingerprint(data);
+      const storageKey = `ucfc:quote-submission:${id}`;
+      let identity = submissionIdentityRef.current;
+
+      if (!identity || identity.fingerprint !== fingerprint) {
+        try {
+          const stored = JSON.parse(
+            sessionStorage.getItem(storageKey) ?? "null",
+          ) as Partial<SubmissionIdentity> | null;
+          identity =
+            stored?.fingerprint === fingerprint &&
+            typeof stored.key === "string" &&
+            UUID_PATTERN.test(stored.key)
+              ? { fingerprint, key: stored.key.toLowerCase() }
+              : null;
+        } catch {
+          identity = null;
+        }
+      }
+
+      if (!identity) {
+        identity = { fingerprint, key: crypto.randomUUID() };
+      }
+      submissionIdentityRef.current = identity;
+      try {
+        sessionStorage.setItem(storageKey, JSON.stringify(identity));
+      } catch {
+        // Same-page retries still reuse the in-memory identity if storage is
+        // blocked or unavailable.
+      }
+
       const res = await fetch("/api/quote", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": identity.key,
+        },
         body: JSON.stringify(data),
       });
 
       const result = (await res.json().catch(() => ({}))) as { leadId?: string };
       if (!res.ok) {
+        if (res.status === 409) {
+          submissionIdentityRef.current = null;
+          try {
+            sessionStorage.removeItem(storageKey);
+          } catch {
+            // Nothing else to clean up.
+          }
+        }
         trackQuoteFormError(responseErrorCategory(res.status));
         setStatus("error");
         setServerError(responseErrorMessage(res.status));
@@ -184,6 +257,12 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         );
       } else {
         setLeadReference(null);
+      }
+      submissionIdentityRef.current = null;
+      try {
+        sessionStorage.removeItem(storageKey);
+      } catch {
+        // The enquiry is already safely accepted.
       }
       setStatus("success");
       form.reset();
@@ -211,7 +290,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         role="status"
         aria-live="polite"
       >
-        <h2 className="heading-md mb-3">Thanks — we&apos;ve got your details</h2>
+        <h2 className="heading-md mb-3">Thanks — we&apos;ve safely received your details</h2>
         <p className="mb-6">
           We&apos;ll call you back with a quote shortly. If you&apos;d rather not wait,
           ring us now and we&apos;ll price it on the spot.

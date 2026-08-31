@@ -39,6 +39,7 @@ const email = {
   subject: "New car quote enquiry",
   text: "Plain-text quote details",
 };
+const idempotencyKey = `quote/${lead.leadId}`;
 
 function dependencies(fetchImplementation, events) {
   let now = 1_000;
@@ -64,6 +65,7 @@ test("webhook delivery sends the exact lead and safe success telemetry", async (
       settings: { webhookUrl: "https://hooks.example.test/quote" },
       lead,
       email,
+      idempotencyKey,
     },
     dependencies(async (url, init) => {
       request = { url, init };
@@ -71,10 +73,14 @@ test("webhook delivery sends the exact lead and safe success telemetry", async (
     }, events),
   );
 
-  assert.deepEqual(result, { ok: true, provider: "webhook" });
+  assert.deepEqual(result, { ok: true, provider: "webhook", status: 204 });
   assert.equal(request.url, "https://hooks.example.test/quote");
   assert.equal(request.init.method, "POST");
-  assert.deepEqual(request.init.headers, { "Content-Type": "application/json" });
+  assert.deepEqual(request.init.headers, {
+    "Content-Type": "application/json",
+    "Idempotency-Key": idempotencyKey,
+    "X-Quote-Lead-Id": lead.leadId,
+  });
   assert.deepEqual(JSON.parse(request.init.body), lead);
   assert.deepEqual(events, [
     {
@@ -99,16 +105,23 @@ test("Resend delivery is text-only and does not reintroduce an HTML MIME part", 
       },
       lead,
       email,
+      idempotencyKey,
     },
     dependencies(async (url, init) => {
       request = { url, init };
-      return new Response("{}", { status: 200 });
+      return new Response('{"id":"email_123"}', { status: 200 });
     }, events),
   );
 
-  assert.deepEqual(result, { ok: true, provider: "resend" });
+  assert.deepEqual(result, {
+    ok: true,
+    provider: "resend",
+    status: 200,
+    providerReceiptId: "email_123",
+  });
   assert.equal(request.url, "https://api.resend.com/emails");
   assert.equal(request.init.headers.Authorization, "Bearer re_test_key");
+  assert.equal(request.init.headers["Idempotency-Key"], idempotencyKey);
   const body = JSON.parse(request.init.body);
   assert.deepEqual(body, {
     from: "Quotes <sender@example.test>",
@@ -127,7 +140,7 @@ test("provider HTTP failures return only a safe status and allowlisted telemetry
   ]) {
     const events = [];
     const result = await deliverQuote(
-      { settings, lead, email },
+      { settings, lead, email, idempotencyKey },
       dependencies(async () => new Response(null, { status: 503 }), events),
     );
 
@@ -152,6 +165,7 @@ test("timeouts and generic fetch failures are classified without raw messages", 
         settings: { webhookUrl: "https://hooks.example.test/quote" },
         lead,
         email,
+        idempotencyKey,
       },
       dependencies(async () => {
         throw error;
@@ -184,7 +198,7 @@ test("invalid delivery configuration fails closed without making a request", asy
     const events = [];
     let calls = 0;
     const result = await deliverQuote(
-      { settings, lead, email },
+      { settings, lead, email, idempotencyKey },
       dependencies(async () => {
         calls += 1;
         return new Response(null, { status: 200 });
@@ -214,6 +228,7 @@ test("structured telemetry never contains lead PII or delivery credentials", asy
       },
       lead,
       email,
+      idempotencyKey,
     },
     dependencies(async () => new Response(null, { status: 200 }), events),
   );
@@ -231,4 +246,50 @@ test("structured telemetry never contains lead PII or delivery credentials", asy
   ]) {
     assert.ok(!serialized.includes(privateValue), `telemetry leaked ${privateValue}`);
   }
+});
+
+test("invalid provider idempotency keys fail before any outbound request", async () => {
+  const events = [];
+  let calls = 0;
+  const result = await deliverQuote(
+    {
+      settings: { webhookUrl: "https://hooks.example.test/quote" },
+      lead,
+      email,
+      idempotencyKey: "unsafe key with spaces",
+    },
+    dependencies(async () => {
+      calls += 1;
+      return new Response(null, { status: 200 });
+    }, events),
+  );
+
+  assert.equal(calls, 0);
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, "invalid_idempotency_key");
+  assert.equal(events[0].reason, "invalid_idempotency_key");
+});
+
+test("retry-after is allowlisted and bounded on provider failures", async () => {
+  const events = [];
+  const result = await deliverQuote(
+    {
+      settings: { webhookUrl: "https://hooks.example.test/quote" },
+      lead,
+      email,
+      idempotencyKey,
+    },
+    dependencies(
+      async () =>
+        new Response(null, {
+          status: 429,
+          headers: { "Retry-After": "999999" },
+        }),
+      events,
+    ),
+  );
+
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, "http_error");
+  assert.equal(result.retryAfterSeconds, 3600);
 });

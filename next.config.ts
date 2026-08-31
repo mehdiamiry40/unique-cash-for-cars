@@ -17,6 +17,18 @@ import { resolveQuoteDelivery } from "./src/lib/quote-delivery";
  */
 
 if (process.env.VERCEL_ENV === "production") {
+  if (!process.env.DATABASE_URL?.trim()) {
+    throw new Error(
+      "Production quote persistence requires DATABASE_URL.",
+    );
+  }
+
+  if (!process.env.CRON_SECRET?.trim()) {
+    throw new Error(
+      "Production quote retries require CRON_SECRET.",
+    );
+  }
+
   const quoteDelivery = resolveQuoteDelivery({
     webhookUrl: process.env.QUOTE_WEBHOOK_URL,
     resendApiKey: process.env.RESEND_API_KEY,
