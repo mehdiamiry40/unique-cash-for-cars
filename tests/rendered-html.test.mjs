@@ -90,6 +90,7 @@ before(async () => {
     env: {
       ...process.env,
       NODE_ENV: "production",
+      VERCEL_ENV: "",
       NEXT_DIST_DIR: "",
       QUOTE_WEBHOOK_URL: "",
       RESEND_API_KEY: "",
@@ -871,7 +872,7 @@ test("the quote endpoint validates contact details", async () => {
   const result = await response.json();
 
   assert.equal(response.status, 400);
-  assert.match(result.error, /valid phone number/i);
+  assert.match(result.fields.phone, /valid phone number/i);
   assert.equal(response.headers.get("cache-control"), "no-store");
 });
 
@@ -880,16 +881,16 @@ test("the quote endpoint requires location and vehicle details, not an expected 
     [
       "192.0.2.14",
       { name: "Jamie Example", phone: "0400 000 000", vehicle: "2016 Toyota Corolla" },
-      /suburb is required/i,
+      "suburb",
     ],
     [
       "192.0.2.15",
       { name: "Jamie Example", phone: "0400 000 000", suburb: "Southport" },
-      /vehicle details are required/i,
+      "vehicle",
     ],
   ];
 
-  for (const [ip, body, expectedError] of cases) {
+  for (const [ip, body, expectedField] of cases) {
     const response = await fetch(`${origin}/api/quote`, {
       method: "POST",
       headers: { "content-type": "application/json", "x-forwarded-for": ip },
@@ -897,7 +898,8 @@ test("the quote endpoint requires location and vehicle details, not an expected 
     });
     const result = await response.json();
     assert.equal(response.status, 400);
-    assert.match(result.error, expectedError);
+    assert.equal(result.code, "invalid_quote_fields");
+    assert.ok(result.fields[expectedField]);
   }
 
   const withoutPrice = await fetch(`${origin}/api/quote`, {
@@ -914,7 +916,8 @@ test("the quote endpoint requires location and vehicle details, not an expected 
       vehicle: "2016 Toyota Corolla",
     }),
   });
-  assert.equal(withoutPrice.status, 503, "optional price must pass field validation");
+  assert.equal(withoutPrice.status, 200, "optional price must pass field validation");
+  assert.equal((await withoutPrice.json()).code, "preview_quote");
 });
 
 test("the quote endpoint rejects non-object JSON with a controlled 400", async () => {
@@ -983,7 +986,8 @@ test("the quote endpoint enforces media type and body size", async () => {
       vehicle: "2016 Toyota Corolla",
     }),
   });
-  assert.equal(caseInsensitiveJson.status, 503);
+  assert.equal(caseInsensitiveJson.status, 200);
+  assert.equal((await caseInsensitiveJson.json()).code, "preview_quote");
 
   const tooLarge = await fetch(`${origin}/api/quote`, {
     method: "POST",
@@ -1029,7 +1033,7 @@ test("the local quote brake is bounded and returns Retry-After", async () => {
   }
 });
 
-test("the quote endpoint never reports success without a delivery service", async () => {
+test("local production-mode builds validate without claiming a real capture", async () => {
   const response = await fetch(`${origin}/api/quote`, {
     method: "POST",
     headers: {
@@ -1048,8 +1052,8 @@ test("the quote endpoint never reports success without a delivery service", asyn
   });
   const result = await response.json();
 
-  assert.equal(response.status, 503);
-  assert.match(result.error, /0423 476 111/);
+  assert.equal(response.status, 200);
+  assert.deepEqual(result, {ok: true, code: "preview_quote", stored: false});
 });
 
 test("valid quote submissions require a stable idempotency key", async () => {
@@ -1168,11 +1172,8 @@ test("conversion tracking separates durably captured leads from funnel intent", 
     /sendConversion\(quoteConversionLabel/,
     "durably captured quote enquiries do not fire the native Google Ads conversion",
   );
-  assert.match(
-    quoteForm,
-    /if \(result\.leadId\)[\s\S]*?trackQuoteConversion\(result\.leadId\)/,
-    "quote conversion is not gated by the server-issued lead ID",
-  );
+  // Server-issued ID gating is exercised through the real React form in
+  // quote-form.test.mjs, including malformed IDs and honeypot responses.
   assert.match(
     quoteForm,
     /trackQuoteFormStart\(\)/,
@@ -1333,9 +1334,9 @@ test("the quote form prioritises contact, location and vehicle details", async (
   });
   const result = await response.json();
 
-  // No delivery configured in tests → 503 after required-field validation.
-  assert.equal(response.status, 503);
-  assert.match(result.error, /0423 476 111/);
+  // Local next start remains a simulation even with NODE_ENV=production.
+  assert.equal(response.status, 200);
+  assert.deepEqual(result, {ok: true, code: "preview_quote", stored: false});
 });
 
 // Builds a second copy of the site as Vercel would build a preview deployment.

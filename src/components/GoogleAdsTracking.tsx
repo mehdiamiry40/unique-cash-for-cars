@@ -82,6 +82,8 @@ export type QuoteFormErrorCategory =
   | "validation_phone"
   | "validation_suburb"
   | "validation_vehicle"
+  | "validation_expected_price"
+  | "validation_condition"
   | "rate_limited"
   | "request_rejected"
   | "delivery_unavailable"

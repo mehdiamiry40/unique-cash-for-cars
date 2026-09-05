@@ -83,7 +83,7 @@ export function Header() {
           <a
             href={site.phone.href}
             data-cta="call-header"
-            className="hidden items-center gap-2 rounded bg-brand px-5 py-3 text-lg font-bold text-white transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:inline-flex"
+            className="hidden items-center gap-2 rounded bg-brand px-5 py-3 text-lg font-bold text-white transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-white sm:inline-flex"
           >
             <PhoneIcon />
             <span className="whitespace-nowrap">{site.phone.display}</span>

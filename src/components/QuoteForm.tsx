@@ -1,8 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { site } from "@/content/site";
+import {
+  normalizeQuoteValue,
+  quoteFieldLimits,
+  quoteFieldOrder,
+  quoteIdPattern,
+  savedQuoteReference,
+  validateQuoteFields,
+  type QuoteFieldErrors,
+  type QuoteFieldName,
+} from "@/lib/quote-validation";
 import {
   trackQuoteConversion,
   trackQuoteFormError,
@@ -10,34 +20,23 @@ import {
   type QuoteFormErrorCategory,
 } from "@/components/GoogleAdsTracking";
 
-type Status = "idle" | "submitting" | "success" | "error";
-type RequiredFieldName = "name" | "phone" | "suburb" | "vehicle";
-type FieldErrors = Partial<Record<RequiredFieldName, string>>;
+type Status = "idle" | "submitting" | "success" | "saved" | "preview" | "error";
 type SubmissionIdentity = Readonly<{ fingerprint: string; key: string }>;
 
-const requiredFieldOrder: RequiredFieldName[] = [
-  "name",
-  "phone",
-  "suburb",
-  "vehicle",
-];
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-function normalizedSubmissionValue(value: FormDataEntryValue | undefined) {
-  return String(value ?? "").trim().replace(/\s+/g, " ");
-}
+const subscribeToClient = () => () => {};
+const clientReady = () => true;
+const serverReady = () => false;
 
 async function submissionFingerprint(
   data: Record<string, FormDataEntryValue>,
 ) {
   const canonical = JSON.stringify([
-    normalizedSubmissionValue(data.name),
-    normalizedSubmissionValue(data.phone),
-    normalizedSubmissionValue(data.suburb),
-    normalizedSubmissionValue(data.vehicle),
-    normalizedSubmissionValue(data.expectedPrice) || "Not sure",
-    normalizedSubmissionValue(data.condition) || "—",
+    normalizeQuoteValue(data.name),
+    normalizeQuoteValue(data.phone),
+    normalizeQuoteValue(data.suburb),
+    normalizeQuoteValue(data.vehicle),
+    normalizeQuoteValue(data.expectedPrice) || "Not sure",
+    normalizeQuoteValue(data.condition) || "—",
   ]);
   const digest = await crypto.subtle.digest(
     "SHA-256",
@@ -48,15 +47,17 @@ async function submissionFingerprint(
   ).join("");
 }
 
-const validationCategories: Record<RequiredFieldName, QuoteFormErrorCategory> = {
+const validationCategories: Record<QuoteFieldName, QuoteFormErrorCategory> = {
   name: "validation_name",
   phone: "validation_phone",
   suburb: "validation_suburb",
   vehicle: "validation_vehicle",
+  expectedPrice: "validation_expected_price",
+  condition: "validation_condition",
 };
 
-function isRequiredFieldName(name: string): name is RequiredFieldName {
-  return requiredFieldOrder.includes(name as RequiredFieldName);
+function isQuoteFieldName(name: string): name is QuoteFieldName {
+  return quoteFieldOrder.includes(name as QuoteFieldName);
 }
 
 function responseErrorCategory(status: number): QuoteFormErrorCategory {
@@ -86,21 +87,32 @@ function responseErrorMessage(status: number) {
  * Contact Form 7 has no built-in protection.
  */
 export function QuoteForm({ id = "quote" }: { id?: string }) {
+  // SSR and the first hydration render keep native submission unavailable.
+  // The explicit POST action below also prevents GET URLs if native submit()
+  // bypasses the disabled button. Only the ready client sends the JSON protocol.
+  const ready = useSyncExternalStore(subscribeToClient, clientReady, serverReady);
   const [status, setStatus] = useState<Status>("idle");
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [fieldErrors, setFieldErrors] = useState<QuoteFieldErrors>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [leadReference, setLeadReference] = useState<string | null>(null);
   const hasStartedRef = useRef(false);
   const submissionIdentityRef = useRef<SubmissionIdentity | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const firstInvalidFieldRef = useRef<RequiredFieldName | null>(null);
+  const firstInvalidFieldRef = useRef<QuoteFieldName | null>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
 
-  const fieldErrorIds: Record<RequiredFieldName, string> = {
+  const fieldErrorIds: Record<QuoteFieldName, string> = {
     name: `${id}-name-error`,
     phone: `${id}-phone-error`,
     suburb: `${id}-suburb-error`,
     vehicle: `${id}-vehicle-error`,
+    expectedPrice: `${id}-price-error`,
+    condition: `${id}-condition-error`,
   };
+
+  useEffect(() => {
+    if (status === "success" || status === "saved" || status === "preview") resultRef.current?.focus();
+  }, [status]);
 
   useEffect(() => {
     const fieldName = firstInvalidFieldRef.current;
@@ -120,7 +132,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
   function handleFormStart(event: React.SyntheticEvent<HTMLFormElement>) {
     const field = event.target;
     if (
-      !(field instanceof HTMLInputElement) ||
+      !(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) ||
       field.name === "contactRef"
     ) {
       return;
@@ -134,8 +146,8 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
 
     const field = event.target;
     if (
-      !(field instanceof HTMLInputElement) ||
-      !isRequiredFieldName(field.name)
+      !(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) ||
+      !isQuoteFieldName(field.name)
     ) {
       return;
     }
@@ -152,32 +164,15 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!ready || status === "submitting") return;
     trackFormStartOnce();
     setServerError(null);
 
     const form = event.currentTarget;
     const data = Object.fromEntries(new FormData(form).entries());
 
-    const name = String(data.name ?? "").trim();
-    const phone = String(data.phone ?? "").trim();
-    const suburb = String(data.suburb ?? "").trim();
-    const vehicle = String(data.vehicle ?? "").trim();
-    const validationErrors: FieldErrors = {};
-
-    if (!name) validationErrors.name = "Please enter your name.";
-    if (phone.replace(/\D/g, "").length < 8) {
-      validationErrors.phone =
-        "Please enter a valid phone number so we can call you back.";
-    }
-    if (!suburb) {
-      validationErrors.suburb =
-        "Please enter the suburb where the vehicle is located.";
-    }
-    if (!vehicle) {
-      validationErrors.vehicle = "Please enter the vehicle’s make, model and year.";
-    }
-
-    const firstInvalidField = requiredFieldOrder.find(
+    const { errors: validationErrors } = validateQuoteFields(data);
+    const firstInvalidField = quoteFieldOrder.find(
       (fieldName) => validationErrors[fieldName],
     );
     if (firstInvalidField) {
@@ -204,7 +199,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
           identity =
             stored?.fingerprint === fingerprint &&
             typeof stored.key === "string" &&
-            UUID_PATTERN.test(stored.key)
+            quoteIdPattern.test(stored.key)
               ? { fingerprint, key: stored.key.toLowerCase() }
               : null;
         } catch {
@@ -232,8 +227,15 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         body: JSON.stringify(data),
       });
 
-      const result = (await res.json().catch(() => ({}))) as { leadId?: string };
+      const result: unknown = await res.json().catch(() => ({}));
       if (!res.ok) {
+        const savedReference = savedQuoteReference(result);
+        if (res.status === 502 && savedReference) {
+          trackQuoteFormError("delivery_unavailable");
+          setLeadReference(savedReference);
+          setStatus("saved");
+          return;
+        }
         if (res.status === 409) {
           submissionIdentityRef.current = null;
           try {
@@ -248,12 +250,20 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         return;
       }
 
+      if (result && typeof result === "object" && "code" in result && result.code === "preview_quote") {
+        setLeadReference(null);
+        setStatus("preview");
+        return;
+      }
+
       // Only count a conversion when the server issued a lead ID — honeypot
       // replies are `{ ok: true }` with no id and must not fire Ads events.
-      if (result.leadId) {
-        trackQuoteConversion(result.leadId);
+      const leadId = result && typeof result === "object" && "leadId" in result
+        ? result.leadId : undefined;
+      if (typeof leadId === "string" && quoteIdPattern.test(leadId)) {
+        trackQuoteConversion(leadId);
         setLeadReference(
-          result.leadId.split("-", 1)[0].slice(0, 8).toUpperCase(),
+          leadId.slice(0, 8).toUpperCase(),
         );
       } else {
         setLeadReference(null);
@@ -282,18 +292,26 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
     "w-full rounded border border-field bg-surface px-4 py-3 text-base text-ink placeholder:text-ink-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-brand";
   const labelClass = "mb-1.5 block text-sm font-semibold text-ink-heading";
 
-  if (status === "success") {
+  if (status === "success" || status === "saved" || status === "preview") {
     return (
       <div
+        ref={resultRef}
         id={id}
+        tabIndex={-1}
         className="scroll-mt-28 rounded-lg border border-hairline bg-surface p-8 shadow-lg"
         role="status"
         aria-live="polite"
       >
-        <h2 className="heading-md mb-3">Thanks — we&apos;ve safely received your details</h2>
+        <h2 className="heading-md mb-3">
+          {status === "preview" ? "Preview checked — no enquiry sent"
+            : status === "saved" ? "Your details are saved — please call us" : "Thanks — we’ve safely received your details"}
+        </h2>
         <p className="mb-6">
-          We&apos;ll call you back with a quote shortly. If you&apos;d rather not wait,
-          ring us now and we&apos;ll price it on the spot.
+          {status === "preview"
+            ? "This preview checks the form without saving your details or sending a notification. To request a real quote, visit our live website or call us."
+            : status === "saved"
+            ? "Your enquiry needs our attention because the automatic notification could not be delivered. Please call and quote the reference below so we can find your details."
+            : "We’ll call you back during our opening hours, 8am–5pm daily. If you’d prefer to speak with us, call the number below."}
         </p>
         {leadReference ? (
           <p className="mb-6 rounded bg-surface-alt px-4 py-3 text-sm text-ink-heading">
@@ -303,7 +321,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         ) : null}
         <a
           href={site.phone.href}
-          className="inline-flex items-center gap-2 rounded bg-brand px-6 py-3 font-bold text-white transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          className="inline-flex items-center gap-2 rounded bg-brand px-6 py-3 font-bold text-white transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-dark"
         >
           {site.phone.display}
         </a>
@@ -315,6 +333,8 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
     <form
       ref={formRef}
       id={id}
+      method="post"
+      action="/api/quote"
       noValidate
       onSubmit={handleSubmit}
       onFocusCapture={handleFormStart}
@@ -325,13 +345,22 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         Get a Free Quote
       </h2>
 
+      {!ready ? (
+        <p className="mb-5 text-sm" role="status">
+          You can call <a className="font-semibold text-brand underline" href={site.phone.href}>{site.phone.display}</a> for a quote if this form does not become available.
+        </p>
+      ) : null}
+      <noscript>
+        <p className="mb-5 text-sm">Online submission needs JavaScript. Please call {site.phone.display} for your quote.</p>
+      </noscript>
+
       <div className="grid gap-4">
         <div>
-          <label htmlFor="q-name" className={labelClass}>
+          <label htmlFor={`${id}-name`} className={labelClass}>
             Name
           </label>
           <input
-            id="q-name"
+            id={`${id}-name`}
             name="name"
             required
             aria-invalid={Boolean(fieldErrors.name)}
@@ -351,11 +380,11 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </div>
 
         <div>
-          <label htmlFor="q-phone" className={labelClass}>
+          <label htmlFor={`${id}-phone`} className={labelClass}>
             Phone
           </label>
           <input
-            id="q-phone"
+            id={`${id}-phone`}
             name="phone"
             type="tel"
             required
@@ -377,11 +406,11 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </div>
 
         <div>
-          <label htmlFor="q-suburb" className={labelClass}>
+          <label htmlFor={`${id}-suburb`} className={labelClass}>
             Suburb
           </label>
           <input
-            id="q-suburb"
+            id={`${id}-suburb`}
             name="suburb"
             required
             aria-invalid={Boolean(fieldErrors.suburb)}
@@ -403,11 +432,11 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </div>
 
         <div>
-          <label htmlFor="q-vehicle" className={labelClass}>
+          <label htmlFor={`${id}-vehicle`} className={labelClass}>
             Make, model and year
           </label>
           <input
-            id="q-vehicle"
+            id={`${id}-vehicle`}
             name="vehicle"
             required
             aria-invalid={Boolean(fieldErrors.vehicle)}
@@ -429,30 +458,42 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         </div>
 
         <div>
-          <label htmlFor="q-price" className={labelClass}>
+          <label htmlFor={`${id}-price`} className={labelClass}>
             Expected price{" "}
             <span className="font-normal text-ink-muted">(optional)</span>
           </label>
           <input
-            id="q-price"
+            id={`${id}-price`}
             name="expectedPrice"
+            aria-invalid={Boolean(fieldErrors.expectedPrice)}
+            aria-describedby={fieldErrors.expectedPrice ? fieldErrorIds.expectedPrice : undefined}
             inputMode="numeric"
             autoComplete="off"
             placeholder="$1,500 or leave blank…"
             className={inputClass}
           />
+          {fieldErrors.expectedPrice ? (
+            <p id={fieldErrorIds.expectedPrice} className="mt-1.5 text-sm font-semibold text-brand-dark">{fieldErrors.expectedPrice}</p>
+          ) : null}
         </div>
 
         <div>
-          <label htmlFor="q-condition" className={labelClass}>
-            Condition
+          <label htmlFor={`${id}-condition`} className={labelClass}>
+            Condition <span className="font-normal text-ink-muted">(optional)</span>
           </label>
-          <input
-            id="q-condition"
+          <textarea
+            id={`${id}-condition`}
             name="condition"
+            rows={3}
+            aria-invalid={Boolean(fieldErrors.condition)}
+            aria-describedby={`${id}-condition-help${fieldErrors.condition ? ` ${fieldErrorIds.condition}` : ""}`}
             placeholder="Runs, needs work, wreck…"
             className={inputClass}
           />
+          <p id={`${id}-condition-help`} className="mt-1.5 text-sm text-ink-muted">Up to {quoteFieldLimits.condition} characters. Include damage or collection details.</p>
+          {fieldErrors.condition ? (
+            <p id={fieldErrorIds.condition} className="mt-1.5 text-sm font-semibold text-brand-dark">{fieldErrors.condition}</p>
+          ) : null}
         </div>
 
         {/*
@@ -465,8 +506,8 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
           anywhere. Don't rename this to anything autofill recognises.
         */}
         <div aria-hidden="true" className="absolute -left-[9999px]">
-          <label htmlFor="q-contact-ref">Leave this field empty</label>
-          <input id="q-contact-ref" name="contactRef" tabIndex={-1} autoComplete="off" />
+          <label htmlFor={`${id}-contact-ref`}>Leave this field empty</label>
+          <input id={`${id}-contact-ref`} name="contactRef" tabIndex={-1} autoComplete="off" />
         </div>
 
         {serverError ? (
@@ -477,9 +518,9 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
 
         <button
           type="submit"
-          disabled={status === "submitting"}
+          disabled={!ready || status === "submitting"}
           data-cta="quote-submit"
-          className="w-full rounded bg-brand px-6 py-3.5 font-bold uppercase tracking-wide text-white transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded bg-brand px-6 py-3.5 font-bold uppercase tracking-wide text-white transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
         >
           {status === "submitting" ? "Sending…" : "Get a Free Quote"}
         </button>
