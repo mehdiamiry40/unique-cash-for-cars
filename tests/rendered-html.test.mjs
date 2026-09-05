@@ -1172,11 +1172,8 @@ test("conversion tracking separates durably captured leads from funnel intent", 
     /sendConversion\(quoteConversionLabel/,
     "durably captured quote enquiries do not fire the native Google Ads conversion",
   );
-  assert.match(
-    quoteForm,
-    /if \(result\.leadId\)[\s\S]*?trackQuoteConversion\(result\.leadId\)/,
-    "quote conversion is not gated by the server-issued lead ID",
-  );
+  // Server-issued ID gating is exercised through the real React form in
+  // quote-form.test.mjs, including malformed IDs and honeypot responses.
   assert.match(
     quoteForm,
     /trackQuoteFormStart\(\)/,

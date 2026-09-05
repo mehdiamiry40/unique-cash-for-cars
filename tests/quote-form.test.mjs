@@ -165,3 +165,12 @@ test("untrusted or malformed failure references never become the saved state",as
   assert.doesNotMatch(container.textContent,/Untrusted provider text|Your details are saved/);
   assert.equal(conversions.length,0);
 });
+
+test("honeypot and malformed success responses never count as captured conversions",async()=>{
+  for(const body of [{ok:true},{ok:true,leadId:"invalid"},{ok:true,leadId:123},null]){
+    await mount();await fill();
+    await submit(Response.json(body));
+    assert.equal(conversions.length,0);
+    assert.doesNotMatch(container.textContent,/Your enquiry reference/);
+  }
+});
