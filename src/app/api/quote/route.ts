@@ -7,6 +7,7 @@ import {
 } from "@/lib/quote-lead-store";
 import { processQuoteLeadNow } from "@/lib/quote-outbox";
 import { createFixedWindowLimiter } from "@/lib/quote-rate-limit";
+import { quoteIdPattern, validateQuoteFields } from "@/lib/quote-validation";
 
 /**
  * Quote enquiry endpoint.
@@ -52,8 +53,6 @@ type QuotePayload = {
 const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 5;
 const MAX_BODY_BYTES = 32_000;
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 /** Cap on distinct IPs tracked, so a spray of unique sources cannot grow the map without bound. */
 const MAX_TRACKED_IPS = 10_000;
 const rateLimiter = createFixedWindowLimiter({
@@ -92,16 +91,10 @@ function sameOrigin(request: Request) {
   }
 }
 
-function text(value: unknown, maxLength: number) {
-  return typeof value === "string"
-    ? value.trim().replace(/\s+/g, " ").slice(0, maxLength)
-    : "";
-}
-
 function submissionKey(request: Request) {
   const supplied = request.headers.get("idempotency-key")?.trim();
   if (!supplied) return { ok: false, reason: "missing" } as const;
-  if (!UUID_PATTERN.test(supplied)) return { ok: false, reason: "invalid" } as const;
+  if (!quoteIdPattern.test(supplied)) return { ok: false, reason: "invalid" } as const;
   return { ok: true, value: supplied.toLowerCase() } as const;
 }
 
@@ -214,25 +207,15 @@ export async function POST(request: Request) {
   // No `leadId`: the client must not treat this as a captured conversion.
   if (body.contactRef) return json({ ok: true });
 
-  const name = text(body.name, 100);
-  const phone = text(body.phone, 40);
-  const suburb = text(body.suburb, 120);
-  const vehicle = text(body.vehicle, 160);
-  const expectedPrice = text(body.expectedPrice, 60) || "Not sure";
-
-  // Phone-only contact. The public form does not collect email — we call back.
-  if (!name || !phone) {
-    return json({ error: "Name and phone are required." }, 400);
+  const validation = validateQuoteFields(body);
+  if (!validation.valid) {
+    return json({
+      code: "invalid_quote_fields",
+      error: "Please check the highlighted enquiry details.",
+      fields: validation.errors,
+    }, 400);
   }
-  if (phone.replace(/\D/g, "").length < 8) {
-    return json({ error: "Please enter a valid phone number." }, 400);
-  }
-  if (!suburb) {
-    return json({ error: "Suburb is required." }, 400);
-  }
-  if (!vehicle) {
-    return json({ error: "Vehicle details are required." }, 400);
-  }
+  const { name, phone, suburb, vehicle, expectedPrice, condition } = validation.values;
 
   const key = submissionKey(request);
   if (!key.ok) {
@@ -248,14 +231,20 @@ export async function POST(request: Request) {
   }
   const leadId = key.value;
 
+  // Preview/development forms exercise validation only. They must never use
+  // an integration's production database or send a real notification.
+  if (process.env.VERCEL_ENV !== "production" || process.env.NODE_ENV === "development") {
+    return json({ ok: true, code: "preview_quote", stored: false });
+  }
+
   const lead = {
     leadId,
     name,
     phone,
     suburb,
     vehicle,
-    expectedPrice,
-    condition: text(body.condition, 500) || "—",
+    expectedPrice: expectedPrice || "Not sure",
+    condition: condition || "—",
     receivedAt: new Date().toISOString(),
   };
 
@@ -311,6 +300,9 @@ export async function POST(request: Request) {
   if (persisted.quote.state === "dead") {
     return json(
       {
+        code: "quote_saved_delivery_failed",
+        stored: true,
+        leadId,
         error: `Your enquiry was saved but could not be delivered automatically. Please call ${site.phone.display} and quote reference ${leadId.slice(0, 8).toUpperCase()}.`,
       },
       502,
@@ -338,6 +330,9 @@ export async function POST(request: Request) {
   if (processingOutcome === "dead_lettered") {
     return json(
       {
+        code: "quote_saved_delivery_failed",
+        stored: true,
+        leadId,
         error: `Your enquiry was saved but could not be delivered automatically. Please call ${site.phone.display} and quote reference ${leadId.slice(0, 8).toUpperCase()}.`,
       },
       502,

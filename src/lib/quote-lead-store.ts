@@ -1,5 +1,9 @@
 import { createHash } from "node:crypto";
-import { neon } from "@neondatabase/serverless";
+import {
+  neon,
+  type NeonQueryFunctionInTransaction,
+  type NeonQueryInTransaction,
+} from "@neondatabase/serverless";
 
 import type {
   QuoteDeliveryFailureReason,
@@ -9,6 +13,9 @@ import type { QuoteEmailLead } from "./quote-email";
 
 export const MAX_QUOTE_DELIVERY_ATTEMPTS = 8;
 export const QUOTE_DELIVERY_LEASE_SECONDS = 120;
+export const QUOTE_DATABASE_TIMEOUT_MS = 3_000;
+// Conservative margin within Resend's 24-hour provider idempotency window.
+export const QUOTE_SAFE_REPLAY_HOURS = 23;
 
 export type QuoteOutboxState =
   | "pending"
@@ -40,7 +47,27 @@ export class QuoteStorageConfigurationError extends Error {
 function database() {
   const connectionString = process.env.DATABASE_URL?.trim();
   if (!connectionString) throw new QuoteStorageConfigurationError();
-  return neon(connectionString);
+  const sql = neon(connectionString, {
+    fetchOptions: { signal: AbortSignal.timeout(QUOTE_DATABASE_TIMEOUT_MS) },
+  });
+  // Bound both client waiting and database work, including lock waits. Settings
+  // are transaction-local, so they cannot leak through a pooled connection.
+  const limits = "SELECT set_config('statement_timeout', '2500', true), set_config('lock_timeout', '2000', true)";
+  return {
+    async query(query: string, values: unknown[] = []) {
+      const results = await sql.transaction((tx) => [
+        tx.query(limits),
+        tx.query(query, values),
+      ]);
+      return results[1];
+    },
+    async transaction(
+      queries: (tx: NeonQueryFunctionInTransaction<false, false>) => NeonQueryInTransaction[],
+    ) {
+      const results = await sql.transaction((tx) => [tx.query(limits), ...queries(tx)]);
+      return results.slice(1);
+    },
+  };
 }
 
 export function quotePayloadHash(lead: QuoteEmailLead) {
@@ -201,6 +228,12 @@ export async function claimQuoteByLeadId(
           AND state IN ('pending', 'processing')
           AND run_after <= now()
           AND attempts < $3
+          AND (state = 'pending' OR provider = 'resend')
+          AND (attempts = 0 OR EXISTS (
+            SELECT 1 FROM quote_leads AS l
+            WHERE l.lead_id = quote_delivery_outbox.lead_id
+              AND l.received_at > now() - ($5 * interval '1 hour')
+          ))
         FOR UPDATE SKIP LOCKED
       ),
       claimed AS (
@@ -223,6 +256,7 @@ export async function claimQuoteByLeadId(
       leaseToken,
       MAX_QUOTE_DELIVERY_ATTEMPTS,
       QUOTE_DELIVERY_LEASE_SECONDS,
+      QUOTE_SAFE_REPLAY_HOURS,
     ],
   );
 
@@ -235,7 +269,7 @@ export async function claimDueQuotes(
   leaseToken: string,
 ): Promise<ClaimedQuote[]> {
   const sql = database();
-  const safeLimit = Math.max(1, Math.min(25, Math.floor(limit)));
+  const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.min(25, Math.floor(limit))) : 1;
   const rows = await sql.query(
     `
       WITH picked AS (
@@ -244,6 +278,12 @@ export async function claimDueQuotes(
         WHERE state IN ('pending', 'processing')
           AND run_after <= now()
           AND attempts < $2
+          AND (state = 'pending' OR provider = 'resend')
+          AND (attempts = 0 OR EXISTS (
+            SELECT 1 FROM quote_leads AS l
+            WHERE l.lead_id = quote_delivery_outbox.lead_id
+              AND l.received_at > now() - ($5 * interval '1 hour')
+          ))
         ORDER BY run_after, outbox_id
         FOR UPDATE SKIP LOCKED
         LIMIT $1
@@ -269,6 +309,7 @@ export async function claimDueQuotes(
       MAX_QUOTE_DELIVERY_ATTEMPTS,
       leaseToken,
       QUOTE_DELIVERY_LEASE_SECONDS,
+      QUOTE_SAFE_REPLAY_HOURS,
     ],
   );
 
@@ -352,23 +393,78 @@ export async function markQuoteFailure(
   return rows.length === 1;
 }
 
-export async function deadLetterExpiredFinalLeases() {
+export type ExpiredQuoteFailure = Readonly<{
+  leadId: string;
+  provider: QuoteDeliveryProvider;
+  attempts: number;
+  reason: string;
+}>;
+
+export async function deadLetterExpiredFinalLeases(): Promise<ExpiredQuoteFailure[]> {
   const sql = database();
-  const rows = await sql`
-    UPDATE quote_delivery_outbox
-    SET state = 'dead',
-        lease_token = NULL,
-        last_error_code = 'lease_expired_at_attempt_cap',
-        provider_status = 'failed',
-        provider_status_at = now(),
-        finished_at = now(),
-        updated_at = now()
-    WHERE state = 'processing'
-      AND run_after <= now()
-      AND attempts >= ${MAX_QUOTE_DELIVERY_ATTEMPTS}
-    RETURNING outbox_id
-  `;
-  return rows.length;
+  const rows = await sql.query(
+    `
+      WITH expired AS (
+        SELECT o.outbox_id,
+          CASE
+            WHEN o.state = 'processing' AND o.provider = 'webhook'
+              THEN 'lease_expired_delivery_unknown'
+            WHEN o.attempts >= $1 THEN 'lease_expired_at_attempt_cap'
+            ELSE 'idempotency_window_expired'
+          END AS reason
+        FROM quote_delivery_outbox AS o
+        JOIN quote_leads AS l USING (lead_id)
+        WHERE o.state IN ('pending', 'processing')
+          AND o.run_after <= now()
+          AND o.attempts > 0
+          AND (
+            (o.state = 'processing' AND (o.attempts >= $1 OR o.provider = 'webhook'))
+            OR l.received_at <= now() - ($2 * interval '1 hour')
+          )
+        ORDER BY o.run_after, o.outbox_id
+        FOR UPDATE OF o SKIP LOCKED
+        LIMIT 100
+      )
+      UPDATE quote_delivery_outbox AS o
+      SET state = 'dead',
+          lease_token = NULL,
+          last_error_code = expired.reason,
+          provider_status = 'failed',
+          provider_status_at = now(),
+          finished_at = now(),
+          updated_at = now()
+      FROM expired
+      WHERE o.outbox_id = expired.outbox_id
+      RETURNING o.lead_id::text, o.provider, o.attempts, o.last_error_code
+    `,
+    [MAX_QUOTE_DELIVERY_ATTEMPTS, QUOTE_SAFE_REPLAY_HOURS],
+  );
+  return (rows as Record<string, unknown>[]).map((row) => ({
+    leadId: asString(row.lead_id),
+    provider: asString(row.provider) as QuoteDeliveryProvider,
+    attempts: asNumber(row.attempts),
+    reason: asString(row.last_error_code),
+  }));
+}
+
+export async function quoteOutboxHealth() {
+  const rows = await database().query(`
+    SELECT
+      count(*) FILTER (WHERE o.state = 'pending')::int AS pending,
+      count(*) FILTER (WHERE o.state = 'processing')::int AS processing,
+      count(*) FILTER (WHERE o.state = 'dead')::int AS dead,
+      COALESCE(EXTRACT(EPOCH FROM now() - min(l.received_at)
+        FILTER (WHERE o.state IN ('pending', 'processing'))), 0)::int AS oldest_pending_age_seconds
+    FROM quote_delivery_outbox AS o
+    JOIN quote_leads AS l USING (lead_id)
+  `);
+  const row = rows[0];
+  return {
+    pending: asNumber(row.pending),
+    processing: asNumber(row.processing),
+    dead: asNumber(row.dead),
+    oldestPendingAgeSeconds: Math.max(0, asNumber(row.oldest_pending_age_seconds)),
+  };
 }
 
 export async function purgeExpiredQuoteLeads(limit = 100) {

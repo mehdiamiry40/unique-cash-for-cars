@@ -70,10 +70,16 @@ summary,
   -webkit-tap-highlight-color: color-mix(in srgb, var(--color-brand) 18%, transparent);
 }
 
-/* Shared keyboard focus — :focus-visible only, so mouse clicks stay clean. */
-:where(a, button, summary, input, select, textarea):focus-visible {
-  outline: 2px solid var(--color-brand);
-  outline-offset: 2px;
+/* Layer defaults so component indicators can override them on dark surfaces. */
+@layer base {
+  .bg-navy {
+    --focus-ring: var(--color-surface);
+  }
+
+  :where(a, button, summary, input, select, textarea):focus-visible {
+    outline: 2px solid var(--focus-ring, var(--color-brand));
+    outline-offset: 2px;
+  }
 }
 
 /* Headings on the original site are Open Sans 800 at generous line-heights. */

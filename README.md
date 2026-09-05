@@ -26,11 +26,18 @@ post-deployment checks.
 ## Local development
 
 ```bash
+nvm use
 npm ci
 npm run dev
 ```
 
-The quote endpoint needs exactly one complete delivery configuration:
+Use Node 24 and npm 10.9.8, matching CI and production. Local development,
+local `next start`, and Vercel previews validate quote input in simulation only:
+they do not save details, notify the operator or count a conversion. Live quote
+capture requires `VERCEL_ENV=production` and a non-development runtime.
+Never add production credentials to preview or development environments.
+
+The production quote endpoint needs exactly one complete delivery configuration:
 
 ```bash
 QUOTE_WEBHOOK_URL=...
@@ -47,17 +54,26 @@ incomplete or ambiguous configuration returns 503 and asks the visitor to call;
 it never reports that an enquiry was captured unless the database commit
 succeeded. The validated lead and one delivery outbox event are committed
 atomically, then the route makes an immediate delivery attempt. Provider
-timeouts, 429s and 5xx responses remain in the outbox for bounded retries from
-the authenticated `/api/cron/quote-delivery` job. Browser, database and Resend
+timeouts, 429s and 5xx responses from Resend remain in the outbox for bounded
+retries from the authenticated `/api/cron/quote-delivery` job. Ambiguous generic
+webhook failures need manual reconciliation; only webhook 429s are automatically
+retried. Browser, database and Resend
 retries reuse the same opaque submission ID so an ambiguous response cannot
 silently create another email.
 
 Apply tracked schema changes before deploying code that uses them:
 
 ```bash
-vercel env pull .env.local --environment=development --yes
-npm run db:migrate
+umask 077
+vercel env pull /private/tmp/ucfc-production-migration.env --environment=production --yes
+node --env-file=/private/tmp/ucfc-production-migration.env scripts/migrate-db.mjs
 ```
+
+Confirm the intended production database before running migrations. The runner
+applies numbered migrations under one transaction lock and does not reapply
+completed migrations. Keep this temporary credentials file outside the source
+tree and remove it after migration. Monitoring uses additive migration 002;
+apply it before the release that adds receipt reconciliation and quote health.
 
 Vercel Git production builds fail before deployment when delivery, database or
 cron configuration is invalid. For a prebuilt deployment, use `vercel build
@@ -66,6 +82,14 @@ cron configuration is invalid. For a prebuilt deployment, use `vercel build
 
 Operational states, alert fields, triage queries and guarded manual recovery are
 documented in `docs/quote-delivery-runbook.md`.
+
+The cron limits delivery and receipt-check work within its 60-second budget.
+Resend delivery receipts are reconciled separately from API acceptance. The
+public `/api/health/quote` endpoint exposes only a healthy boolean and fails
+closed on stale workers or unresolved enquiries. After the first healthy
+production run, enable `QUOTE_HEALTH_MONITOR_ENABLED=true` in repository Actions
+variables to activate the ten-minute monitor. GitHub branch protection requires
+the private-repository plan support described in `.github/SECURITY-CONTROLS.md`.
 
 ## Verify before deployment
 

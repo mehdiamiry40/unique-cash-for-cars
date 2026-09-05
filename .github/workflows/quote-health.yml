@@ -1,0 +1,51 @@
+name: Quote health
+
+on:
+  schedule:
+    - cron: '3,13,23,33,43,53 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: quote-health
+  cancel-in-progress: true
+
+jobs:
+  health:
+    name: Quote delivery health
+    # Enable only after deploying and verifying /api/health/quote. This avoids a
+    # false outage while the first release adding the endpoint is still building.
+    if: vars.QUOTE_HEALTH_MONITOR_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Check the public health summary without submitting a quote
+        env:
+          HEALTH_URL: https://uniquecashforcars.com.au/api/health/quote
+        run: |
+          python3 - <<'PYTHON'
+          import json
+          import os
+          import time
+          import urllib.error
+          import urllib.request
+
+          for attempt in range(3):
+              try:
+                  request = urllib.request.Request(
+                      os.environ["HEALTH_URL"],
+                      headers={"User-Agent": "UCFC-Quote-Health/1.0", "Accept": "application/json"},
+                  )
+                  with urllib.request.urlopen(request, timeout=20) as response:
+                      healthy = response.status == 200 and json.load(response) == {"healthy": True}
+                  if healthy:
+                      print("Quote delivery health is healthy.")
+                      raise SystemExit(0)
+              except (urllib.error.URLError, TimeoutError, ValueError):
+                  pass
+              if attempt < 2:
+                  time.sleep(15)
+          print("::error::Quote delivery health failed. Follow docs/quote-delivery-runbook.md.")
+          raise SystemExit(1)
+          PYTHON
