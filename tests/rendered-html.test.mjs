@@ -60,6 +60,7 @@ const retiredCommercialRoutes = new Map([
   ["/company-info-cash-for-cars-gold-coast-and-free-car-removal", "/about"],
 ]);
 const postRoutes = [
+  "/selling-car-with-lpg-queensland",
   "/sell-car-without-roadworthy-qld",
   "/cancel-car-registration-queensland-after-sale",
   "/what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide",
@@ -71,7 +72,12 @@ const postRoutes = [
   "/transferring-car-registration-in-queensland",
 ];
 /** Pages that render an FAQ block, and so must carry FAQPage. */
-const faqRoutes = ["/", ...serviceRoutes, "/sell-car-without-roadworthy-qld"];
+const faqRoutes = [
+  "/",
+  ...serviceRoutes,
+  "/sell-car-without-roadworthy-qld",
+  "/selling-car-with-lpg-queensland",
+];
 /**
  * Everything except the privacy policy shows a breadcrumb trail.
  *
