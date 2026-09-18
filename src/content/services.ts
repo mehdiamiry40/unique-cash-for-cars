@@ -131,6 +131,7 @@ export const servicePages: ServicePage[] = [
       "sell-car-without-roadworthy-qld",
       "selling-car-with-lpg-queensland",
       "cancel-car-registration-queensland-after-sale",
+      "deceased-estate-car-sale-queensland",
       "how-much-is-my-scrap-car-worth-gold-coast",
       "transferring-car-registration-in-queensland",
       "statutory-vs-repairable-write-off-queensland",

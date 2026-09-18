@@ -40,6 +40,17 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    slug: "deceased-estate-car-sale-queensland",
+    title: "Selling a deceased estate car in Queensland",
+    description:
+      "Who holds the authority to sell, the TMR restriction that follows a death, and the order of steps that keeps a registration refund with the estate.",
+    category: "QLD paperwork",
+    image: "/img/used-car-gold-coast.jpg",
+    imageAlt: "A used car parked at a Gold Coast home while its ownership paperwork is settled",
+    date: "2026-09-17",
+    readingMinutes: 7,
+  },
+  {
     slug: "selling-car-with-lpg-queensland",
     title: "Selling a Car With LPG in Queensland: Gas Certificate Rules",
     description:
