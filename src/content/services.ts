@@ -129,6 +129,7 @@ export const servicePages: ServicePage[] = [
     ],
     related: [
       "sell-car-without-roadworthy-qld",
+      "unregistered-vehicle-permit-queensland",
       "selling-car-with-lpg-queensland",
       "cancel-car-registration-queensland-after-sale",
       "deceased-estate-car-sale-queensland",
