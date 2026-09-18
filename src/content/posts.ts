@@ -56,8 +56,8 @@ export const posts: Post[] = [
     description:
       "Selling a car with LPG in Queensland adds one certificate most sellers miss. When it is required, what an out-of-date cylinder changes, and your options.",
     category: "QLD paperwork",
-    image: "/img/used-car-gold-coast.jpg",
-    imageAlt: "A used car being prepared for sale on the Gold Coast",
+    image: "/img/unwanted-car-gold-coast.jpg",
+    imageAlt: "An older car being prepared for sale on the Gold Coast",
     date: "2026-09-16",
     readingMinutes: 6,
   },
