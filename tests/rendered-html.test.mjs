@@ -61,6 +61,7 @@ const retiredCommercialRoutes = new Map([
 ]);
 const postRoutes = [
   "/deceased-estate-car-sale-queensland",
+  "/selling-car-with-lpg-queensland",
   "/sell-car-without-roadworthy-qld",
   "/cancel-car-registration-queensland-after-sale",
   "/what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide",
@@ -77,6 +78,7 @@ const faqRoutes = [
   ...serviceRoutes,
   "/sell-car-without-roadworthy-qld",
   "/deceased-estate-car-sale-queensland",
+  "/selling-car-with-lpg-queensland",
 ];
 /**
  * Everything except the privacy policy shows a breadcrumb trail.

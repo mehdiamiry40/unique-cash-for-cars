@@ -51,6 +51,17 @@ export const posts: Post[] = [
     readingMinutes: 7,
   },
   {
+    slug: "selling-car-with-lpg-queensland",
+    title: "Selling a Car With LPG in Queensland: Gas Certificate Rules",
+    description:
+      "Selling a car with LPG in Queensland adds one certificate most sellers miss. When it is required, what an out-of-date cylinder changes, and your options.",
+    category: "QLD paperwork",
+    image: "/img/used-car-gold-coast.jpg",
+    imageAlt: "A used car being prepared for sale on the Gold Coast",
+    date: "2026-09-16",
+    readingMinutes: 6,
+  },
+  {
     slug: "sell-car-without-roadworthy-qld",
     title: "Can you sell a car without a roadworthy in Queensland?",
     description:
