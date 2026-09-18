@@ -40,6 +40,17 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    slug: "unregistered-vehicle-permit-queensland",
+    title: "Do you need an unregistered vehicle permit in Queensland?",
+    description:
+      "When TMR will and will not issue a permit, why the plates and the safety test rule out so many cars, and when towing is the simpler path.",
+    category: "QLD paperwork",
+    image: "/img/unwanted-car-gold-coast.jpg",
+    imageAlt: "An unregistered car parked at a Gold Coast home before it is moved",
+    date: "2026-09-18",
+    readingMinutes: 7,
+  },
+  {
     slug: "deceased-estate-car-sale-queensland",
     title: "Selling a deceased estate car in Queensland",
     description:

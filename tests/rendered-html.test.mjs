@@ -60,6 +60,7 @@ const retiredCommercialRoutes = new Map([
   ["/company-info-cash-for-cars-gold-coast-and-free-car-removal", "/about"],
 ]);
 const postRoutes = [
+  "/unregistered-vehicle-permit-queensland",
   "/deceased-estate-car-sale-queensland",
   "/selling-car-with-lpg-queensland",
   "/sell-car-without-roadworthy-qld",
@@ -79,6 +80,7 @@ const faqRoutes = [
   "/sell-car-without-roadworthy-qld",
   "/deceased-estate-car-sale-queensland",
   "/selling-car-with-lpg-queensland",
+  "/unregistered-vehicle-permit-queensland",
 ];
 /**
  * Everything except the privacy policy shows a breadcrumb trail.
