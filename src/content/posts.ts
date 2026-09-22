@@ -40,6 +40,17 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    slug: "abandoned-car-private-property-queensland",
+    title: "Abandoned Car on Private Property in Queensland: Your Options",
+    description:
+      "An abandoned car on private property in Queensland is not yours to sell. The four situations that decide who may move it, and the step that comes first.",
+    category: "QLD paperwork",
+    image: "/img/car-abandoned.jpg",
+    imageAlt: "A long-abandoned car left parked on private property on the Gold Coast",
+    date: "2026-09-22",
+    readingMinutes: 7,
+  },
+  {
     slug: "unregistered-vehicle-permit-queensland",
     title: "Do you need an unregistered vehicle permit in Queensland?",
     description:
