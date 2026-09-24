@@ -40,6 +40,17 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    slug: "sell-car-blown-engine-gold-coast",
+    title: "Selling a Car With a Blown Engine: Repair, Replace or Sell?",
+    description:
+      "Before you pay for a new motor, run the numbers. When to sell a car with a blown engine as it is, what buyers still pay for, and the QLD paperwork it needs.",
+    category: "Selling options",
+    image: "/img/unwanted-car-gold-coast.jpg",
+    imageAlt: "A non-running car parked at a Gold Coast home while the owner decides whether to repair it",
+    date: "2026-09-24",
+    readingMinutes: 10,
+  },
+  {
     slug: "abandoned-car-private-property-queensland",
     title: "Abandoned Car on Private Property in Queensland: Your Options",
     description:
