@@ -40,6 +40,17 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    slug: "selling-car-personalised-plates-queensland",
+    title: "Selling a car with personalised plates in Queensland",
+    description:
+      "Personalised plates belong to you, not the car. How to keep, transfer or cancel them before a sale, and why attached plates block an online transfer.",
+    category: "QLD paperwork",
+    image: "/img/used-car-gold-coast.jpg",
+    imageAlt: "A used car on the Gold Coast before its plates are dealt with for sale",
+    date: "2026-09-25",
+    readingMinutes: 7,
+  },
+  {
     slug: "abandoned-car-private-property-queensland",
     title: "Abandoned Car on Private Property in Queensland: Your Options",
     description:

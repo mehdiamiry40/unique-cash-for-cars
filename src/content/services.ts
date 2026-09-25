@@ -133,6 +133,7 @@ export const servicePages: ServicePage[] = [
       "unregistered-vehicle-permit-queensland",
       "selling-car-with-lpg-queensland",
       "cancel-car-registration-queensland-after-sale",
+      "selling-car-personalised-plates-queensland",
       "deceased-estate-car-sale-queensland",
       "how-much-is-my-scrap-car-worth-gold-coast",
       "transferring-car-registration-in-queensland",
