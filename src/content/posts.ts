@@ -40,6 +40,17 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    slug: "sell-car-blown-engine-queensland",
+    title: "Selling a car with a blown engine in Queensland",
+    description:
+      "Repair, replace or sell as is: how to weigh a blown engine against the car's running value, and the Queensland sale paths for a car that will not start.",
+    category: "Selling options",
+    image: "/img/old-car-gold-coast.jpg",
+    imageAlt: "An older car that no longer runs, waiting on a Gold Coast driveway",
+    date: "2026-09-26",
+    readingMinutes: 7,
+  },
+  {
     slug: "selling-car-personalised-plates-queensland",
     title: "Selling a car with personalised plates in Queensland",
     description:
