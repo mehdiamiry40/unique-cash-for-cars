@@ -40,6 +40,17 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    slug: "dead-hybrid-battery-repair-or-sell",
+    title: "Dead hybrid battery: repair, replace or sell the car",
+    description:
+      "Check warranty and consumer-guarantee rights first, compare new, reconditioned and module repairs, then weigh the quote against what the car is worth.",
+    category: "Selling options",
+    image: "/img/unwanted-car-gold-coast.jpg",
+    imageAlt: "A non-running car parked at a Gold Coast home while its owner decides whether to repair it",
+    date: "2026-09-27",
+    readingMinutes: 8,
+  },
+  {
     slug: "selling-car-personalised-plates-queensland",
     title: "Selling a car with personalised plates in Queensland",
     description:
