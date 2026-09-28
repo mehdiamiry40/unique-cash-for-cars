@@ -40,6 +40,17 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    slug: "blown-engine-repair-or-sell",
+    title: "Blown engine: is it worth fixing or should you sell the car?",
+    description:
+      "Get the diagnosis in writing, check whether a dealer or workshop should pay, compare the repair options, then weigh the quote against what the car is worth.",
+    category: "Selling options",
+    image: "/img/old-car-gold-coast.jpg",
+    imageAlt: "An older car with engine failure parked at a Gold Coast home while its owner weighs repair against sale",
+    date: "2026-09-28",
+    readingMinutes: 9,
+  },
+  {
     slug: "dead-hybrid-battery-repair-or-sell",
     title: "Dead hybrid battery: repair, replace or sell the car",
     description:
