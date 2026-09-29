@@ -136,6 +136,7 @@ export const servicePages: ServicePage[] = [
       "dead-hybrid-battery-repair-or-sell",
       "blown-engine-repair-or-sell",
       "selling-car-personalised-plates-queensland",
+      "selling-nsw-registered-car-queensland",
       "deceased-estate-car-sale-queensland",
       "how-much-is-my-scrap-car-worth-gold-coast",
       "transferring-car-registration-in-queensland",

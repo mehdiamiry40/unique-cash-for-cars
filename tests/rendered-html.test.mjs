@@ -60,6 +60,7 @@ const retiredCommercialRoutes = new Map([
   ["/company-info-cash-for-cars-gold-coast-and-free-car-removal", "/about"],
 ]);
 const postRoutes = [
+  "/selling-nsw-registered-car-queensland",
   "/blown-engine-repair-or-sell",
   "/dead-hybrid-battery-repair-or-sell",
   "/selling-car-personalised-plates-queensland",
@@ -89,6 +90,7 @@ const faqRoutes = [
   "/selling-car-personalised-plates-queensland",
   "/dead-hybrid-battery-repair-or-sell",
   "/blown-engine-repair-or-sell",
+  "/selling-nsw-registered-car-queensland",
 ];
 /**
  * Everything except the privacy policy shows a breadcrumb trail.
