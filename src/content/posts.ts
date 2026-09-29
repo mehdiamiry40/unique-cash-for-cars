@@ -40,6 +40,17 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    slug: "selling-nsw-registered-car-queensland",
+    title: "Selling a NSW registered car in Queensland",
+    description:
+      "The sale is recorded with Service NSW, not TMR. How to lodge the notice from Queensland, cancel the NSW registration, and what the buyer must do next.",
+    category: "QLD paperwork",
+    image: "/img/used-car-gold-coast.jpg",
+    imageAlt: "A used car parked at a Gold Coast home before its interstate registration is dealt with",
+    date: "2026-09-29",
+    readingMinutes: 7,
+  },
+  {
     slug: "blown-engine-repair-or-sell",
     title: "Blown engine: is it worth fixing or should you sell the car?",
     description:
