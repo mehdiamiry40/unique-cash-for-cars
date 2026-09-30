@@ -40,6 +40,17 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    slug: "sell-car-on-behalf-of-someone-else-qld",
+    title: "Selling a car on behalf of someone else in Queensland",
+    description:
+      "Keys and family ties are not authority. The TMR form an owner can sign, when a power of attorney works and when it does not, and what to have ready.",
+    category: "QLD paperwork",
+    image: "/img/used-car-gold-coast.jpg",
+    imageAlt: "A used car parked at a Gold Coast home while a family member arranges its sale for the owner",
+    date: "2026-09-30",
+    readingMinutes: 8,
+  },
+  {
     slug: "selling-nsw-registered-car-queensland",
     title: "Selling a NSW registered car in Queensland",
     description:
