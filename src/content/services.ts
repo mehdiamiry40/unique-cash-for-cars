@@ -138,6 +138,7 @@ export const servicePages: ServicePage[] = [
       "selling-car-personalised-plates-queensland",
       "selling-nsw-registered-car-queensland",
       "deceased-estate-car-sale-queensland",
+      "sell-car-on-behalf-of-someone-else-qld",
       "how-much-is-my-scrap-car-worth-gold-coast",
       "transferring-car-registration-in-queensland",
       "statutory-vs-repairable-write-off-queensland",
