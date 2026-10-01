@@ -128,6 +128,7 @@ export const servicePages: ServicePage[] = [
       },
     ],
     related: [
+      "selling-car-defect-notice-queensland",
       "abandoned-car-private-property-queensland",
       "sell-car-without-roadworthy-qld",
       "unregistered-vehicle-permit-queensland",

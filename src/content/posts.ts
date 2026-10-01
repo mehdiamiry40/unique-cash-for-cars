@@ -40,6 +40,17 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    slug: "selling-car-defect-notice-queensland",
+    title: "Selling a car with a defect notice in Queensland",
+    description:
+      "Which defect notice you hold decides whether the car can be driven. The three paths TMR allows, and how to choose between repair, a dealer sale and cancellation.",
+    category: "QLD paperwork",
+    image: "/img/unwanted-car-gold-coast.jpg",
+    imageAlt: "A car that cannot be driven parked at a Gold Coast home while its owner decides how to deal with a defect notice",
+    date: "2026-10-01",
+    readingMinutes: 7,
+  },
+  {
     slug: "selling-nsw-registered-car-queensland",
     title: "Selling a NSW registered car in Queensland",
     description:
