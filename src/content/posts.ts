@@ -40,6 +40,17 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    slug: "sell-car-defect-notice-qld",
+    title: "Selling a car with a defect notice in Queensland",
+    description:
+      "A sale does not end a defect notice. When to repair and clear it, when to cancel the registration, and the 7-day written notice that releases you.",
+    category: "QLD paperwork",
+    image: "/img/unwanted-car-gold-coast.jpg",
+    imageAlt: "A defected car parked at a Gold Coast home while its owner decides whether to repair, cancel or sell",
+    date: "2026-10-02",
+    readingMinutes: 8,
+  },
+  {
     slug: "selling-nsw-registered-car-queensland",
     title: "Selling a NSW registered car in Queensland",
     description:
