@@ -48,13 +48,21 @@ export function Header() {
           {/*
             Intrinsic size is 800×348 (≈4× the old 200×87 mark) so next/image
             can serve crisp 2×/3× candidates at the h-14 display size.
+
+            Eager but low priority, and so not preloaded: it is above the fold,
+            so lazy loading would only delay it, but it is never the LCP
+            element. A preload here put it in the queue ahead of the homepage
+            hero on every page. React 19 emits its own <link rel=preload> for
+            any eager <img> during SSR unless fetchPriority is "low" — dropping
+            `priority` alone is not enough.
           */}
           <Image
             src="/img/logo.png"
             alt={site.name}
             width={800}
             height={348}
-            priority
+            loading="eager"
+            fetchPriority="low"
             sizes="129px"
             className="h-14 w-auto"
           />

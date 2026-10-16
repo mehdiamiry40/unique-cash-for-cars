@@ -136,6 +136,12 @@ export function articleSchema(opts: {
   slug: string;
   title: string;
   description: string;
+  /**
+   * Site-relative path from posts.ts. Must be the same image the blog index
+   * emits for this post's @id, or the two pages describe one entity with two
+   * different images.
+   */
+  image: string;
   datePublished: string;
   dateModified?: string;
 }) {
@@ -148,7 +154,7 @@ export function articleSchema(opts: {
     url,
     headline: opts.title,
     description: opts.description,
-    image: `${site.url}/img/Best-Cash-for-Cars-Gold-Coast.jpg`,
+    image: `${site.url}${opts.image}`,
     datePublished: opts.datePublished,
     dateModified: opts.dateModified ?? opts.datePublished,
     inLanguage: "en-AU",

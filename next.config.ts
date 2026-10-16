@@ -92,6 +92,19 @@ const nextConfig: NextConfig = {
         destination: "https://uniquecashforcars.com.au/:path*",
         permanent: true,
       },
+      /*
+       * The project's production alias served the full site with 200 and
+       * index,follow — a second copy of every page, held off only by the
+       * canonical. Exact host only: preview and per-deployment *.vercel.app
+       * URLs must stay reachable (they are noindexed separately), and /api/ is
+       * left alone so nothing calling the alias directly gets a redirect.
+       */
+      {
+        source: "/:path((?!api/).*)",
+        has: [{ type: "host", value: "unique-cash-for-cars.vercel.app" }],
+        destination: "https://uniquecashforcars.com.au/:path",
+        permanent: true,
+      },
 
       // Consolidate overlapping commercial intent into two canonical pillars.
       { source: "/cash-for-cars", destination: "/", permanent: true },

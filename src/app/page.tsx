@@ -154,14 +154,18 @@ export default function HomePage() {
           the hero is roughly square, get it full-bleed behind the copy.
 
           Decorative in both cases — the h1 carries the message — hence the
-          empty alt. Preloaded rather than lazy since it is above the fold.
+          empty alt. Preloaded rather than lazy since it is above the fold, and
+          fetchPriority high because it is the measured LCP element: `preload`
+          alone (and the deprecated `priority`) emits the <link> but leaves the
+          <img> itself at default priority.
         */}
         <div className="relative aspect-[1920/620] w-full lg:absolute lg:inset-0 lg:-z-20 lg:aspect-auto">
           <Image
             src="/img/Best-Cash-for-Cars-Gold-Coast.jpg"
             alt=""
             fill
-            priority
+            preload
+            fetchPriority="high"
             sizes="100vw"
             className="object-cover object-bottom"
           />

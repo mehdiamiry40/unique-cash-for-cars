@@ -43,6 +43,7 @@ export function PostSchema({
       slug: post.slug,
       title: post.title,
       description: post.description,
+      image: post.image,
       datePublished: post.date,
       dateModified: post.updated,
     }),
