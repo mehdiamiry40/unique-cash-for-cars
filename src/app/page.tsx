@@ -49,7 +49,7 @@ const services = [
     image: "/img/unwanted-car-gold-coast.jpg",
     alt: "An unwanted car left on a Gold Coast property",
     body: "Cars, utes, vans, buses, 4WDs, hatchbacks, hybrids and EVs. If you want the vehicle gone, tell us its condition and we will assess it for an offer.",
-    cta: "See free car removal",
+    cta: "See how free removal works",
   },
   {
     title: "Cash for Scrap Cars",
@@ -57,15 +57,15 @@ const services = [
     image: "/img/car-abandoned.jpg",
     alt: "An abandoned scrap car with flat tyres awaiting collection",
     body: "Past the point of repair is not the same as worthless. We recover the drivetrain, panels, glass and catalytic converter, and dispose of the rest properly.",
-    cta: "See free car removal",
+    cta: "Plan a scrap car pickup",
   },
   {
     title: "Cash for Accident-Damaged Cars",
-    href: "/what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide",
+    href: "/statutory-vs-repairable-write-off-queensland",
     image: "/img/accident-damaged-car.jpg",
     alt: "A car with accident damage to the front quarter panel",
     body: "Written off, still at the smash repairer, or sitting where it stopped. Wherever your damaged car is, we come to it and the removal costs you nothing.",
-    cta: "Compare your options",
+    cta: "Understand write-off types",
   },
   {
     title: "Cash for Used Cars",
@@ -77,11 +77,11 @@ const services = [
   },
   {
     title: "Cash for Damaged Cars",
-    href: "/car-removal-gold-coast",
+    href: "/what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide",
     image: "/img/car-front-damaged.jpg",
     alt: "A car with a crumpled front end after a collision",
     body: "Body damage, missing parts, electrical faults, mechanical failure, flood or hail damage. Tell us what's wrong up front and we'll price it honestly.",
-    cta: "See free car removal",
+    cta: "Compare repair and sale options",
   },
 ] as const;
 
