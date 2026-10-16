@@ -557,6 +557,69 @@ test("www URLs redirect permanently to the canonical non-www domain", async () =
   );
 });
 
+test("the production vercel.app alias redirects pages to the canonical domain, not the API", async () => {
+  const host = "unique-cash-for-cars.vercel.app";
+
+  for (const [path, expected] of [
+    ["/", "https://uniquecashforcars.com.au/"],
+    ["/car-removal-gold-coast", "https://uniquecashforcars.com.au/car-removal-gold-coast"],
+  ]) {
+    const response = await getWithHost(path, host);
+    assert.ok([301, 308].includes(response.statusCode), `${path} on ${host}: ${response.statusCode}`);
+    assert.equal(response.headers.location, expected, `${path} on ${host}`);
+  }
+
+  const api = await getWithHost("/api/health/quote", host);
+  assert.ok(
+    ![301, 308].includes(api.statusCode),
+    `/api/ on ${host} must not redirect (got ${api.statusCode})`,
+  );
+});
+
+test("only the homepage hero is preloaded at high priority; the logo is not preloaded", async () => {
+  for (const path of ["/", "/car-removal-gold-coast", "/blog"]) {
+    const source = await html(path);
+    const imagePreloads = [...source.matchAll(/<link\b[^>]*rel="preload"[^>]*as="image"[^>]*>/gi)].map(
+      ([tag]) => tag,
+    );
+    assert.ok(
+      imagePreloads.every((tag) => !/logo\.png/.test(tag)),
+      `${path}: the logo must not be preloaded ahead of the LCP image`,
+    );
+    const logo = source.match(/<img\b[^>]*src="[^"]*logo\.png[^"]*"[^>]*>/i)?.[0] ?? "";
+    assert.ok(logo, `${path}: no logo image`);
+    assert.doesNotMatch(logo, /loading="lazy"/, `${path}: above-the-fold logo must not lazy load`);
+  }
+
+  const home = await html("/");
+  const hero = home.match(/<img\b[^>]*Best-Cash-for-Cars-Gold-Coast[^>]*>/i)?.[0] ?? "";
+  assert.match(hero, /fetchPriority="high"/i, "homepage hero (the LCP element) needs fetchpriority=high");
+  assert.match(
+    home,
+    /<link\b[^>]*rel="preload"[^>]*as="image"[^>]*Best-Cash-for-Cars-Gold-Coast/i,
+    "homepage hero must still be preloaded",
+  );
+});
+
+test("each guide's BlogPosting image matches the blog index entry for the same @id", async () => {
+  const hubPosts = new Map(
+    schemaNodes(await html("/blog"))
+      .find((node) => node["@type"] === "Blog")
+      .blogPost.map((post) => [post["@id"], post.image]),
+  );
+
+  for (const path of postRoutes) {
+    const article = schemaNodes(await html(path)).find((node) => node["@type"] === "BlogPosting");
+    // Archived posts are not on the hub; nothing to disagree with.
+    if (!hubPosts.has(article["@id"])) continue;
+    assert.equal(
+      article.image,
+      hubPosts.get(article["@id"]),
+      `${path}: BlogPosting image differs between the post and /blog`,
+    );
+  }
+});
+
 test("the audited security headers are present on HTML responses", async () => {
   const response = await get("/", { redirect: "follow" });
   const expected = {

@@ -10,7 +10,7 @@ import { blogSchema, breadcrumbSchema, graph } from "@/lib/schema";
 import { pageMeta } from "@/lib/seo";
 
 export const metadata: Metadata = pageMeta({
-  title: "Gold Coast Car Selling and Removal Guides | Unique",
+  title: "Gold Coast Car Selling Guides | Unique Cash For Cars",
   description:
     "Practical Gold Coast car selling guides covering value, write-offs, finance, roadworthy rules, Queensland registration, paperwork and vehicle removal.",
   path: "/blog",
