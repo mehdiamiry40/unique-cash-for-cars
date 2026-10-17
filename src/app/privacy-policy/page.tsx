@@ -22,7 +22,7 @@ export default function PrivacyPolicyPage() {
   // Hardcoded on purpose. This is the date the policy was last reviewed, not
   // the date the site was last deployed — a build-time date would silently
   // claim a review that never happened. Bump it when you change the text.
-  const updated = "1 September 2026";
+  const updated = "17 October 2026";
 
   return (
     <Section>
@@ -46,12 +46,10 @@ export default function PrivacyPolicyPage() {
           request logs as described below.
         </p>
         <p>
-          Valid online enquiries are stored in a managed database before we try
-          to notify our team. We keep a submission reference, the details listed
-          above, delivery status, attempt count and the email provider&apos;s message
-          reference where available. This lets us recover an enquiry if the email
-          provider is temporarily unavailable without asking you to submit it again.
-          We do not add your IP address to the stored enquiry.
+          Valid online enquiries are sent straight to our team by our email or
+          form-delivery provider, together with a submission reference. The
+          website itself does not keep a copy, and we do not add your IP address
+          to the enquiry.
         </p>
         <p>
           When you complete a sale we additionally sight your photo identification
@@ -76,13 +74,12 @@ export default function PrivacyPolicyPage() {
         <p>
           This site loads Google Ads conversion and call-measurement tags, plus
           Google Analytics 4, so we can understand visits and tell which ads led
-          to a safely stored quote enquiry or phone call. Analytics records page
+          to a quote enquiry or phone call. Analytics records page
           views and interactions such as scrolls, outbound links and phone-link
           clicks. It also records quote-button clicks, the first interaction with
           the quote form, broad error categories such as validation or network
-          failure, and a lead event after the quote system safely stores the
-          enquiry. Email-provider acceptance and inbox delivery are tracked
-          separately from that measurement event. We
+          failure, and a lead event after our email or form-delivery provider
+          accepts the enquiry. We
           do not send error messages or the values entered in the quote form —
           including your name, phone number, optional expected price, suburb,
           vehicle or condition details — to Google through these measurement
@@ -106,9 +103,8 @@ export default function PrivacyPolicyPage() {
         <h2>Who we share it with</h2>
         <p>
           The personal details and vehicle information you provide are shared only
-          where necessary: with our managed database and hosting providers so the
-          enquiry can be stored safely; with our email or form-delivery provider so
-          our team can receive it; with our towing operator to arrange a collection you
+          where necessary: with our hosting provider so the website can process the
+          enquiry; with our email or form-delivery provider so our team can receive it; with our towing operator to arrange a collection you
           accept; with the Queensland Department of Transport and Main Roads for an
           applicable registration transfer or cancellation; and with our accountant
           or auditor where required by law.
@@ -121,8 +117,7 @@ export default function PrivacyPolicyPage() {
 
         <h2>How long we keep it</h2>
         <p>
-          Quote enquiries that don&apos;t proceed are kept for up to 12 months. The
-          database removes expired enquiries and their delivery records together.
+          Quote enquiries that don&apos;t proceed are kept for up to 12 months.
           Completed transaction records are kept for the period required under
           Queensland law for vehicle dealers and for tax purposes.
         </p>

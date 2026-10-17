@@ -7,10 +7,6 @@
         "app_id": 15368
       },
       {
-        "context": "PostgreSQL integration",
-        "app_id": 15368
-      },
-      {
         "context": "Dependency audit",
         "app_id": 15368
       },

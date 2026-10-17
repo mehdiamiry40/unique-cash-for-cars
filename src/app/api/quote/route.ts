@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { site } from "@/content/site";
-import { resolveQuoteDelivery } from "@/lib/quote-delivery";
-import {
-  persistQuote,
-  QuoteStorageConfigurationError,
-} from "@/lib/quote-lead-store";
-import { processQuoteLeadNow } from "@/lib/quote-outbox";
+import { deliverQuote, resolveQuoteDelivery } from "@/lib/quote-delivery";
+import { buildQuoteEmail } from "@/lib/quote-email";
 import { createFixedWindowLimiter } from "@/lib/quote-rate-limit";
 import { quoteIdPattern, validateQuoteFields } from "@/lib/quote-validation";
 
@@ -231,8 +227,8 @@ export async function POST(request: Request) {
   }
   const leadId = key.value;
 
-  // Preview/development forms exercise validation only. They must never use
-  // an integration's production database or send a real notification.
+  // Preview/development forms exercise validation only. They must never send
+  // a real notification.
   if (process.env.VERCEL_ENV !== "production" || process.env.NODE_ENV === "development") {
     return json({ ok: true, code: "preview_quote", stored: false });
   }
@@ -248,14 +244,14 @@ export async function POST(request: Request) {
     receivedAt: new Date().toISOString(),
   };
 
-  const delivery = resolveQuoteDelivery({
+  const settings = {
     webhookUrl: process.env.QUOTE_WEBHOOK_URL,
     resendApiKey: process.env.RESEND_API_KEY,
     toEmail: process.env.QUOTE_TO_EMAIL,
     fromEmail: process.env.QUOTE_FROM_EMAIL,
-  });
+  };
 
-  if (!delivery.ok) {
+  if (!resolveQuoteDelivery(settings).ok) {
     return json(
       {
         error: `Online enquiries are temporarily unavailable. Please call ${site.phone.display}.`,
@@ -264,86 +260,29 @@ export async function POST(request: Request) {
     );
   }
 
-  let persisted;
-  try {
-    persisted = await persistQuote(lead, delivery.provider);
-  } catch (error) {
-    console.error(
-      JSON.stringify({
-        event: "quote_persistence",
-        outcome: "failure",
-        reference: leadId.slice(0, 8).toUpperCase(),
-        reason:
-          error instanceof QuoteStorageConfigurationError
-            ? "missing_configuration"
-            : "database_error",
-      }),
-    );
-    return json(
-      {
-        error: `Your enquiry could not be saved. Please try again or call ${site.phone.display}.`,
-      },
-      503,
-    );
-  }
+  // The browser reuses the same submission ID when it retries, so the provider
+  // idempotency key stops an ambiguous failure from sending a second email.
+  const result = await deliverQuote({
+    settings,
+    lead,
+    email: buildQuoteEmail(lead),
+    idempotencyKey: `quote/${leadId}`,
+  });
 
-  if (!persisted.ok) {
-    return json(
-      {
-        error:
-          "This submission reference was already used for different details. Please try again.",
-      },
-      409,
-    );
-  }
+  // Resend answers 409 when this idempotency key was already used, which means
+  // an earlier attempt for this submission already sent the email. The body
+  // differs on a retry because the "Received" time is rendered per attempt.
+  const alreadySent =
+    !result.ok && result.provider === "resend" && result.status === 409;
 
-  if (persisted.quote.state === "dead") {
+  if (!result.ok && !alreadySent) {
     return json(
       {
-        code: "quote_saved_delivery_failed",
-        stored: true,
-        leadId,
-        error: `Your enquiry was saved but could not be delivered automatically. Please call ${site.phone.display} and quote reference ${leadId.slice(0, 8).toUpperCase()}.`,
+        error: `Your enquiry could not be sent. Please try again or call ${site.phone.display}.`,
       },
       502,
     );
   }
 
-  let processingOutcome: Awaited<ReturnType<typeof processQuoteLeadNow>> =
-    "not_claimed";
-  if (persisted.quote.state !== "succeeded") {
-    try {
-      processingOutcome = await processQuoteLeadNow(leadId);
-    } catch {
-      console.error(
-        JSON.stringify({
-          event: "quote_outbox",
-          outcome: "immediate_worker_error",
-          reference: leadId.slice(0, 8).toUpperCase(),
-        }),
-      );
-    }
-  }
-
-  const providerAccepted =
-    persisted.quote.state === "succeeded" || processingOutcome === "accepted";
-  if (processingOutcome === "dead_lettered") {
-    return json(
-      {
-        code: "quote_saved_delivery_failed",
-        stored: true,
-        leadId,
-        error: `Your enquiry was saved but could not be delivered automatically. Please call ${site.phone.display} and quote reference ${leadId.slice(0, 8).toUpperCase()}.`,
-      },
-      502,
-    );
-  }
-  return json(
-    {
-      ok: true,
-      leadId,
-      delivery: providerAccepted ? "accepted" : "stored",
-    },
-    providerAccepted ? 200 : 202,
-  );
+  return json({ ok: true, leadId });
 }
