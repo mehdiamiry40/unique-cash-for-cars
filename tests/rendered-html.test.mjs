@@ -569,7 +569,7 @@ test("the production vercel.app alias redirects pages to the canonical domain, n
     assert.equal(response.headers.location, expected, `${path} on ${host}`);
   }
 
-  const api = await getWithHost("/api/health/quote", host);
+  const api = await getWithHost("/api/quote", host);
   assert.ok(
     ![301, 308].includes(api.statusCode),
     `/api/ on ${host} must not redirect (got ${api.statusCode})`,

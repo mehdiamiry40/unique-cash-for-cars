@@ -53,15 +53,3 @@ export function validateQuoteFields(input: Partial<Record<QuoteFieldName, unknow
 
 export const quoteIdPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-export function savedQuoteReference(result: unknown) {
-  if (!result || typeof result !== "object") return null;
-  const body = result as Record<string, unknown>;
-  if (
-    body.code !== "quote_saved_delivery_failed" ||
-    body.stored !== true ||
-    typeof body.leadId !== "string" ||
-    !quoteIdPattern.test(body.leadId)
-  ) return null;
-  return body.leadId.slice(0, 8).toUpperCase();
-}
