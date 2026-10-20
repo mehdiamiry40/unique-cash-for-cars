@@ -60,6 +60,7 @@ const retiredCommercialRoutes = new Map([
   ["/company-info-cash-for-cars-gold-coast-and-free-car-removal", "/about"],
 ]);
 const postRoutes = [
+  "/sell-car-defect-notice-qld",
   "/selling-nsw-registered-car-queensland",
   "/blown-engine-repair-or-sell",
   "/dead-hybrid-battery-repair-or-sell",
@@ -83,6 +84,7 @@ const faqRoutes = [
   "/",
   ...serviceRoutes,
   "/sell-car-without-roadworthy-qld",
+  "/sell-car-defect-notice-qld",
   "/deceased-estate-car-sale-queensland",
   "/selling-car-with-lpg-queensland",
   "/unregistered-vehicle-permit-queensland",
