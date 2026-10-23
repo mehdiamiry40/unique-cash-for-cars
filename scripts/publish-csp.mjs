@@ -107,7 +107,7 @@ function replacePlaceholder(value, placeholder, replacement) {
 
 function contentSecurityPolicies(value, found = []) {
   if (typeof value === "string") {
-    if (value.includes("script-src")) found.push(value);
+    if (value.includes("script-src") || value.includes("sha256-AAAAAAAAAAAA")) found.push(value);
     return found;
   }
   if (Array.isArray(value)) {
@@ -120,11 +120,16 @@ function contentSecurityPolicies(value, found = []) {
   return found;
 }
 
-export function deploymentOutputConfigs(projectRoot) {
-  return [
+export function deploymentOutputConfigs(projectRoot, distDir) {
+  const outputDir = resolveDistDir(projectRoot, distDir);
+  const candidates = [
+    // Next 16's Vercel adapter writes the Build Output here. The builder
+    // reads it after `npm run build` returns.
+    join(outputDir, "output/config.json"),
     join(projectRoot, ".vercel/output/config.json"),
     "/vercel/output/config.json",
-  ].filter((file, index, files) => existsSync(file) && files.indexOf(file) === index);
+  ];
+  return candidates.filter((file, index) => existsSync(file) && candidates.indexOf(file) === index);
 }
 
 function patchBuildFiles(distDir, placeholder, hashList) {
@@ -256,11 +261,16 @@ export function assertPublishedCsp({
     }
   }
 
-  const outputs = deploymentOutputConfigs(projectRoot);
+  const outputs = deploymentOutputConfigs(projectRoot, outputDir);
   if (requireDeploymentOutput && outputs.length === 0) {
     throw new Error(
-      "Vercel adapter did not write a deployment config. " +
-        `Looked for ${join(projectRoot, ".vercel/output/config.json")} and /vercel/output/config.json.`,
+      "Vercel adapter did not write a deployment config. Looked for " +
+        [
+          join(outputDir, "output/config.json"),
+          join(projectRoot, ".vercel/output/config.json"),
+          "/vercel/output/config.json",
+        ].join(", ") +
+        ".",
     );
   }
   for (const output of outputs) {
