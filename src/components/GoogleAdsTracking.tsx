@@ -3,7 +3,7 @@
 import Script from "next/script";
 import { useEffect } from "react";
 
-import { resolveGoogleMeasurement, validMeasurementLabel } from "@/lib/google-measurement";
+import { site } from "@/content/site";
 
 declare global {
   interface Window {
@@ -12,12 +12,28 @@ declare global {
   }
 }
 
-const {
-  validAdsId,
-  validAnalyticsId,
-  quoteConversionLabel,
-  inlineScript: googleMeasurementScript,
-} = resolveGoogleMeasurement();
+const accountGoogleAdsId = "AW-750701638";
+const accountGoogleAnalyticsId = "G-VZT8S8WXDH";
+const accountQuoteConversionLabel = "PXg6CPz39usBEMaY--UC";
+const accountPhoneConversionLabel = "sF8gCNG54ZgBEMaY--UC";
+
+const googleAdsId =
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_ID?.trim() || accountGoogleAdsId;
+const googleAnalyticsId =
+  process.env.NEXT_PUBLIC_GA4_ID?.trim() || accountGoogleAnalyticsId;
+const quoteConversionLabel =
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_FORM_CONVERSION_LABEL?.trim() ||
+  accountQuoteConversionLabel;
+const phoneConversionLabel =
+  process.env.NEXT_PUBLIC_GOOGLE_ADS_PHONE_CONVERSION_LABEL?.trim() ||
+  accountPhoneConversionLabel;
+
+const validAdsId = /^AW-\d+$/.test(googleAdsId) ? googleAdsId : "";
+const validAnalyticsId = /^G-[A-Z0-9]+$/.test(googleAnalyticsId)
+  ? googleAnalyticsId
+  : "";
+const validLabel = (label: string) =>
+  /^[A-Za-z0-9_-]+$/.test(label) ? label : "";
 
 function getGtag() {
   if (typeof window === "undefined") return null;
@@ -38,7 +54,7 @@ function sendConversion(
   label: string,
   parameters: Record<string, string | number | undefined> = {},
 ) {
-  const conversionLabel = validMeasurementLabel(label);
+  const conversionLabel = validLabel(label);
   const gtag = getGtag();
   if (!validAdsId || !conversionLabel || !gtag) return;
 
@@ -152,6 +168,10 @@ export function GoogleAdsTracking() {
   const tagId = validAdsId || validAnalyticsId;
   if (!tagId) return null;
 
+  const phoneSendTo = validAdsId && validLabel(phoneConversionLabel)
+    ? `${validAdsId}/${phoneConversionLabel}`
+    : "";
+
   return (
     <>
       <Script
@@ -159,7 +179,21 @@ export function GoogleAdsTracking() {
         strategy="afterInteractive"
       />
       <Script id="google-measurement-tag" strategy="afterInteractive">
-        {googleMeasurementScript}
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          window.gtag = window.gtag || gtag;
+          gtag('js', new Date());
+          ${validAdsId ? `gtag('config', ${JSON.stringify(validAdsId)});` : ""}
+          ${validAnalyticsId ? `gtag('config', ${JSON.stringify(validAnalyticsId)});` : ""}
+          ${
+            phoneSendTo
+              ? `gtag('config', ${JSON.stringify(phoneSendTo)}, {
+                  'phone_conversion_number': ${JSON.stringify(site.phone.display)}
+                });`
+              : ""
+          }
+        `}
       </Script>
     </>
   );
