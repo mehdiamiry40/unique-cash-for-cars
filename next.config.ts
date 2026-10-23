@@ -1,14 +1,16 @@
 import type { NextConfig } from "next";
 import createMDX from "@next/mdx";
 import { retiredSuburbRedirects } from "./src/content/suburbs";
+import { join } from "node:path";
 import { contentSecurityPolicy } from "./src/lib/csp";
 import { resolveQuoteDelivery } from "./src/lib/quote-delivery";
-import { scheduleInlineScriptCsp } from "./scripts/apply-csp-hashes";
+import { scheduleInlineScriptCsp } from "./scripts/publish-csp.mjs";
 
 // The config is evaluated before NEXT_PHASE is assigned, so the build cannot
 // be detected from that variable here. Skip worker processes: they exit while
-// pages are still being written. The parent `next build` process patches the
-// header as it exits, once the prerendered HTML is final.
+// pages are still being written. The parent `next build` process checks the
+// header as it exits. On Vercel that is too late to change the deployed
+// header — scripts/csp-adapter.mjs runs first, inside onBuildComplete.
 const isBuildWorker =
   Boolean(process.send) || process.env.NEXT_PRIVATE_BUILD_WORKER === "1";
 if (!isBuildWorker) {
@@ -64,6 +66,16 @@ const nextConfig: NextConfig = {
   // --distDir flag, so it redirects the output here instead of overwriting the
   // real build. Unset everywhere else, including on Vercel.
   ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
+
+  // Vercel injects its deployment adapter through NEXT_ADAPTER_PATH. That
+  // adapter copies headers into the Build Output during onBuildComplete,
+  // before this process exits, and it stores prerendered HTML outside
+  // `.next/server/app`. Wrap it so the real script hashes are in the object
+  // Vercel serialises. Local `next build` has no adapter and keeps the
+  // default output layout; the exit hook patches routes-manifest.json there.
+  ...(process.env.NEXT_ADAPTER_PATH
+    ? { adapterPath: join(__dirname, "scripts/csp-adapter.mjs") }
+    : {}),
 
   // There is a stray package-lock.json in the home directory, so Turbopack
   // guesses $HOME as the workspace root and tries to watch the whole home
@@ -181,12 +193,13 @@ const nextConfig: NextConfig = {
              * script-src is hash-based, not nonce-based. A nonce has to be
              * unique per response, and Next only stamps it onto scripts while
              * rendering dynamically — every page here is prerendered and cached
-             * at the edge. The placeholder hash below is replaced, after the
-             * HTML exists, with the sha256 of each inline script from this
-             * build (see scripts/apply-csp-hashes.ts). 'strict-dynamic' is not
-             * set: it would ignore 'self' and the Google host list, and the
-             * parser-inserted Next chunks plus the client-inserted gtag script
-             * depend on those.
+             * at the edge. The placeholder hash below is replaced with the
+             * sha256 of each inline script from this build once the HTML
+             * exists (scripts/csp-adapter.mjs on Vercel, scripts/publish-csp.mjs
+             * otherwise). The build fails if the placeholder is still present.
+             * 'strict-dynamic' is not set: it would ignore 'self' and the
+             * Google host list, and the parser-inserted Next chunks plus the
+             * client-inserted gtag script depend on those.
              *
              * style-src-attr stays 'unsafe-inline' because next/image emits
              * style attributes, which cannot carry a nonce or a hash.
