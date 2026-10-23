@@ -94,7 +94,7 @@ test("hashes are published into adapter routing before that adapter seals output
         `<script>window.__page = ${index};</script>`,
       );
     }
-    const placeholderPolicy = `script-src 'self' ${csp.SCRIPT_HASH_PLACEHOLDER}`;
+    const placeholderPolicy = `default-src 'self'; script-src 'self' ${csp.SCRIPT_HASH_PLACEHOLDER}; object-src 'none'`;
     writeFileSync(
       join(distDir, "routes-manifest.json"),
       JSON.stringify({
@@ -114,7 +114,8 @@ test("hashes are published into adapter routing before that adapter seals output
        import { dirname } from "node:path";
        const sealed = ${JSON.stringify(sealedPath)};
        export async function onBuildComplete(payload) {
-         const policy = payload.routing.beforeMiddleware[0].headers["content-security-policy"];
+         let policy = payload.routing.beforeMiddleware[0].headers["content-security-policy"];
+         policy = policy.replace(/'sha256-[^']+'/, "");
          mkdirSync(dirname(sealed), { recursive: true });
          writeFileSync(sealed, JSON.stringify({ routes: [{ headers: { "content-security-policy": policy } }] }));
        }

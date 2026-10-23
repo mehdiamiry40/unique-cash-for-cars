@@ -220,6 +220,34 @@ export function publishInlineScriptCsp({ projectRoot, distDir, routing }) {
   };
 }
 
+function replaceSitePolicies(value, policy) {
+  if (typeof value === "string") {
+    if (value.includes("default-src 'self'") && value.includes("script-src")) return policy;
+    return value;
+  }
+  if (Array.isArray(value)) return value.map((entry) => replaceSitePolicies(entry, policy));
+  if (value && typeof value === "object") {
+    for (const key of Object.keys(value)) {
+      value[key] = replaceSitePolicies(value[key], policy);
+    }
+  }
+  return value;
+}
+
+/**
+ * The Vercel adapter serialises routing headers into `.next/output/config.json`.
+ * A hash whose base64 contains `/` was missing from that file even though the
+ * routing object and routes-manifest had it. Rewrite the site policy from the
+ * manifest, which is what the builder reads after this process returns.
+ */
+function repairDeploymentOutputs(outputs, policy) {
+  for (const output of outputs) {
+    const data = JSON.parse(readFileSync(output, "utf8"));
+    replaceSitePolicies(data, policy);
+    writeFileSync(output, JSON.stringify(data));
+  }
+}
+
 function assertHashesInPolicy(policy, hashes, label) {
   for (const hash of hashes) {
     if (!policy.includes(hash)) {
@@ -229,9 +257,9 @@ function assertHashesInPolicy(policy, hashes, label) {
 }
 
 /**
- * Fail the build if a published artifact still contains the placeholder.
- * This does not patch. A late rewrite of `.next` cannot change headers Vercel
- * has already copied into the deployment output.
+ * Fail the build if a published artifact still contains the placeholder or is
+ * missing an inline-script hash. Deployment config is rewritten from the
+ * routes manifest first: that file is what Vercel reads after the build.
  */
 export function assertPublishedCsp({
   projectRoot,
@@ -273,6 +301,7 @@ export function assertPublishedCsp({
         ".",
     );
   }
+  repairDeploymentOutputs(outputs, policy);
   for (const output of outputs) {
     const text = readFileSync(output, "utf8");
     if (text.includes(SCRIPT_HASH_PLACEHOLDER)) {
