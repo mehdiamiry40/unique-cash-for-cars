@@ -20,7 +20,7 @@
     "@next/mdx": "16.4.2",
     "@types/mdx": "^2.0.14",
     "next": "16.4.2",
-    "postcss": "8.5.24",
+    "postcss": "8.5.30",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "sharp": "0.35.5"
