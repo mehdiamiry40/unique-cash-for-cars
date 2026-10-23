@@ -309,12 +309,21 @@ export function assertPublishedCsp({
         `CSP placeholder is still in ${output}. The deployment would block inline scripts.`,
       );
     }
-    const policies = contentSecurityPolicies(JSON.parse(text));
+    const policies = contentSecurityPolicies(JSON.parse(text)).filter(
+      (published) =>
+        published.includes("default-src 'self'") && published.includes("object-src 'none'"),
+    );
     if (policies.length === 0) {
-      throw new Error(`Content-Security-Policy is missing from ${output}`);
+      const samples = contentSecurityPolicies(JSON.parse(text))
+        .slice(0, 3)
+        .map((published) => `${published.length} bytes: ${published.slice(0, 160)}`)
+        .join("\n");
+      throw new Error(
+        `Content-Security-Policy is missing from ${output}. script-src strings:\n${samples}`,
+      );
     }
     for (const published of policies) {
-      assertHashesInPolicy(published, hashes, output);
+      assertHashesInPolicy(published, hashes, `${output} (${published.length} bytes)`);
     }
   }
 
