@@ -27,12 +27,12 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.6.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "es-abstract": "^1.24.2",
     "eslint": "^9",
-    "eslint-config-next": "16.4.2",
+    "eslint-config-next": "16.4.5",
     "jsdom": "^30.0.1",
     "tailwindcss": "^4",
     "typescript": "^5"
