@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 import createMDX from "@next/mdx";
 import { retiredSuburbRedirects } from "./src/content/suburbs";
 import { join } from "node:path";
-import { contentSecurityPolicy } from "./src/lib/csp";
+import { contentSecurityPolicyFor } from "./src/lib/csp";
 import { resolveQuoteDelivery } from "./src/lib/quote-delivery";
 import { scheduleInlineScriptCsp } from "./scripts/publish-csp.mjs";
 
@@ -54,7 +54,7 @@ if (process.env.VERCEL_ENV === "production") {
   }
 }
 
-const nextConfig: NextConfig = {
+const nextConfig = (phase: string): NextConfig => ({
   pageExtensions: ["ts", "tsx", "mdx"],
 
   // Don't advertise the framework and version to anyone scanning for known
@@ -206,9 +206,14 @@ const nextConfig: NextConfig = {
              * style-src-elem does not, so an injected <style> tag is still
              * refused in browsers that understand the split. style-src keeps
              * 'unsafe-inline' for browsers that only read style-src.
+             *
+             * `next dev` has no build to hash, so its pages would refuse
+             * Next's own inline scripts and never hydrate. That phase alone
+             * gets a relaxed policy; see contentSecurityPolicyFor in
+             * src/lib/csp.ts. Every build still gets the policy above.
              */
             key: "Content-Security-Policy",
-            value: contentSecurityPolicy(),
+            value: contentSecurityPolicyFor(phase, process.env.NODE_ENV),
           },
         ],
       },
@@ -234,8 +239,11 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-};
+});
 
 const withMDX = createMDX({});
 
-export default withMDX(nextConfig);
+// A function, so Next passes the phase: only `next dev` relaxes the CSP.
+export default function config(phase: string) {
+  return withMDX(nextConfig(phase));
+}

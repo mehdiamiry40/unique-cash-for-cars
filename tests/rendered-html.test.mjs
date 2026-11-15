@@ -27,7 +27,7 @@ import { fileURLToPath } from "node:url";
 import test, { after, before } from "node:test";
 import { loadTypeScriptModule } from "./helpers/load-ts-module.mjs";
 
-const { extractInlineScriptSources, hashInlineScript } = loadTypeScriptModule(
+const { contentSecurityPolicy, extractInlineScriptSources, hashInlineScript } = loadTypeScriptModule(
   fileURLToPath(new URL("../src/lib/csp.ts", import.meta.url)),
 );
 const { resolveGoogleMeasurement } = loadTypeScriptModule(
@@ -35,6 +35,8 @@ const { resolveGoogleMeasurement } = loadTypeScriptModule(
 );
 
 const execFileAsync = promisify(execFile);
+
+const inlineScriptHashes = (policy) => policy.match(/'sha256-[A-Za-z0-9+/]{43}='/g) ?? [];
 
 const projectPath = fileURLToPath(new URL("../", import.meta.url));
 const nextBin = fileURLToPath(new URL("../node_modules/next/dist/bin/next", import.meta.url));
@@ -670,6 +672,9 @@ test("the audited security headers are present on HTML responses", async () => {
   assert.match(csp, /script-src[^;]*'sha256-/, "script-src must list inline script hashes");
   assert.doesNotMatch(csp, /sha256-AAAAAAAAAAAA/, "the hash placeholder must be replaced after the build");
   assert.doesNotMatch(csp, / \* |https: |http: /, "CSP must not use a scheme or open wildcard");
+  // Exactly the published policy with this build's hashes where the
+  // placeholder was. Nothing from the `next dev` policy reaches a build.
+  assert.equal(csp, contentSecurityPolicy(inlineScriptHashes(csp)));
   const measurementHash = hashInlineScript(resolveGoogleMeasurement().inlineScript);
   assert.ok(
     csp.includes(measurementHash),
@@ -1516,4 +1521,15 @@ test("a preview deployment is not indexable", { timeout: 600_000 }, async () => 
     /googletagmanager\.com/,
     "a preview build must not load Google measurement tags",
   );
+
+  // A preview build publishes the same strict policy as production.
+  const manifest = JSON.parse(
+    readFileSync(join(projectPath, distDir, "routes-manifest.json"), "utf8"),
+  );
+  const previewCsp =
+    manifest.headers
+      .flatMap((rule) => rule.headers)
+      .find((header) => header.key === "Content-Security-Policy")?.value ?? "";
+  assert.match(previewCsp, /script-src[^;]*'sha256-/, "a preview build must publish its script hashes");
+  assert.equal(previewCsp, contentSecurityPolicy(inlineScriptHashes(previewCsp)));
 });
