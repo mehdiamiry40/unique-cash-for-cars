@@ -33,7 +33,11 @@ export const site = {
     href: "tel:+61732196670",
   },
 
-  email: "info@uniquecashforcars.com.au",
+  /**
+   * No email address is published. This domain has no mailbox, so an address
+   * on it bounces. Contact is by phone and the quote form. Add an `email`
+   * field back only once the address is confirmed to receive mail.
+   */
 
   /**
    * Registered as a service-area business: we travel to the customer.
@@ -66,6 +70,12 @@ export const site = {
   /** Licence 4253110 was current in the QLD register on 5 August 2026; recheck at expiry. */
   abn: "39 627 952 916" as string,
   licenceNumber: "4253110" as string,
+  /**
+   * The register's search page. Its results endpoint returns raw JSON, which
+   * reads as a broken page to a customer, so link here and show the number to
+   * search for beside the link.
+   */
+  licenceRegisterUrl: "https://ftlr.fairtrading.qld.gov.au/",
 
   /** Headline offer. Change once here, updates every page and title tag. */
   maxPayout: "$9,999",

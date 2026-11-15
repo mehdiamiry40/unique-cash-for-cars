@@ -1,4 +1,5 @@
 import type { Faq } from "@/lib/schema";
+import { site } from "@/content/site";
 
 /**
  * The site has two commercial pillars:
@@ -80,6 +81,15 @@ export const servicePages: ServicePage[] = [
         body: [
           "Reusable components are assessed before the remaining vehicle is sent through the appropriate recycling process. Engines, transmissions, panels, glass, wheels, lights and electrical modules may retain value even when the complete car no longer runs.",
           "Fluids and batteries must be handled separately before an end-of-life shell is processed. Keeping the car complete usually gives us more recoverable value to include in the offer than receiving it after the high-value parts have been removed.",
+        ],
+      },
+      {
+        heading: "How our service differs from a car wrecker",
+        body: [
+          "Many people looking for car wreckers on the Gold Coast want the same result: an old or broken car gone, with some money for it. The businesses behind that word are not all the same. A traditional wrecker, or auto dismantler, is a parts business. It buys vehicles to strip, sells the used parts to repairers and the public, and sends what is left to a metal recycler. Collection terms vary, so ask whether towing is included or deducted from the price.",
+          "We start from the seller's side. We quote the whole vehicle, confirm the offer and payment method before pickup, and include removal inside the confirmed Gold Coast service area with no towing deduction. Recoverable parts and metal are part of how the car is valued, but you deal with one buyer for the offer, the paperwork and the collection.",
+          `Licensing is the other practical difference. A business calling itself a wrecker, recycler or cash-for-cars buyer is not automatically a licensed motor dealer. ${site.name} is operated by ${site.registeredEntityName} under Queensland motor dealer licence ${site.licenceNumber}. That matters when a registered vehicle is traded to a dealer, where the safety-certificate exemption can apply; a registered vehicle sold for parts must still be de-registered first.`,
+          "If you need a second-hand part for another car, contact a parts wrecker directly. This page is about selling and removing a whole vehicle.",
         ],
       },
       {

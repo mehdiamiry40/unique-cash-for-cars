@@ -152,6 +152,49 @@ test("provider HTTP failures return only a safe status and allowlisted telemetry
   }
 });
 
+test("Resend 409 conflicts are reduced to a fixed kind, never the provider's own text", async () => {
+  const settings = { resendApiKey: "re_test_key", toEmail: "quotes@example.test" };
+  for (const [name, expected] of [
+    ["concurrent_idempotent_requests", "in_progress"],
+    ["invalid_idempotent_request", "already_used"],
+    ["something_else secret provider detail", undefined],
+  ]) {
+    const events = [];
+    const result = await deliverQuote(
+      { settings, lead, email, idempotencyKey },
+      dependencies(
+        async () =>
+          Response.json(
+            { statusCode: 409, name, message: "secret provider detail" },
+            { status: 409 },
+          ),
+        events,
+      ),
+    );
+
+    assert.equal(result.ok, false);
+    assert.equal(result.status, 409);
+    assert.equal(result.idempotencyConflict, expected);
+    assert.doesNotMatch(JSON.stringify([result, events]), /secret provider detail/);
+  }
+
+  // A webhook 409 carries no such meaning, and an unreadable body is not guessed at.
+  for (const [conflictSettings, response] of [
+    [
+      { webhookUrl: "https://hooks.example.test/quote" },
+      () => Response.json({ name: "concurrent_idempotent_requests" }, { status: 409 }),
+    ],
+    [settings, () => new Response("not json", { status: 409 })],
+  ]) {
+    const result = await deliverQuote(
+      { settings: conflictSettings, lead, email, idempotencyKey },
+      dependencies(async () => response(), []),
+    );
+    assert.equal(result.status, 409);
+    assert.equal(result.idempotencyConflict, undefined);
+  }
+});
+
 test("timeouts and generic fetch failures are classified without raw messages", async () => {
   for (const [errorName, expectedReason] of [
     ["TimeoutError", "timeout"],

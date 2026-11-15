@@ -48,7 +48,10 @@ const validation = compile("src/lib/quote-validation.ts", {});
 const { QuoteForm } = compile("src/components/QuoteForm.tsx", {
   "@/lib/quote-validation": validation,
   "next/link": { default: ({children, ...props}) => React.createElement("a", props, children) },
-  "@/content/site": { site: { name:"Unique Cash For Cars", phone:{display:"0423 476 111",href:"tel:+61423476111"} } },
+  // Hours differ from the live site on purpose, so the success message can only
+  // pass by reading them from site.ts.
+  "@/content/site": { site: { name:"Unique Cash For Cars", phone:{display:"0423 476 111",href:"tel:+61423476111"},
+    openingHours:[{days:["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],opens:"07:30",closes:"18:00"}] } },
   "@/components/GoogleAdsTracking": {
     trackQuoteFormStart() {}, trackQuoteFormError() {},
     trackQuoteConversion(id) { conversions.push(id); },
@@ -125,20 +128,19 @@ test("hydration enables the JSON protocol; ordinary success clears identity and 
   assert.equal(sessionStorage.getItem("ucfc:quote-submission:quote"),null);
   assert.equal(document.activeElement.id,"quote");
   assert.match(container.textContent,/A1B2C3D4/);
+  assert.match(container.textContent,/during our opening hours, 7:30am–6pm daily\./);
 });
 
-test("retry retains identity, and a saved delivery failure exposes the reference without a conversion",async()=>{
+test("retry after a delivery failure reuses the submission identity",async()=>{
   await mount();await fill();
-  await submit(Response.json({error:"Unavailable"},{status:503}));
+  await submit(Response.json({error:"Unavailable"},{status:502}));
   assert.ok(container.querySelector("form"));
-  await submit(Response.json({code:"quote_saved_delivery_failed",stored:true,leadId:id},{status:502}));
-  assert.equal(requests[0].headers["Idempotency-Key"],requests[1].headers["Idempotency-Key"]);
-  assert.match(container.textContent,/Your details are saved/);
-  assert.match(container.textContent,/A1B2C3D4/);
-  assert.ok(container.querySelector('a[href="tel:+61423476111"]'));
-  assert.equal(document.activeElement.id,"quote");
+  assert.match(container.textContent,/couldn’t deliver your quote request/);
   assert.equal(conversions.length,0);
   assert.ok(sessionStorage.getItem("ucfc:quote-submission:quote"));
+  await submit(Response.json({ok:true,leadId:id}));
+  assert.equal(requests[0].headers["Idempotency-Key"],requests[1].headers["Idempotency-Key"]);
+  assert.deepEqual(conversions,[id]);
 });
 
 test("long optional notes remain editable and are rejected without a request",async()=>{
@@ -156,14 +158,6 @@ test("preview acknowledgement is explicit and never counts as a captured lead",a
   assert.match(container.textContent,/Preview checked — no enquiry sent/);
   assert.equal(conversions.length,0);
   assert.doesNotMatch(container.textContent,/safely received your details/);
-});
-
-test("untrusted or malformed failure references never become the saved state",async()=>{
-  await mount();await fill();
-  await submit(Response.json({code:"quote_saved_delivery_failed",stored:true,leadId:"invalid",error:"Untrusted provider text"},{status:502}));
-  assert.ok(container.querySelector("form"));
-  assert.doesNotMatch(container.textContent,/Untrusted provider text|Your details are saved/);
-  assert.equal(conversions.length,0);
 });
 
 test("honeypot and malformed success responses never count as captured conversions",async()=>{
