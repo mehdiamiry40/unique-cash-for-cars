@@ -13,7 +13,7 @@ export const interstateRegoFaqs = [
   {
     question: "How do I lodge a NSW notice of disposal if I live in Queensland?",
     answer:
-      "Service NSW asks for the notice of disposal within 14 days of the sale. Service NSW says a sale to a person or dealership located interstate cannot go through the online notice, and it offers a paper Notice of Disposal form. The form can be posted to Transport for NSW or lodged at a Service NSW centre, and none of those centres is in Queensland.",
+      "Service NSW asks for the notice of disposal within 14 days of the sale. Service NSW says a sale to a person or dealership located interstate cannot go through the online notice, and it offers a paper Notice of Disposal form. The form can be posted to the address printed on it or lodged at a Service NSW centre, and none of those centres is in Queensland.",
   },
   {
     question: "Does a Queensland buyer have to re-register a NSW car?",
@@ -23,7 +23,7 @@ export const interstateRegoFaqs = [
   {
     question: "How do I cancel NSW registration from the Gold Coast?",
     answer:
-      "Transport for NSW has a process for cancelling registration from interstate. You complete its refund form and either email it with a receipt for plates already surrendered, or post the form, documents and NSW plates to the address on the form. Any refund covers the unused motor vehicle tax from the date the plates are surrendered, and only if you cancel before the registration expires.",
+      "Transport for NSW has a process for cancelling registration from interstate, written mainly for people who have re-registered the car in their new state. You post its refund form, your documents and the NSW plates, or a receipt for plates already surrendered, to Transport for NSW at Locked Bag 14, Dubbo NSW 2830. An admin fee applies, and a refund is only available if you cancel before the registration expires. If the car is being scrapped rather than re-registered, check with Service NSW first.",
   },
   {
     question: "Is a NSW pink slip the same as a Queensland safety certificate?",
