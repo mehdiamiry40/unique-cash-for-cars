@@ -18,6 +18,9 @@ const eslintConfig = defineConfig([
     // thousands of problems that are not ours to fix.
     ".next-preview/**",
     "dist/**",
+    // Local agent worktrees are full checkouts with their own build output.
+    // They are not part of this tree and are never present in CI.
+    ".claude/**",
     ".vinext/**",
     ".wrangler/**",
   ]),

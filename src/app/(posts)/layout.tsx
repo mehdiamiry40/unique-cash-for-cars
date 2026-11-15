@@ -23,7 +23,7 @@ export default function PostLayout({ children }: { children: React.ReactNode }) 
               <li aria-hidden="true">/</li>
               <li>
                 <Link href="/blog" className="hover:text-brand">
-                  Blog
+                  Guides
                 </Link>
               </li>
             </ol>

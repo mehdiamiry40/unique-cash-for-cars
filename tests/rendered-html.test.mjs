@@ -25,8 +25,18 @@ import { join } from "node:path";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import test, { after, before } from "node:test";
+import { loadTypeScriptModule } from "./helpers/load-ts-module.mjs";
+
+const { contentSecurityPolicy, extractInlineScriptSources, hashInlineScript } = loadTypeScriptModule(
+  fileURLToPath(new URL("../src/lib/csp.ts", import.meta.url)),
+);
+const { resolveGoogleMeasurement } = loadTypeScriptModule(
+  fileURLToPath(new URL("../src/lib/google-measurement.ts", import.meta.url)),
+);
 
 const execFileAsync = promisify(execFile);
+
+const inlineScriptHashes = (policy) => policy.match(/'sha256-[A-Za-z0-9+/]{43}='/g) ?? [];
 
 const projectPath = fileURLToPath(new URL("../", import.meta.url));
 const nextBin = fileURLToPath(new URL("../node_modules/next/dist/bin/next", import.meta.url));
@@ -559,12 +569,75 @@ test("www URLs redirect permanently to the canonical non-www domain", async () =
   );
 });
 
+test("the production vercel.app alias redirects pages to the canonical domain, not the API", async () => {
+  const host = "unique-cash-for-cars.vercel.app";
+
+  for (const [path, expected] of [
+    ["/", "https://uniquecashforcars.com.au/"],
+    ["/car-removal-gold-coast", "https://uniquecashforcars.com.au/car-removal-gold-coast"],
+  ]) {
+    const response = await getWithHost(path, host);
+    assert.ok([301, 308].includes(response.statusCode), `${path} on ${host}: ${response.statusCode}`);
+    assert.equal(response.headers.location, expected, `${path} on ${host}`);
+  }
+
+  const api = await getWithHost("/api/quote", host);
+  assert.ok(
+    ![301, 308].includes(api.statusCode),
+    `/api/ on ${host} must not redirect (got ${api.statusCode})`,
+  );
+});
+
+test("only the homepage hero is preloaded at high priority; the logo is not preloaded", async () => {
+  for (const path of ["/", "/car-removal-gold-coast", "/blog"]) {
+    const source = await html(path);
+    const imagePreloads = [...source.matchAll(/<link\b[^>]*rel="preload"[^>]*as="image"[^>]*>/gi)].map(
+      ([tag]) => tag,
+    );
+    assert.ok(
+      imagePreloads.every((tag) => !/logo\.png/.test(tag)),
+      `${path}: the logo must not be preloaded ahead of the LCP image`,
+    );
+    const logo = source.match(/<img\b[^>]*src="[^"]*logo\.png[^"]*"[^>]*>/i)?.[0] ?? "";
+    assert.ok(logo, `${path}: no logo image`);
+    assert.doesNotMatch(logo, /loading="lazy"/, `${path}: above-the-fold logo must not lazy load`);
+  }
+
+  const home = await html("/");
+  const hero = home.match(/<img\b[^>]*Best-Cash-for-Cars-Gold-Coast[^>]*>/i)?.[0] ?? "";
+  assert.match(hero, /fetchPriority="high"/i, "homepage hero (the LCP element) needs fetchpriority=high");
+  assert.match(
+    home,
+    /<link\b[^>]*rel="preload"[^>]*as="image"[^>]*Best-Cash-for-Cars-Gold-Coast/i,
+    "homepage hero must still be preloaded",
+  );
+});
+
+test("each guide's BlogPosting image matches the blog index entry for the same @id", async () => {
+  const hubPosts = new Map(
+    schemaNodes(await html("/blog"))
+      .find((node) => node["@type"] === "Blog")
+      .blogPost.map((post) => [post["@id"], post.image]),
+  );
+
+  for (const path of postRoutes) {
+    const article = schemaNodes(await html(path)).find((node) => node["@type"] === "BlogPosting");
+    // Archived posts are not on the hub; nothing to disagree with.
+    if (!hubPosts.has(article["@id"])) continue;
+    assert.equal(
+      article.image,
+      hubPosts.get(article["@id"]),
+      `${path}: BlogPosting image differs between the post and /blog`,
+    );
+  }
+});
+
 test("the audited security headers are present on HTML responses", async () => {
   const response = await get("/", { redirect: "follow" });
   const expected = {
     "x-content-type-options": "nosniff",
     "referrer-policy": "strict-origin-when-cross-origin",
-    "x-frame-options": "SAMEORIGIN",
+    "x-frame-options": "DENY",
   };
   for (const [header, value] of Object.entries(expected)) {
     assert.equal(response.headers.get(header), value, `${header} header`);
@@ -575,17 +648,49 @@ test("the audited security headers are present on HTML responses", async () => {
     /max-age=63072000/,
     "HSTS must not depend on the host supplying it",
   );
-  // No script-src here on purpose — see the note in next.config.ts. These four
-  // directives need no nonce, so they must actually be present.
   const csp = response.headers.get("content-security-policy") ?? "";
   for (const directive of [
-    "frame-ancestors 'self'",
+    "default-src 'self'",
+    "script-src-attr 'none'",
+    "style-src-elem 'self'",
+    "style-src-attr 'unsafe-inline'",
+    "font-src 'self'",
+    "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    "object-src 'none'",
+    "frame-ancestors 'none'",
+    "upgrade-insecure-requests",
+    "https://www.googletagmanager.com",
+    "connect-src 'self'",
   ]) {
     assert.ok(csp.includes(directive), `CSP is missing ${directive} — got: ${csp}`);
   }
+  assert.doesNotMatch(csp, /unsafe-eval/, "production CSP must not allow eval");
+  assert.doesNotMatch(
+    csp,
+    /script-src[^;]*'unsafe-inline'/,
+    "script-src must be hash-based rather than unsafe-inline",
+  );
+  assert.match(csp, /script-src[^;]*'sha256-/, "script-src must list inline script hashes");
+  assert.doesNotMatch(csp, /sha256-AAAAAAAAAAAA/, "the hash placeholder must be replaced after the build");
+  assert.doesNotMatch(csp, / \* |https: |http: /, "CSP must not use a scheme or open wildcard");
+  // Exactly the published policy with this build's hashes where the
+  // placeholder was. Nothing from the `next dev` policy reaches a build.
+  assert.equal(csp, contentSecurityPolicy(inlineScriptHashes(csp)));
+  const measurementHash = hashInlineScript(resolveGoogleMeasurement().inlineScript);
+  assert.ok(
+    csp.includes(measurementHash),
+    "CSP must allow the exact Google measurement snippet next/script inserts",
+  );
+
+  for (const path of ["/", "/contact-us", "/car-removal-gold-coast", "/blog"]) {
+    const page = await html(path);
+    for (const source of extractInlineScriptSources(page)) {
+      const hash = hashInlineScript(source);
+      assert.ok(csp.includes(hash), `${path} has an inline script that the CSP does not allow`);
+    }
+  }
+
   // poweredByHeader: false — don't name the framework for vulnerability scanners.
   assert.equal(response.headers.get("x-powered-by"), null, "x-powered-by must not be sent");
 });
@@ -623,14 +728,13 @@ test("the homepage trust proof links its business claims to public registers", a
     links.some((link) => link.href === "https://abr.business.gov.au/ABN/View?id=39627952916"),
     "homepage does not link its ABN to ABN Lookup",
   );
+  // The register's results endpoint returns raw JSON, so the link goes to its
+  // search page and the proof block shows the number to search for.
   assert.ok(
-    links.some(
-      (link) =>
-        link.href.startsWith("https://ftlr.fairtrading.qld.gov.au/home/search?") &&
-        link.href.includes("LicenceNumber=4253110"),
-    ),
-    "homepage does not link its licence to the QLD register",
+    links.some((link) => link.href === "https://ftlr.fairtrading.qld.gov.au/"),
+    "homepage does not link its licence to the QLD register search page",
   );
+  assert.match(proofText, /Search for this licence number/);
 });
 
 test("the preserved WordPress image URLs still resolve", async () => {
@@ -1145,12 +1249,26 @@ test("conversion tracking separates durably captured leads from funnel intent", 
     join(projectPath, "src", "components", "GoogleAdsTracking.tsx"),
     "utf8",
   );
+  const measurement = readFileSync(
+    join(projectPath, "src", "lib", "google-measurement.ts"),
+    "utf8",
+  );
   const quoteForm = readFileSync(
     join(projectPath, "src", "components", "QuoteForm.tsx"),
     "utf8",
   );
 
-  assert.match(tracking, /G-VZT8S8WXDH/, "GA4 stream is not configured");
+  assert.match(measurement, /G-VZT8S8WXDH/, "GA4 stream is not configured");
+  assert.match(
+    tracking,
+    /resolveGoogleMeasurement\(/,
+    "tracking must use the shared measurement configuration that the CSP hashes",
+  );
+  assert.match(
+    tracking,
+    /\{googleMeasurementScript\}/,
+    "tracking must insert the measurement snippet the CSP hashes",
+  );
   assert.match(tracking, /sendAnalyticsEvent\("generate_lead"/, "no GA4 lead event");
   assert.match(tracking, /sendAnalyticsEvent\("click_to_call"/, "no GA4 call-click event");
   assert.match(
@@ -1323,6 +1441,24 @@ test("indexable pages do not link internally to consolidated URLs", async () => 
   }
 });
 
+test("no page publishes an email address the business cannot receive mail on", async () => {
+  // The site's domain has no mailbox, so an address on it bounces. Contact is
+  // by phone and the quote form until a working address is confirmed.
+  for (const path of [...(await sitemapPaths()), "/privacy-policy"]) {
+    const source = await html(path);
+    assert.doesNotMatch(source, /mailto:/i, `${path}: still has a mailto link`);
+    assert.doesNotMatch(
+      source,
+      /[\w.+-]+@uniquecashforcars\.com\.au/i,
+      `${path}: still shows an address on the site's own domain`,
+    );
+  }
+
+  const llms = readFileSync(join(projectPath, "public", "llms.txt"), "utf8");
+  assert.doesNotMatch(llms, /^Email:/im);
+  assert.doesNotMatch(llms, /@uniquecashforcars\.com\.au/i);
+});
+
 test("the quote form prioritises contact, location and vehicle details", async () => {
   const home = await html("/");
   assert.doesNotMatch(home, /name="email"|id="q-email"/);
@@ -1404,4 +1540,15 @@ test("a preview deployment is not indexable", { timeout: 600_000 }, async () => 
     /googletagmanager\.com/,
     "a preview build must not load Google measurement tags",
   );
+
+  // A preview build publishes the same strict policy as production.
+  const manifest = JSON.parse(
+    readFileSync(join(projectPath, distDir, "routes-manifest.json"), "utf8"),
+  );
+  const previewCsp =
+    manifest.headers
+      .flatMap((rule) => rule.headers)
+      .find((header) => header.key === "Content-Security-Policy")?.value ?? "";
+  assert.match(previewCsp, /script-src[^;]*'sha256-/, "a preview build must publish its script hashes");
+  assert.equal(previewCsp, contentSecurityPolicy(inlineScriptHashes(previewCsp)));
 });

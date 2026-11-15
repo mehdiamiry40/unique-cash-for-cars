@@ -8,7 +8,7 @@ export const abandonedCarFaqs = [
   {
     question: "Can I sell a car someone abandoned on my property in Queensland?",
     answer:
-      "Not straight away, and not on the basis that it is parked on your land. The registered operator still owns it. Every lawful route to selling or scrapping an abandoned vehicle runs through a process first — the residential tenancy rules, the uncollected goods rules, or a tribunal or court order — and which one applies depends on how the car came to be there.",
+      "Not straight away, and not on the basis that it is parked on your land. The car still belongs to its owner, who is usually but not always the registered operator. Every lawful route to selling or scrapping an abandoned vehicle runs through a process first — the residential tenancy rules, the uncollected goods rules, or a tribunal or court order — and which one applies depends on how the car came to be there.",
   },
   {
     question: "Will the council remove an abandoned car from private property?",
@@ -33,6 +33,6 @@ export const abandonedCarFaqs = [
   {
     question: "Can I just tow the car off my property myself?",
     answer:
-      "Towing from private property in Queensland is a regulated activity. Transport and Main Roads requires that vehicles be towed only by accredited tow truck operators using authorised tow trucks, under a written contract with the property owner or occupier and a completed Towing Consent. Moving the car is also not the same as acquiring the right to dispose of it.",
+      "In Queensland's regulated towing areas, which include the Gold Coast, towing from private property is a regulated activity. There, Transport and Main Roads requires that vehicles be towed only by accredited tow truck operators using authorised tow trucks, under a written contract with the property owner or occupier and a completed Towing Consent. Moving the car is also not the same as acquiring the right to dispose of it.",
   },
 ] as const satisfies readonly Faq[];

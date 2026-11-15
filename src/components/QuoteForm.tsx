@@ -8,7 +8,6 @@ import {
   quoteFieldLimits,
   quoteFieldOrder,
   quoteIdPattern,
-  savedQuoteReference,
   validateQuoteFields,
   type QuoteFieldErrors,
   type QuoteFieldName,
@@ -20,7 +19,7 @@ import {
   type QuoteFormErrorCategory,
 } from "@/components/GoogleAdsTracking";
 
-type Status = "idle" | "submitting" | "success" | "saved" | "preview" | "error";
+type Status = "idle" | "submitting" | "success" | "preview" | "error";
 type SubmissionIdentity = Readonly<{ fingerprint: string; key: string }>;
 
 const subscribeToClient = () => () => {};
@@ -55,6 +54,26 @@ const validationCategories: Record<QuoteFieldName, QuoteFormErrorCategory> = {
   expectedPrice: "validation_expected_price",
   condition: "validation_condition",
 };
+
+/** "08:00" → "8am", "17:30" → "5:30pm". */
+function clockLabel(time: string) {
+  const [hours, minutes] = time.split(":").map(Number);
+  const hour = hours % 12 || 12;
+  const suffix = hours < 12 ? "am" : "pm";
+  return minutes
+    ? `${hour}:${String(minutes).padStart(2, "0")}${suffix}`
+    : `${hour}${suffix}`;
+}
+
+/**
+ * The callback window promised in the success message, read from site.ts so it
+ * cannot drift from the published hours. Only a single seven-day slot can be
+ * summarised in a phrase; anything else falls back to naming no times.
+ */
+const callbackHours =
+  site.openingHours.length === 1 && site.openingHours[0].days.length === 7
+    ? `, ${clockLabel(site.openingHours[0].opens)}–${clockLabel(site.openingHours[0].closes)} daily`
+    : "";
 
 function isQuoteFieldName(name: string): name is QuoteFieldName {
   return quoteFieldOrder.includes(name as QuoteFieldName);
@@ -111,7 +130,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
   };
 
   useEffect(() => {
-    if (status === "success" || status === "saved" || status === "preview") resultRef.current?.focus();
+    if (status === "success" || status === "preview") resultRef.current?.focus();
   }, [status]);
 
   useEffect(() => {
@@ -229,13 +248,6 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
 
       const result: unknown = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const savedReference = savedQuoteReference(result);
-        if (res.status === 502 && savedReference) {
-          trackQuoteFormError("delivery_unavailable");
-          setLeadReference(savedReference);
-          setStatus("saved");
-          return;
-        }
         if (res.status === 409) {
           submissionIdentityRef.current = null;
           try {
@@ -292,7 +304,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
     "w-full rounded border border-field bg-surface px-4 py-3 text-base text-ink placeholder:text-ink-muted focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-brand";
   const labelClass = "mb-1.5 block text-sm font-semibold text-ink-heading";
 
-  if (status === "success" || status === "saved" || status === "preview") {
+  if (status === "success" || status === "preview") {
     return (
       <div
         ref={resultRef}
@@ -304,14 +316,12 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
       >
         <h2 className="heading-md mb-3">
           {status === "preview" ? "Preview checked — no enquiry sent"
-            : status === "saved" ? "Your details are saved — please call us" : "Thanks — we’ve safely received your details"}
+            : "Thanks — we’ve safely received your details"}
         </h2>
         <p className="mb-6">
           {status === "preview"
             ? "This preview checks the form without saving your details or sending a notification. To request a real quote, visit our live website or call us."
-            : status === "saved"
-            ? "Your enquiry needs our attention because the automatic notification could not be delivered. Please call and quote the reference below so we can find your details."
-            : "We’ll call you back during our opening hours, 8am–5pm daily. If you’d prefer to speak with us, call the number below."}
+            : `We’ll call you back during our opening hours${callbackHours}. If you’d prefer to speak with us, call the number below.`}
         </p>
         {leadReference ? (
           <p className="mb-6 rounded bg-surface-alt px-4 py-3 text-sm text-ink-heading">

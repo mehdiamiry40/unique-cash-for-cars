@@ -49,7 +49,7 @@ const services = [
     image: "/img/unwanted-car-gold-coast.jpg",
     alt: "An unwanted car left on a Gold Coast property",
     body: "Cars, utes, vans, buses, 4WDs, hatchbacks, hybrids and EVs. If you want the vehicle gone, tell us its condition and we will assess it for an offer.",
-    cta: "See free car removal",
+    cta: "See how free removal works",
   },
   {
     title: "Cash for Scrap Cars",
@@ -57,15 +57,15 @@ const services = [
     image: "/img/car-abandoned.jpg",
     alt: "An abandoned scrap car with flat tyres awaiting collection",
     body: "Past the point of repair is not the same as worthless. We recover the drivetrain, panels, glass and catalytic converter, and dispose of the rest properly.",
-    cta: "See free car removal",
+    cta: "Plan a scrap car pickup",
   },
   {
     title: "Cash for Accident-Damaged Cars",
-    href: "/what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide",
+    href: "/statutory-vs-repairable-write-off-queensland",
     image: "/img/accident-damaged-car.jpg",
     alt: "A car with accident damage to the front quarter panel",
     body: "Written off, still at the smash repairer, or sitting where it stopped. Wherever your damaged car is, we come to it and the removal costs you nothing.",
-    cta: "Compare your options",
+    cta: "Understand write-off types",
   },
   {
     title: "Cash for Used Cars",
@@ -77,11 +77,11 @@ const services = [
   },
   {
     title: "Cash for Damaged Cars",
-    href: "/car-removal-gold-coast",
+    href: "/what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide",
     image: "/img/car-front-damaged.jpg",
     alt: "A car with a crumpled front end after a collision",
     body: "Body damage, missing parts, electrical faults, mechanical failure, flood or hail damage. Tell us what's wrong up front and we'll price it honestly.",
-    cta: "See free car removal",
+    cta: "Compare repair and sale options",
   },
 ] as const;
 
@@ -154,14 +154,18 @@ export default function HomePage() {
           the hero is roughly square, get it full-bleed behind the copy.
 
           Decorative in both cases — the h1 carries the message — hence the
-          empty alt. Preloaded rather than lazy since it is above the fold.
+          empty alt. Preloaded rather than lazy since it is above the fold, and
+          fetchPriority high because it is the measured LCP element: `preload`
+          alone (and the deprecated `priority`) emits the <link> but leaves the
+          <img> itself at default priority.
         */}
         <div className="relative aspect-[1920/620] w-full lg:absolute lg:inset-0 lg:-z-20 lg:aspect-auto">
           <Image
             src="/img/Best-Cash-for-Cars-Gold-Coast.jpg"
             alt=""
             fill
-            priority
+            preload
+            fetchPriority="high"
             sizes="100vw"
             className="object-cover object-bottom"
           />
@@ -293,11 +297,14 @@ export default function HomePage() {
                   <dt className="mb-1 text-sm font-bold text-ink-muted">QLD motor dealer licence</dt>
                   <dd>
                     <a
-                      href={"https://ftlr.fairtrading.qld.gov.au/home/search?LicenceNumber=4253110&GivenName=&LastName=&CompanyName=&MasterType=MOTOR%20DEALING"}
+                      href={site.licenceRegisterUrl}
                       className="font-bold text-brand underline underline-offset-2"
                     >
                       Licence {site.licenceNumber}
                     </a>
+                    <p className="mt-1 text-sm text-ink-muted">
+                      Opens the Fair Trading register. Search for this licence number.
+                    </p>
                   </dd>
                 </div>
               </dl>

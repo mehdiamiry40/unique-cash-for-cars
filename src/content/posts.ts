@@ -59,6 +59,7 @@ export const posts: Post[] = [
     image: "/img/used-car-gold-coast.jpg",
     imageAlt: "A used car parked at a Gold Coast home before its interstate registration is dealt with",
     date: "2026-09-29",
+    updated: "2026-11-15",
     readingMinutes: 7,
   },
   {
@@ -103,6 +104,7 @@ export const posts: Post[] = [
     image: "/img/car-abandoned.jpg",
     imageAlt: "A long-abandoned car left parked on private property on the Gold Coast",
     date: "2026-09-22",
+    updated: "2026-11-15",
     readingMinutes: 7,
   },
   {
@@ -114,6 +116,7 @@ export const posts: Post[] = [
     image: "/img/unwanted-car-gold-coast.jpg",
     imageAlt: "An unregistered car parked at a Gold Coast home before it is moved",
     date: "2026-09-18",
+    updated: "2026-11-15",
     readingMinutes: 7,
   },
   {
@@ -125,6 +128,7 @@ export const posts: Post[] = [
     image: "/img/used-car-gold-coast.jpg",
     imageAlt: "A used car parked at a Gold Coast home while its ownership paperwork is settled",
     date: "2026-09-17",
+    updated: "2026-11-15",
     readingMinutes: 7,
   },
   {
@@ -136,6 +140,7 @@ export const posts: Post[] = [
     image: "/img/used-car-gold-coast.jpg",
     imageAlt: "A used car being prepared for sale on the Gold Coast",
     date: "2026-09-16",
+    updated: "2026-11-15",
     readingMinutes: 6,
   },
   {
@@ -181,7 +186,7 @@ export const posts: Post[] = [
     image: "/img/car-front-damaged.jpg",
     imageAlt: "A car with severe front-end damage after a collision",
     date: "2026-07-28",
-    updated: "2026-08-06",
+    updated: "2026-11-15",
     readingMinutes: 7,
   },
   {
