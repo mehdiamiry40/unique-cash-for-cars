@@ -17,7 +17,7 @@ The repository is public. The owner confirmed on 15 November 2026 that it stays 
 
 Because anyone can read the repository, keep internal reports, enquiry details, real inbox addresses and credentials out of commits, pull request text and issues. Earlier commits remain readable in the history.
 
-The reviewable desired policy is `.github/branch-protection.json`. As of 15 November 2026 it has not been applied: `main` is unprotected, and a direct push to it deploys to production through Vercel. Apply the policy with:
+The reviewable desired policy is `.github/branch-protection.json`. It was applied to `main` on 15 November 2026, so a direct push to `main` is now refused. Read the live rules back with `gh api repos/mehdiamiry40/unique-cash-for-cars/branches/main/protection`. After changing the file, apply it again with:
 
 ```sh
 gh api --method PUT repos/mehdiamiry40/unique-cash-for-cars/branches/main/protection --input .github/branch-protection.json
