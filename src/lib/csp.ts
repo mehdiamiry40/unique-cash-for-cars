@@ -105,22 +105,24 @@ export function extractInlineScriptSources(html: string) {
   return sources;
 }
 
-export function contentSecurityPolicy(
-  inlineHashes: readonly string[] = [SCRIPT_HASH_PLACEHOLDER],
-) {
-  const hashes =
-    inlineHashes.length > 0 ? inlineHashes.join(" ") : SCRIPT_HASH_PLACEHOLDER;
+type PolicySources = {
+  /** Follows 'self' in script-src: the inline-script hashes, or keywords. */
+  inlineScripts: string;
+  styleElements: string;
+  connect: readonly string[];
+};
 
+function policy({ inlineScripts, styleElements, connect }: PolicySources) {
   return [
     "default-src 'self'",
-    `script-src 'self' ${hashes} ${scriptHosts.join(" ")}`,
+    `script-src 'self' ${inlineScripts} ${scriptHosts.join(" ")}`,
     "script-src-attr 'none'",
     "style-src 'self' 'unsafe-inline'",
-    "style-src-elem 'self'",
+    `style-src-elem ${styleElements}`,
     "style-src-attr 'unsafe-inline'",
     `img-src 'self' ${imageHosts.join(" ")}`,
     "font-src 'self'",
-    `connect-src 'self' ${connectHosts.join(" ")}`,
+    `connect-src 'self' ${connect.join(" ")}`,
     `frame-src ${frameHosts.join(" ")}`,
     "worker-src 'self'",
     "manifest-src 'self'",
@@ -131,4 +133,59 @@ export function contentSecurityPolicy(
     "frame-ancestors 'none'",
     "upgrade-insecure-requests",
   ].join("; ");
+}
+
+/** The policy every build publishes: production, preview and `next start`. */
+export function contentSecurityPolicy(
+  inlineHashes: readonly string[] = [SCRIPT_HASH_PLACEHOLDER],
+) {
+  const hashes =
+    inlineHashes.length > 0 ? inlineHashes.join(" ") : SCRIPT_HASH_PLACEHOLDER;
+
+  return policy({
+    inlineScripts: hashes,
+    styleElements: "'self'",
+    connect: connectHosts,
+  });
+}
+
+/**
+ * `next dev` only. Nothing hashes the dev server's inline scripts, so the
+ * placeholder is never replaced there and Next's own bootstrap is refused:
+ * pages render but never hydrate. Three directives differ from the published
+ * policy, and nothing else:
+ *
+ *  - script-src drops the hash for 'unsafe-inline', because a browser ignores
+ *    'unsafe-inline' once script-src lists a hash, and adds 'unsafe-eval',
+ *    which React's development build uses to rebuild stack traces. Without it
+ *    React logs an error on every page.
+ *  - style-src-elem adds 'unsafe-inline': the Next dev overlay styles itself
+ *    with <style> elements.
+ *  - connect-src adds `ws:` for the hot-reload socket. Chromium accepts that
+ *    socket under 'self'; browsers have not always matched 'self' to ws:.
+ */
+export function developmentContentSecurityPolicy() {
+  return policy({
+    inlineScripts: "'unsafe-inline' 'unsafe-eval'",
+    styleElements: "'self' 'unsafe-inline'",
+    connect: [...connectHosts, "ws:"],
+  });
+}
+
+/** The phase Next passes to next.config.ts under `next dev`, and only there. */
+const DEVELOPMENT_SERVER_PHASE = "phase-development-server";
+
+/**
+ * Chooses the header for next.config.ts. The relaxed policy needs both the
+ * `next dev` phase and NODE_ENV=development. NODE_ENV alone is not enough:
+ * `next build` keeps an inherited NODE_ENV=development and
+ * `next build --debug-prerender` sets it, and neither may publish this policy.
+ */
+export function contentSecurityPolicyFor(
+  phase: string | undefined,
+  nodeEnv: string | undefined,
+) {
+  return phase === DEVELOPMENT_SERVER_PHASE && nodeEnv === "development"
+    ? developmentContentSecurityPolicy()
+    : contentSecurityPolicy();
 }
