@@ -88,10 +88,11 @@ export default function PrivacyPolicyPage() {
         <p>
           Google may set or read cookies and similar technologies for measurement
           and receive technical details about the visit, such as the page URL,
-          browser and IP address. We intend to use these tags for measurement rather
-          than remarketing; the features that are active depend on the Google Ads and
-          Analytics account and tag settings in force. We do not load Meta Pixel or
-          Microsoft Clarity.
+          browser and IP address. We use these tags for measurement, not
+          remarketing. The tags on this site are set with Google&apos;s advertising
+          features and ad personalisation signals switched off, which tells Google
+          not to use visits to this site for remarketing audiences or personalised
+          advertising. We do not load Meta Pixel or Microsoft Clarity.
         </p>
         <p>
           Our hosting provider keeps standard server logs — the requested page,

@@ -1236,6 +1236,12 @@ test("the privacy policy describes the Google measurement tags that production l
   assert.match(source, /do not send the values entered in the quote form to Google/i);
   assert.doesNotMatch(source, /truncated IP address/i);
 
+  // The policy may only say remarketing is off while the tag switches it off.
+  assert.match(plainText(source), /measurement, not remarketing/i);
+  const snippet = resolveGoogleMeasurement().inlineScript;
+  assert.match(snippet, /gtag\('set', 'allow_google_signals', false\);/);
+  assert.match(snippet, /gtag\('set', 'allow_ad_personalization_signals', false\);/);
+
   const home = await html("/");
   const form = home.match(/<form\b[^>]*id="quote"[^>]*>[\s\S]*?<\/form>/i)?.[0] ?? "";
   assert.match(form, /href="\/privacy-policy"/);
