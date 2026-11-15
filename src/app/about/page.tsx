@@ -106,10 +106,10 @@ export default function CompanyPage() {
                     <dd>
                       {site.licenceNumber} ·{" "}
                       <a
-                        href={"https://ftlr.fairtrading.qld.gov.au/home/search?LicenceNumber=4253110&GivenName=&LastName=&CompanyName=&MasterType=MOTOR%20DEALING"}
+                        href={site.licenceRegisterUrl}
                         className="text-brand underline"
                       >
-                        check the QLD register
+                        search the QLD register for this number
                       </a>
                     </dd>
                   </div>

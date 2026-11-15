@@ -16,7 +16,7 @@ import { JsonLd } from "@/components/JsonLd";
  * place that knows its own slug.
  *
  * Emits two things the posts were missing: BlogPosting (the post layout has
- * always rendered a Home / Blog breadcrumb with no markup behind it) and
+ * always rendered a Home / Guides breadcrumb with no markup behind it) and
  * BreadcrumbList.
  */
 export function PostSchema({
@@ -36,13 +36,14 @@ export function PostSchema({
   const nodes: object[] = [
     breadcrumbSchema([
       { name: "Home", path: "/" },
-      { name: "Blog", path: "/blog" },
+      { name: "Guides", path: "/blog" },
       { name: post.title, path: `/${post.slug}` },
     ]),
     articleSchema({
       slug: post.slug,
       title: post.title,
       description: post.description,
+      image: post.image,
       datePublished: post.date,
       dateModified: post.updated,
     }),

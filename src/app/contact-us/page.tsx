@@ -68,18 +68,6 @@ export default function ContactPage() {
               </Card>
 
               <Card>
-                <h2 className="heading-md mb-3">Email</h2>
-                <p className="mb-4">
-                  <a href={`mailto:${site.email}`} className="font-bold text-brand hover:underline">
-                    {site.email}
-                  </a>
-                </p>
-                <p className="text-sm text-ink-muted">
-                  Photos of the car help us quote accurately — attach a few if you can.
-                </p>
-              </Card>
-
-              <Card>
                 <h2 className="heading-md mb-3">Hours</h2>
                 <ul className="space-y-1 text-sm">
                   {site.openingHours.map((slot) => (
