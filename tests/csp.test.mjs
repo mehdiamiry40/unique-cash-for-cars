@@ -27,6 +27,8 @@ test("the Google measurement snippet matches the text next/script inserts today"
       "          function gtag(){dataLayer.push(arguments);}",
       "          window.gtag = window.gtag || gtag;",
       "          gtag('js', new Date());",
+      "          gtag('set', 'allow_google_signals', false);",
+      "          gtag('set', 'allow_ad_personalization_signals', false);",
       '          gtag(\'config\', "AW-750701638");',
       '          gtag(\'config\', "G-VZT8S8WXDH");',
       '          gtag(\'config\', "AW-750701638/sF8gCNG54ZgBEMaY--UC", {',
@@ -35,6 +37,25 @@ test("the Google measurement snippet matches the text next/script inserts today"
       "        ",
     ].join("\n"),
   );
+});
+
+test("remarketing is switched off before any Google product is configured", () => {
+  // The privacy policy says the tags are for measurement, not remarketing.
+  // Google reads these settings only if they come before the config commands.
+  for (const env of [
+    {},
+    { NEXT_PUBLIC_GOOGLE_ADS_ID: "AW-1", NEXT_PUBLIC_GA4_ID: "G-TEST" },
+    { NEXT_PUBLIC_GOOGLE_ADS_ID: "invalid", NEXT_PUBLIC_GA4_ID: "G-TEST" },
+  ]) {
+    const script = measurement.resolveGoogleMeasurement(env).inlineScript;
+    const firstConfig = script.indexOf("gtag('config'");
+    assert.notEqual(firstConfig, -1, "snippet configures no Google product");
+    for (const setting of ["allow_google_signals", "allow_ad_personalization_signals"]) {
+      const at = script.indexOf(`gtag('set', '${setting}', false);`);
+      assert.notEqual(at, -1, `${setting} must be set to false`);
+      assert.ok(at < firstConfig, `${setting} must come before the first config command`);
+    }
+  }
 });
 
 test("the static CSP names required directives and refuses eval and open wildcards", () => {

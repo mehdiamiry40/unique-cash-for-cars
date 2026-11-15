@@ -20,6 +20,16 @@ export function validMeasurementLabel(label: string) {
   return /^[A-Za-z0-9_-]+$/.test(label) ? label : "";
 }
 
+/**
+ * The two `set` commands switch remarketing off for every product this tag
+ * configures, and Google asks for them before any `config` command.
+ * `allow_google_signals` turns off Analytics advertising features, including
+ * remarketing audiences. `allow_ad_personalization_signals` stops Google Ads
+ * collecting remarketing data and marks hits as non-personalised.
+ * Conversion and call measurement are unaffected. The privacy policy tells
+ * visitors the tags are used for measurement, not remarketing, so removing
+ * either line means changing that page in the same commit.
+ */
 export function googleMeasurementInlineScript(input: {
   adsId: string;
   analyticsId: string;
@@ -32,6 +42,8 @@ export function googleMeasurementInlineScript(input: {
           function gtag(){dataLayer.push(arguments);}
           window.gtag = window.gtag || gtag;
           gtag('js', new Date());
+          gtag('set', 'allow_google_signals', false);
+          gtag('set', 'allow_ad_personalization_signals', false);
           ${adsId ? `gtag('config', ${JSON.stringify(adsId)});` : ""}
           ${analyticsId ? `gtag('config', ${JSON.stringify(analyticsId)});` : ""}
           ${
