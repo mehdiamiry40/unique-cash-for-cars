@@ -33,7 +33,11 @@ export const site = {
     href: "tel:+61732196670",
   },
 
-  email: "info@uniquecashforcars.com.au",
+  /**
+   * No email address is published. This domain has no mailbox, so an address
+   * on it bounces. Contact is by phone and the quote form. Add an `email`
+   * field back only once the address is confirmed to receive mail.
+   */
 
   /**
    * Registered as a service-area business: we travel to the customer.

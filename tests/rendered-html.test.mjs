@@ -1434,6 +1434,24 @@ test("indexable pages do not link internally to consolidated URLs", async () => 
   }
 });
 
+test("no page publishes an email address the business cannot receive mail on", async () => {
+  // The site's domain has no mailbox, so an address on it bounces. Contact is
+  // by phone and the quote form until a working address is confirmed.
+  for (const path of [...(await sitemapPaths()), "/privacy-policy"]) {
+    const source = await html(path);
+    assert.doesNotMatch(source, /mailto:/i, `${path}: still has a mailto link`);
+    assert.doesNotMatch(
+      source,
+      /[\w.+-]+@uniquecashforcars\.com\.au/i,
+      `${path}: still shows an address on the site's own domain`,
+    );
+  }
+
+  const llms = readFileSync(join(projectPath, "public", "llms.txt"), "utf8");
+  assert.doesNotMatch(llms, /^Email:/im);
+  assert.doesNotMatch(llms, /@uniquecashforcars\.com\.au/i);
+});
+
 test("the quote form prioritises contact, location and vehicle details", async () => {
   const home = await html("/");
   assert.doesNotMatch(home, /name="email"|id="q-email"/);

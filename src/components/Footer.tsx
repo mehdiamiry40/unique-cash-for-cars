@@ -35,15 +35,6 @@ export function Footer() {
                   {site.phone.display}
                 </a>
               </p>
-              <p>
-                <span className="font-semibold">Email: </span>
-                <a
-                  href={`mailto:${site.email}`}
-                  className="hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                >
-                  {site.email}
-                </a>
-              </p>
             </div>
 
             <p className="mt-3 text-sm text-ink-muted">
