@@ -4,29 +4,26 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/publish-csp.mjs --check",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "fetch:assets": "node scripts/fetch-assets.mjs",
-    "db:migrate": "node --env-file=.env.local scripts/migrate-db.mjs",
     "check:urls": "node scripts/check-urls.mjs",
     "verify": "npm run typecheck && npm run lint && npm run check:urls && npm test",
-    "test": "npm run build && node --test tests/*.test.mjs",
-    "test:db": "node --test tests/*.integration.mjs"
+    "test": "npm run build && node --test tests/*.test.mjs"
   },
   "dependencies": {
     "@fontsource/open-sans": "^5.3.0",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
-    "@neondatabase/serverless": "^1.1.0",
-    "@next/mdx": "16.3.4",
+    "@next/mdx": "16.4.2",
     "@types/mdx": "^2.0.14",
-    "next": "16.3.6",
+    "next": "16.4.2",
     "postcss": "8.5.24",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "sharp": "0.35.4"
+    "sharp": "0.35.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -35,15 +32,20 @@
     "@types/react-dom": "^19",
     "es-abstract": "^1.24.2",
     "eslint": "^9",
-    "eslint-config-next": "16.3.4",
+    "eslint-config-next": "16.4.2",
     "jsdom": "^30.0.1",
-    "pg": "^8.23.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
   "overrides": {
     "postcss": "$postcss",
-    "sharp": "$sharp"
+    "sharp": "$sharp",
+    "@next/eslint-plugin-next": {
+      "fast-glob": "npm:tinyglobby@0.2.17"
+    },
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.1"
+    }
   },
   "engines": {
     "node": "24.x",

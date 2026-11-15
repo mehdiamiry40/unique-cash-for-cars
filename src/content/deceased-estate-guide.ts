@@ -33,6 +33,6 @@ export const deceasedEstateFaqs = [
   {
     question: "Does a deceased estate car still need a safety certificate?",
     answer:
-      "It depends on the transaction and whether an exemption applies. Queensland generally requires the person transferring a registered vehicle to give the new owner a current safety certificate, and the exemption criteria are listed on TMR's safety-certificate page. Confirm your circumstances with TMR rather than assuming the estate is exempt.",
+      "It depends on who the car is going to. TMR's safety-certificate page lists a transfer to a beneficiary of a deceased estate as exempt, along with transfers between spouses. A sale from the estate to an outside private buyer is not exempt, so a registered car needs a current safety certificate, while a car sold unregistered or to a licensed motor dealer does not. Confirm your circumstances with TMR.",
   },
 ] as const satisfies readonly Faq[];

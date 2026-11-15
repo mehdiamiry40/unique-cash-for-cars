@@ -18,7 +18,7 @@ export const lpgFaqs = [
   {
     question: "What happens if the LPG cylinder is out of date?",
     answer:
-      "Automotive LPG cylinders carry a stamped test date and a refuelling outlet will not fill a cylinder past it. The cylinder has to be retested or replaced by an authorised gas installer before the system can be used again. An out-of-date cylinder does not stop you selling the car, but it does change which sale path makes sense.",
+      "Automotive LPG cylinders carry a stamped test date and must not be filled past it. The cylinder has to be retested or replaced by an authorised gas installer before the system can be used again. An out-of-date cylinder does not stop you selling the car, but it does change which sale path makes sense.",
   },
   {
     question: "Do I need a gas certificate if the car is unregistered?",
