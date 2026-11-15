@@ -59,7 +59,16 @@ export type QuoteDeliveryResult =
       reason: QuoteDeliveryFailureReason;
       status?: number;
       retryAfterSeconds?: number;
+      /** Which of Resend's two 409 idempotency conflicts this was, when known. */
+      idempotencyConflict?: QuoteIdempotencyConflict;
     }>;
+
+/**
+ * `already_used`: the key was used by an earlier request that Resend has
+ * finished with. `in_progress`: that earlier request is still running and can
+ * still fail.
+ */
+export type QuoteIdempotencyConflict = "already_used" | "in_progress";
 
 type QuoteDeliveryDependencies = Readonly<{
   fetch: typeof globalThis.fetch;
@@ -174,6 +183,28 @@ async function resendReceiptId(response: Response) {
   }
 }
 
+/**
+ * Resend answers 409 for two different idempotency conflicts and tells them
+ * apart only by the error name in the body. The name is mapped to a fixed
+ * value here so nothing else from the provider's error body reaches a caller
+ * or a log line.
+ */
+async function resendIdempotencyConflict(
+  response: Response,
+): Promise<QuoteIdempotencyConflict | undefined> {
+  if (response.status !== 409) return undefined;
+  try {
+    const value: unknown = await response.json();
+    if (!value || typeof value !== "object" || !("name" in value)) return undefined;
+    const name = (value as { name?: unknown }).name;
+    if (name === "concurrent_idempotent_requests") return "in_progress";
+    if (name === "invalid_idempotent_request") return "already_used";
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function deliverQuote(
   input: Readonly<{
     settings: QuoteDeliverySettings;
@@ -270,12 +301,17 @@ export async function deliverQuote(
         status: response.status,
       };
       dependencies.report(event);
+      const idempotencyConflict =
+        resolved.provider === "resend"
+          ? await resendIdempotencyConflict(response)
+          : undefined;
       return {
         ok: false,
         provider: resolved.provider,
         reason: "http_error",
         status: response.status,
         retryAfterSeconds: retryAfterSeconds(response),
+        ...(idempotencyConflict ? { idempotencyConflict } : {}),
       };
     }
 
