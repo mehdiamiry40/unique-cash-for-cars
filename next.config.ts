@@ -1,7 +1,21 @@
 import type { NextConfig } from "next";
 import createMDX from "@next/mdx";
 import { retiredSuburbRedirects } from "./src/content/suburbs";
+import { join } from "node:path";
+import { contentSecurityPolicyFor } from "./src/lib/csp";
 import { resolveQuoteDelivery } from "./src/lib/quote-delivery";
+import { scheduleInlineScriptCsp } from "./scripts/publish-csp.mjs";
+
+// The config is evaluated before NEXT_PHASE is assigned, so the build cannot
+// be detected from that variable here. Skip worker processes: they exit while
+// pages are still being written. The parent `next build` process checks the
+// header as it exits. On Vercel that is too late to change the deployed
+// header — scripts/csp-adapter.mjs runs first, inside onBuildComplete.
+const isBuildWorker =
+  Boolean(process.send) || process.env.NEXT_PRIVATE_BUILD_WORKER === "1";
+if (!isBuildWorker) {
+  scheduleInlineScriptCsp(__dirname);
+}
 
 /**
  * URL preservation is the highest-risk part of this migration.
@@ -17,18 +31,6 @@ import { resolveQuoteDelivery } from "./src/lib/quote-delivery";
  */
 
 if (process.env.VERCEL_ENV === "production") {
-  if (!process.env.DATABASE_URL?.trim()) {
-    throw new Error(
-      "Production quote persistence requires DATABASE_URL.",
-    );
-  }
-
-  if (!process.env.CRON_SECRET?.trim()) {
-    throw new Error(
-      "Production quote retries require CRON_SECRET.",
-    );
-  }
-
   const quoteDelivery = resolveQuoteDelivery({
     webhookUrl: process.env.QUOTE_WEBHOOK_URL,
     resendApiKey: process.env.RESEND_API_KEY,
@@ -52,7 +54,7 @@ if (process.env.VERCEL_ENV === "production") {
   }
 }
 
-const nextConfig: NextConfig = {
+const nextConfig = (phase: string): NextConfig => ({
   pageExtensions: ["ts", "tsx", "mdx"],
 
   // Don't advertise the framework and version to anyone scanning for known
@@ -64,6 +66,16 @@ const nextConfig: NextConfig = {
   // --distDir flag, so it redirects the output here instead of overwriting the
   // real build. Unset everywhere else, including on Vercel.
   ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
+
+  // Vercel injects its deployment adapter through NEXT_ADAPTER_PATH. That
+  // adapter copies headers into the Build Output during onBuildComplete,
+  // before this process exits, and it stores prerendered HTML outside
+  // `.next/server/app`. Wrap it so the real script hashes are in the object
+  // Vercel serialises. Local `next build` has no adapter and keeps the
+  // default output layout; the exit hook patches routes-manifest.json there.
+  ...(process.env.NEXT_ADAPTER_PATH
+    ? { adapterPath: join(__dirname, "scripts/csp-adapter.mjs") }
+    : {}),
 
   // There is a stray package-lock.json in the home directory, so Turbopack
   // guesses $HOME as the workspace root and tries to watch the whole home
@@ -90,6 +102,19 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         has: [{ type: "host", value: "www.uniquecashforcars.com.au" }],
         destination: "https://uniquecashforcars.com.au/:path*",
+        permanent: true,
+      },
+      /*
+       * The project's production alias served the full site with 200 and
+       * index,follow — a second copy of every page, held off only by the
+       * canonical. Exact host only: preview and per-deployment *.vercel.app
+       * URLs must stay reachable (they are noindexed separately), and /api/ is
+       * left alone so nothing calling the alias directly gets a redirect.
+       */
+      {
+        source: "/:path((?!api/).*)",
+        has: [{ type: "host", value: "unique-cash-for-cars.vercel.app" }],
+        destination: "https://uniquecashforcars.com.au/:path",
         permanent: true,
       },
 
@@ -151,7 +176,7 @@ const nextConfig: NextConfig = {
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "X-Frame-Options", value: "DENY" },
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
@@ -165,20 +190,30 @@ const nextConfig: NextConfig = {
           },
           {
             /*
-             * Deliberately no script-src or style-src.
+             * script-src is hash-based, not nonce-based. A nonce has to be
+             * unique per response, and Next only stamps it onto scripts while
+             * rendering dynamically — every page here is prerendered and cached
+             * at the edge. The placeholder hash below is replaced with the
+             * sha256 of each inline script from this build once the HTML
+             * exists (scripts/csp-adapter.mjs on Vercel, scripts/publish-csp.mjs
+             * otherwise). The build fails if the placeholder is still present.
+             * 'strict-dynamic' is not set: it would ignore 'self' and the
+             * Google host list, and the parser-inserted Next chunks plus the
+             * client-inserted gtag script depend on those.
              *
-             * Locking those down properly needs per-request nonces, which means
-             * middleware, which means every page renders dynamically — a real
-             * cost for a site that is otherwise entirely static, and
-             * 'unsafe-inline' would buy nothing. The four directives below need
-             * no nonce and still close the openings that matter here:
-             * clickjacking (backing up X-Frame-Options with the modern
-             * equivalent), <base> injection, form exfiltration to a third-party
-             * host, and legacy plugin embedding.
+             * style-src-attr stays 'unsafe-inline' because next/image emits
+             * style attributes, which cannot carry a nonce or a hash.
+             * style-src-elem does not, so an injected <style> tag is still
+             * refused in browsers that understand the split. style-src keeps
+             * 'unsafe-inline' for browsers that only read style-src.
+             *
+             * `next dev` has no build to hash, so its pages would refuse
+             * Next's own inline scripts and never hydrate. That phase alone
+             * gets a relaxed policy; see contentSecurityPolicyFor in
+             * src/lib/csp.ts. Every build still gets the policy above.
              */
             key: "Content-Security-Policy",
-            value:
-              "frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'",
+            value: contentSecurityPolicyFor(phase, process.env.NODE_ENV),
           },
         ],
       },
@@ -204,8 +239,11 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-};
+});
 
 const withMDX = createMDX({});
 
-export default withMDX(nextConfig);
+// A function, so Next passes the phase: only `next dev` relaxes the CSP.
+export default function config(phase: string) {
+  return withMDX(nextConfig(phase));
+}

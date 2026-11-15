@@ -3,7 +3,6 @@
 > Vehicle-buying and car-removal service operated by A Plus Car Removal Pty Ltd and serving the Gold Coast, Queensland. Vehicle-specific phone quotes, payment on collection and free towing for vehicles the company agrees to buy.
 
 Phone: +61 423 476 111
-Email: info@uniquecashforcars.com.au
 Website: https://uniquecashforcars.com.au
 ABN: 39 627 952 916
 
@@ -14,7 +13,7 @@ ABN: 39 627 952 916
 
 ## Supporting pages
 
-- [Contact](https://uniquecashforcars.com.au/contact-us): Phone, email, business hours and quote form
+- [Contact](https://uniquecashforcars.com.au/contact-us): Phone, business hours and quote form
 - [About](https://uniquecashforcars.com.au/about): Operator, ABN and licence details
 - [Guides](https://uniquecashforcars.com.au/blog): Vehicle value, write-offs, finance and Queensland paperwork
 - [XML sitemap](https://uniquecashforcars.com.au/sitemap.xml)

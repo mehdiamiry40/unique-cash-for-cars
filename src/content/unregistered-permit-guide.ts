@@ -8,7 +8,12 @@ export const unregisteredPermitFaqs = [
   {
     question: "Do I need an unregistered vehicle permit to move my car in Queensland?",
     answer:
-      "Only if the car is going to be driven on a road. A permit authorises a specific journey in an unregistered vehicle. If the car travels on a tow truck, a tilt tray or a trailer, it is not being driven and TMR does not require a permit for it.",
+      "Only if the car is going to be driven on a road, and not for every trip. A permit authorises a specific journey in an unregistered vehicle, such as a trip to a repairer or a move to a new address. If the car travels on a tow truck, a tilt tray or a trailer, it is not being driven and TMR does not require a permit for it.",
+  },
+  {
+    question: "Do I need a permit to drive to a safety certificate inspection or to register the car?",
+    answer:
+      "No. TMR lists both trips among those that do not need an unregistered vehicle permit. You must carry a valid CTP insurance certificate, take the number plates off before a safety certificate trip, and go straight there without stopping anywhere else. If the car fails the inspection it cannot be driven or towed away and has to be transported.",
   },
   {
     question: "Can I get a permit for a car that is not roadworthy?",
@@ -33,6 +38,6 @@ export const unregisteredPermitFaqs = [
   {
     question: "What if I am selling the car rather than re-registering it?",
     answer:
-      "Then the permit is usually the wrong tool. A permit exists to get a vehicle to an inspection, a repairer or a new registration, and it carries a fee and a separate CTP premium each time. Where the car is leaving the road for good, arranging collection avoids the drive altogether.",
+      "Then the permit is usually the wrong tool. A permit exists for journeys such as a trip to a repairer or a move to a new address, and it carries a fee and a separate CTP premium each time. Where the car is leaving the road for good, arranging collection avoids the drive altogether.",
   },
 ] as const satisfies readonly Faq[];
