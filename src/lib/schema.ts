@@ -25,7 +25,6 @@ export function organizationSchema() {
     legalName: site.registeredEntityName,
     url: site.url,
     telephone: site.phone.e164,
-    email: site.email,
     image: `${site.url}/img/logo.png`,
     logo: {
       "@type": "ImageObject",

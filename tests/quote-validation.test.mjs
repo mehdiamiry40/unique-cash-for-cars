@@ -98,6 +98,28 @@ test("a Resend idempotency conflict means an earlier attempt already sent the em
   assert.deepEqual(await response.json(), { ok: true, leadId });
 });
 
+test("a Resend conflict with an attempt still in progress is not reported as sent", async () => {
+  const response = await endpoint({
+    result: {
+      ok: false, provider: "resend", reason: "http_error", status: 409,
+      idempotencyConflict: "in_progress",
+    },
+  }).submit(valid);
+  assert.equal(response.status, 502);
+  const body = await response.json();
+  assert.equal(body.leadId, undefined);
+  assert.match(body.error, /could not be sent/);
+
+  const settled = await endpoint({
+    result: {
+      ok: false, provider: "resend", reason: "http_error", status: 409,
+      idempotencyConflict: "already_used",
+    },
+  }).submit(valid);
+  assert.equal(settled.status, 200);
+  assert.deepEqual(await settled.json(), { ok: true, leadId });
+});
+
 test("native encodings remain rejected and GET never captures an enquiry", async () => {
   const api = endpoint();
   for (const type of ["application/x-www-form-urlencoded", "multipart/form-data", "text/plain"]) {

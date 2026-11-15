@@ -1,6 +1,6 @@
 # Repository and platform safeguards
 
-The September 2026 audit fixes add continuous checks supported by this private repository's current plan. Workflow failures use GitHub Actions notifications; the repository owner must keep failed-run notifications enabled for the desired destination. A notification receipt has not been verified.
+The September 2026 audit fixes add continuous checks. The repository is public, so they run on GitHub's free plan. Workflow failures use GitHub Actions notifications; the repository owner must keep failed-run notifications enabled for the desired destination. A notification receipt has not been verified.
 
 ## Checks
 
@@ -13,15 +13,21 @@ The `Security` workflow runs on pull requests, pushes to main, weekly, and manua
 
 ## Main branch protection
 
-The current private-repository plan rejected branch-protection requests with HTTP 403: `Upgrade to GitHub Pro or make this repository public to enable this feature.` Keep the repository private. No purchase or visibility change was made.
+The repository is public. The owner confirmed on 15 November 2026 that it stays public, which makes branch protection available at no cost. While it was private, the plan rejected branch-protection requests with HTTP 403.
 
-The reviewable desired policy is `.github/branch-protection.json`. After an owner enables private-repository protection and the new workflows have registered their checks, apply it with:
+Because anyone can read the repository, keep internal reports, enquiry details, real inbox addresses and credentials out of commits, pull request text and issues. Earlier commits remain readable in the history.
+
+The reviewable desired policy is `.github/branch-protection.json`. As of 15 November 2026 it has not been applied: `main` is unprotected, and a direct push to it deploys to production through Vercel. Apply the policy with:
 
 ```sh
 gh api --method PUT repos/mehdiamiry40/unique-cash-for-cars/branches/main/protection --input .github/branch-protection.json
 ```
 
-It requires one approval, approval after the latest push, resolved conversations, the four named GitHub Actions checks from app ID 15368, and an up-to-date branch. It prevents force pushes and branch deletion and applies to administrators. The protected branch must have an eligible reviewer; authors cannot approve their own PRs. A CI file alone does not enforce this policy or prevent a direct push from deploying through Vercel.
+It requires every change to reach `main` through a pull request, the four named GitHub Actions checks from app ID 15368 to pass, an up-to-date branch, linear history and resolved conversations. It prevents force pushes and branch deletion and applies to administrators.
+
+No approving review is required. The repository has one maintainer and GitHub does not let authors approve their own pull requests, so a review requirement would block every merge. Raise `required_approving_review_count` once a second reviewer exists. A CI file alone does not enforce this policy or prevent a direct push from deploying through Vercel.
+
+`Dependency audit` is one of the required checks. A newly published advisory in any dependency therefore blocks merges until it is fixed, including unrelated content changes.
 
 ## Environment separation
 

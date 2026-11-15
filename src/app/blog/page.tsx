@@ -115,7 +115,7 @@ export default function BlogIndex() {
         data={graph(
           breadcrumbSchema([
             { name: "Home", path: "/" },
-            { name: "Blog", path: "/blog" },
+            { name: "Guides", path: "/blog" },
           ]),
           blogSchema(activePosts),
         )}

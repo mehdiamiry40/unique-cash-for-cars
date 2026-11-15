@@ -92,11 +92,11 @@ export function trackQuoteFormError(errorCategory: QuoteFormErrorCategory) {
 }
 
 /**
- * Records a durably captured quote enquiry, not a button click or an attempted
- * form submission. Requires the server-issued lead ID after the database
- * commit — honeypot responses and failed persistence must not count. That ID
- * becomes Google Ads' transaction ID so replaying the same accepted response
- * cannot count it twice.
+ * Records a delivered quote enquiry, not a button click or an attempted form
+ * submission. Requires the lead ID the server returns once the email provider
+ * has accepted the enquiry — honeypot responses and failed deliveries must not
+ * count. That ID becomes Google Ads' transaction ID so replaying the same
+ * accepted response cannot count it twice.
  */
 export function trackQuoteConversion(transactionId?: string) {
   if (!transactionId) return;

@@ -57,9 +57,9 @@ idempotency key, so an ambiguous response cannot send a second email.
 Vercel Git production builds fail before deployment when the delivery
 configuration is invalid. For a prebuilt deployment, use `vercel build --prod`
 with the production environment pulled—do not substitute a plain local
-`next build`, where `VERCEL_ENV` is intentionally unset. GitHub branch
-protection requires the private-repository plan support described in
-`.github/SECURITY-CONTROLS.md`.
+`next build`, where `VERCEL_ENV` is intentionally unset. The repository is
+public; the branch protection policy for `main`, and whether it has been
+applied, is described in `.github/SECURITY-CONTROLS.md`.
 
 ## Verify before deployment
 

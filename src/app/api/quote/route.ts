@@ -272,8 +272,14 @@ export async function POST(request: Request) {
   // Resend answers 409 when this idempotency key was already used, which means
   // an earlier attempt for this submission already sent the email. The body
   // differs on a retry because the "Received" time is rendered per attempt.
+  // The exception is a 409 raised while that earlier attempt is still in
+  // progress: it can still fail, so the browser is asked to try again rather
+  // than being told the enquiry arrived.
   const alreadySent =
-    !result.ok && result.provider === "resend" && result.status === 409;
+    !result.ok &&
+    result.provider === "resend" &&
+    result.status === 409 &&
+    result.idempotencyConflict !== "in_progress";
 
   if (!result.ok && !alreadySent) {
     return json(

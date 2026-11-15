@@ -55,6 +55,26 @@ const validationCategories: Record<QuoteFieldName, QuoteFormErrorCategory> = {
   condition: "validation_condition",
 };
 
+/** "08:00" → "8am", "17:30" → "5:30pm". */
+function clockLabel(time: string) {
+  const [hours, minutes] = time.split(":").map(Number);
+  const hour = hours % 12 || 12;
+  const suffix = hours < 12 ? "am" : "pm";
+  return minutes
+    ? `${hour}:${String(minutes).padStart(2, "0")}${suffix}`
+    : `${hour}${suffix}`;
+}
+
+/**
+ * The callback window promised in the success message, read from site.ts so it
+ * cannot drift from the published hours. Only a single seven-day slot can be
+ * summarised in a phrase; anything else falls back to naming no times.
+ */
+const callbackHours =
+  site.openingHours.length === 1 && site.openingHours[0].days.length === 7
+    ? `, ${clockLabel(site.openingHours[0].opens)}–${clockLabel(site.openingHours[0].closes)} daily`
+    : "";
+
 function isQuoteFieldName(name: string): name is QuoteFieldName {
   return quoteFieldOrder.includes(name as QuoteFieldName);
 }
@@ -301,7 +321,7 @@ export function QuoteForm({ id = "quote" }: { id?: string }) {
         <p className="mb-6">
           {status === "preview"
             ? "This preview checks the form without saving your details or sending a notification. To request a real quote, visit our live website or call us."
-            : "We’ll call you back during our opening hours, 8am–5pm daily. If you’d prefer to speak with us, call the number below."}
+            : `We’ll call you back during our opening hours${callbackHours}. If you’d prefer to speak with us, call the number below.`}
         </p>
         {leadReference ? (
           <p className="mb-6 rounded bg-surface-alt px-4 py-3 text-sm text-ink-heading">

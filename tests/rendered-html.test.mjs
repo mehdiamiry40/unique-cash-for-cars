@@ -726,14 +726,13 @@ test("the homepage trust proof links its business claims to public registers", a
     links.some((link) => link.href === "https://abr.business.gov.au/ABN/View?id=39627952916"),
     "homepage does not link its ABN to ABN Lookup",
   );
+  // The register's results endpoint returns raw JSON, so the link goes to its
+  // search page and the proof block shows the number to search for.
   assert.ok(
-    links.some(
-      (link) =>
-        link.href.startsWith("https://ftlr.fairtrading.qld.gov.au/home/search?") &&
-        link.href.includes("LicenceNumber=4253110"),
-    ),
-    "homepage does not link its licence to the QLD register",
+    links.some((link) => link.href === "https://ftlr.fairtrading.qld.gov.au/"),
+    "homepage does not link its licence to the QLD register search page",
   );
+  assert.match(proofText, /Search for this licence number/);
 });
 
 test("the preserved WordPress image URLs still resolve", async () => {
@@ -1438,6 +1437,24 @@ test("indexable pages do not link internally to consolidated URLs", async () => 
       assert.ok(!retired.has(link.href), `${path}: internal link still targets ${link.href}`);
     }
   }
+});
+
+test("no page publishes an email address the business cannot receive mail on", async () => {
+  // The site's domain has no mailbox, so an address on it bounces. Contact is
+  // by phone and the quote form until a working address is confirmed.
+  for (const path of [...(await sitemapPaths()), "/privacy-policy"]) {
+    const source = await html(path);
+    assert.doesNotMatch(source, /mailto:/i, `${path}: still has a mailto link`);
+    assert.doesNotMatch(
+      source,
+      /[\w.+-]+@uniquecashforcars\.com\.au/i,
+      `${path}: still shows an address on the site's own domain`,
+    );
+  }
+
+  const llms = readFileSync(join(projectPath, "public", "llms.txt"), "utf8");
+  assert.doesNotMatch(llms, /^Email:/im);
+  assert.doesNotMatch(llms, /@uniquecashforcars\.com\.au/i);
 });
 
 test("the quote form prioritises contact, location and vehicle details", async () => {

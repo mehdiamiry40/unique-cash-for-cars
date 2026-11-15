@@ -22,7 +22,7 @@ export default function PrivacyPolicyPage() {
   // Hardcoded on purpose. This is the date the policy was last reviewed, not
   // the date the site was last deployed — a build-time date would silently
   // claim a review that never happened. Bump it when you change the text.
-  const updated = "17 October 2026";
+  const updated = "15 November 2026";
 
   return (
     <Section>
@@ -130,9 +130,9 @@ export default function PrivacyPolicyPage() {
         <h2>Accessing or correcting your information</h2>
         <p>
           You can ask us what we hold about you, ask us to correct it, or ask us to
-          delete it where we&apos;re not legally required to keep it. Email{" "}
-          <a href={`mailto:${site.email}`}>{site.email}</a> or call{" "}
-          <a href={site.phone.href}>{site.phone.display}</a>.
+          delete it where we&apos;re not legally required to keep it. Call{" "}
+          <a href={site.phone.href}>{site.phone.display}</a> during our opening
+          hours.
         </p>
 
         <h2>Complaints</h2>
@@ -148,8 +148,7 @@ export default function PrivacyPolicyPage() {
           <br />
           Operated by {site.registeredEntityName} · ABN {site.abn}
           <br />
-          <a href={site.phone.href}>{site.phone.display}</a> ·{" "}
-          <a href={`mailto:${site.email}`}>{site.email}</a>
+          <a href={site.phone.href}>{site.phone.display}</a>
         </p>
       </div>
     </Section>
