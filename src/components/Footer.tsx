@@ -5,7 +5,7 @@ import { Container } from "@/components/ui";
 const otherLinks = [
   { label: "About", href: "/about" },
   { label: "Contact Us", href: "/contact-us" },
-  { label: "Blog", href: "/blog" },
+  { label: "Guides", href: "/blog" },
   { label: "Privacy Policy", href: "/privacy-policy" },
 ];
 
@@ -56,10 +56,10 @@ export function Footer() {
               <p className="text-sm text-ink-muted">
                 QLD Licence {site.licenceNumber} ·{" "}
                 <a
-                  href="https://ftlr.fairtrading.qld.gov.au/home/search?LicenceNumber=4253110&GivenName=&LastName=&CompanyName=&MasterType=MOTOR%20DEALING"
+                  href={site.licenceRegisterUrl}
                   className="underline hover:text-brand"
                 >
-                  check register
+                  search the register
                 </a>
               </p>
             )}

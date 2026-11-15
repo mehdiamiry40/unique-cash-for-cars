@@ -297,11 +297,14 @@ export default function HomePage() {
                   <dt className="mb-1 text-sm font-bold text-ink-muted">QLD motor dealer licence</dt>
                   <dd>
                     <a
-                      href={"https://ftlr.fairtrading.qld.gov.au/home/search?LicenceNumber=4253110&GivenName=&LastName=&CompanyName=&MasterType=MOTOR%20DEALING"}
+                      href={site.licenceRegisterUrl}
                       className="font-bold text-brand underline underline-offset-2"
                     >
                       Licence {site.licenceNumber}
                     </a>
+                    <p className="mt-1 text-sm text-ink-muted">
+                      Opens the Fair Trading register. Search for this licence number.
+                    </p>
                   </dd>
                 </div>
               </dl>

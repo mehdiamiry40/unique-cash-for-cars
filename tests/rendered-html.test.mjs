@@ -721,14 +721,13 @@ test("the homepage trust proof links its business claims to public registers", a
     links.some((link) => link.href === "https://abr.business.gov.au/ABN/View?id=39627952916"),
     "homepage does not link its ABN to ABN Lookup",
   );
+  // The register's results endpoint returns raw JSON, so the link goes to its
+  // search page and the proof block shows the number to search for.
   assert.ok(
-    links.some(
-      (link) =>
-        link.href.startsWith("https://ftlr.fairtrading.qld.gov.au/home/search?") &&
-        link.href.includes("LicenceNumber=4253110"),
-    ),
-    "homepage does not link its licence to the QLD register",
+    links.some((link) => link.href === "https://ftlr.fairtrading.qld.gov.au/"),
+    "homepage does not link its licence to the QLD register search page",
   );
+  assert.match(proofText, /Search for this licence number/);
 });
 
 test("the preserved WordPress image URLs still resolve", async () => {

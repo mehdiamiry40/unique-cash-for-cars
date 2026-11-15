@@ -66,6 +66,12 @@ export const site = {
   /** Licence 4253110 was current in the QLD register on 5 August 2026; recheck at expiry. */
   abn: "39 627 952 916" as string,
   licenceNumber: "4253110" as string,
+  /**
+   * The register's search page. Its results endpoint returns raw JSON, which
+   * reads as a broken page to a customer, so link here and show the number to
+   * search for beside the link.
+   */
+  licenceRegisterUrl: "https://ftlr.fairtrading.qld.gov.au/",
 
   /** Headline offer. Change once here, updates every page and title tag. */
   maxPayout: "$9,999",
