@@ -487,7 +487,25 @@ test("structured data is valid, typed per page, and every @id reference resolves
   }
 });
 
-test("retired commercial and location URLs redirect directly to their pillar", async () => {
+/** Walks a path to its final response, one redirect at a time. */
+async function redirectChain(pathname) {
+  const hops = [];
+  let current = pathname;
+
+  for (;;) {
+    const response = await get(current);
+    if (response.status < 300 || response.status >= 400) {
+      return { hops, status: response.status, pathname: current };
+    }
+
+    const target = new URL(response.headers.get("location"), origin);
+    hops.push({ status: response.status, location: response.headers.get("location") });
+    assert.ok(hops.length <= 5, `${pathname}: redirect loop — ${JSON.stringify(hops)}`);
+    current = `${target.pathname}${target.search}`;
+  }
+}
+
+function retiredUrlsAndDestinations() {
   const legacyLocationUrls = JSON.parse(
     readFileSync(join(projectPath, "scripts", "legacy-urls.json"), "utf8"),
   ).urls.filter((url) => url.startsWith("/cash-for-cars/"));
@@ -501,49 +519,85 @@ test("retired commercial and location URLs redirect directly to their pillar", a
     `found only ${legacyLocationUrls.length} legacy location URLs — filter likely broken`,
   );
 
-  const expectedRedirects = new Map([
+  return new Map([
     ...legacyLocationUrls.map((path) => [path, "/"]),
     ...retiredCommercialRoutes,
+    ["/feed", "/blog"],
+    ["/blog/feed", "/blog"],
+    ["/top-5-reasons-to-sell-your-car-for-cash-in-brisbane", "/blog"],
   ]);
+}
 
-  for (const [path, expectedDestination] of expectedRedirects) {
-    // WordPress emitted trailing slashes. Next performs its built-in slash
-    // normalisation before custom redirects, so that legacy form may take two
-    // permanent hops; the canonical slashless form must remain one hop.
+test("retired commercial and location URLs reach their pillar in one redirect, with or without a trailing slash", async () => {
+  for (const [path, expectedDestination] of retiredUrlsAndDestinations()) {
+    // WordPress emitted trailing slashes, so the slash form is the one old
+    // links and Google's index actually hold. Next's built-in slash
+    // normalisation used to run first and add a hop to it; it is switched off
+    // and next.config.ts redirects both forms itself.
     for (const variant of [path, `${path}/`]) {
-      let response = await get(variant);
+      const { hops, status, pathname } = await redirectChain(variant);
 
+      assert.equal(
+        hops.length,
+        1,
+        `${variant} took ${hops.length} redirects, expected exactly one: ${JSON.stringify(hops)}`,
+      );
       // 308 is Next's permanent redirect. Google treats 301 and 308 the same for
       // consolidating signals; a 302 would not pass them on.
       assert.ok(
-        [301, 308].includes(response.status),
-        `${variant} returned ${response.status}, expected a permanent redirect`,
+        [301, 308].includes(hops[0].status),
+        `${variant} returned ${hops[0].status}, expected a permanent redirect`,
       );
-
-      let destination = new URL(response.headers.get("location"), origin).pathname;
-
-      if (variant === path) {
-        assert.equal(destination, expectedDestination, `${variant}: wrong consolidation target`);
-      } else if (destination !== expectedDestination) {
-        assert.equal(destination, path, `${variant}: unexpected slash-normalisation target`);
-        response = await get(destination);
-        assert.ok(
-          [301, 308].includes(response.status),
-          `${variant} second hop returned ${response.status}, expected a permanent redirect`,
-        );
-        destination = new URL(response.headers.get("location"), origin).pathname;
-        assert.equal(destination, expectedDestination, `${variant}: wrong final consolidation target`);
-      }
-
+      assert.equal(pathname, expectedDestination, `${variant}: wrong consolidation target`);
       // The final target itself must be a direct page, not another redirect.
-      const followed = await get(destination);
+      assert.equal(status, 200, `${variant} redirects to ${pathname}, which returned ${status}`);
+    }
+  }
+});
+
+test("retired URLs requested on www reach the canonical destination in one redirect", async () => {
+  const host = "www.uniquecashforcars.com.au";
+
+  for (const [path, expectedDestination] of retiredUrlsAndDestinations()) {
+    for (const variant of [path, `${path}/`]) {
+      const response = await getWithHost(variant, host);
+      assert.ok(
+        [301, 308].includes(response.statusCode),
+        `${variant} on ${host} returned ${response.statusCode}, expected a permanent redirect`,
+      );
+      // Straight to the apex destination: not to the same path on the apex,
+      // and not to the slashless path on www, each of which is a further hop.
       assert.equal(
-        followed.status,
-        200,
-        `${variant} redirects to ${destination}, which returned ${followed.status}`,
+        response.headers.location,
+        `${publicOrigin}${expectedDestination}`,
+        `${variant} on ${host}`,
       );
     }
   }
+});
+
+test("a trailing slash on a live page redirects once to the slashless URL and is never served", async () => {
+  // The built-in slash redirect is off (skipTrailingSlashRedirect), so without
+  // the general rule at the end of redirects() every page would answer 200 at
+  // both /page and /page/ — two URLs for one document.
+  const paths = (await sitemapPaths()).filter((path) => path !== "/");
+  assert.ok(paths.length >= 10, `sitemap listed only ${paths.length} non-home URLs`);
+
+  for (const path of [...paths, "/privacy-policy", "/sitemap.xml", "/api/quote"]) {
+    const response = await get(`${path}/`);
+    assert.equal(response.status, 308, `${path}/ returned ${response.status}, expected 308`);
+    assert.equal(response.headers.get("location"), path, `${path}/: wrong slashless target`);
+  }
+
+  // The query string survives the hop.
+  const withQuery = await get("/about/?utm_source=test");
+  assert.equal(withQuery.status, 308);
+  assert.equal(withQuery.headers.get("location"), "/about?utm_source=test");
+
+  // www loses the slash in the same redirect that moves it to the apex.
+  const www = await getWithHost("/about/", "www.uniquecashforcars.com.au");
+  assert.equal(www.statusCode, 308);
+  assert.equal(www.headers.location, `${publicOrigin}/about`);
 });
 
 test("the retired Brisbane article redirects to the Gold Coast blog", async () => {
@@ -573,6 +627,8 @@ test("the production vercel.app alias redirects pages to the canonical domain, n
   for (const [path, expected] of [
     ["/", "https://uniquecashforcars.com.au/"],
     ["/car-removal-gold-coast", "https://uniquecashforcars.com.au/car-removal-gold-coast"],
+    // The slash goes in the same hop, now that Next no longer strips it first.
+    ["/car-removal-gold-coast/", "https://uniquecashforcars.com.au/car-removal-gold-coast"],
   ]) {
     const response = await getWithHost(path, host);
     assert.ok([301, 308].includes(response.statusCode), `${path} on ${host}: ${response.statusCode}`);

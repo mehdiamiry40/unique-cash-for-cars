@@ -24,11 +24,35 @@ if (!isBuildWorker) {
  *  1. Every URL that ranked on WordPress either resolves here or permanently
  *     redirects to the
  *     closest equivalent. Nothing 404s.
- *  2. WordPress served trailing slashes (/cash-for-cars/southport/). Next
- *     serves without by default and redirects — that's fine and expected, but
- *     the canonical tags in src/lib/seo.ts must match the non-slash form.
+ *  2. WordPress served trailing slashes (/cash-for-cars/southport/). This
+ *     site serves without, and the canonical tags in src/lib/seo.ts must match
+ *     the non-slash form.
  *  3. Redirects are permanent. Temporary redirects don't pass link equity.
+ *  4. One hop. A retired URL reaches its destination in a single redirect in
+ *     both its slash and slashless forms, on the apex and on www. See
+ *     `redirects()` below for why that needs skipTrailingSlashRedirect.
  */
+
+const canonicalOrigin = "https://uniquecashforcars.com.au";
+const wwwHost = [{ type: "host" as const, value: "www.uniquecashforcars.com.au" }];
+
+type RetiredRedirect = { source: string; destination: string; permanent: boolean };
+
+/**
+ * A retired URL in both the form this site links to and the trailing-slash
+ * form WordPress served, each going straight to the destination.
+ */
+const inBothSlashForms = (redirect: RetiredRedirect): RetiredRedirect[] => [
+  redirect,
+  { ...redirect, source: `${redirect.source}/` },
+];
+
+/** The same redirect for a request that arrives on www, ending on the apex. */
+const fromWww = (redirect: RetiredRedirect) => ({
+  ...redirect,
+  has: wwwHost,
+  destination: `${canonicalOrigin}${redirect.destination}`,
+});
 
 if (process.env.VERCEL_ENV === "production") {
   const quoteDelivery = resolveQuoteDelivery({
@@ -60,6 +84,14 @@ const nextConfig = (phase: string): NextConfig => ({
   // Don't advertise the framework and version to anyone scanning for known
   // vulnerabilities. From the parallel migration.
   poweredByHeader: false,
+
+  // Next's built-in trailing-slash redirect is matched before every redirect
+  // listed in `redirects()`, so a retired WordPress URL such as
+  // /cash-for-cars/ipswich/ took two hops: one to drop the slash, a second to
+  // reach its destination. With the built-in rule off, `redirects()` sends the
+  // retired URLs first and then drops the slash from everything else itself.
+  // Without that last rule every page would also answer 200 at its slash form.
+  skipTrailingSlashRedirect: true,
 
   // Test seam. The preview-indexing test has to run a second build with
   // VERCEL_ENV=preview to check the noindex path, and `next build` has no
@@ -97,27 +129,13 @@ const nextConfig = (phase: string): NextConfig => ({
       }),
     );
 
-    return [
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: "www.uniquecashforcars.com.au" }],
-        destination: "https://uniquecashforcars.com.au/:path*",
-        permanent: true,
-      },
-      /*
-       * The project's production alias served the full site with 200 and
-       * index,follow — a second copy of every page, held off only by the
-       * canonical. Exact host only: preview and per-deployment *.vercel.app
-       * URLs must stay reachable (they are noindexed separately), and /api/ is
-       * left alone so nothing calling the alias directly gets a redirect.
-       */
-      {
-        source: "/:path((?!api/).*)",
-        has: [{ type: "host", value: "unique-cash-for-cars.vercel.app" }],
-        destination: "https://uniquecashforcars.com.au/:path",
-        permanent: true,
-      },
-
+    /*
+     * Every retired URL, written once in its slashless form. The list returned
+     * below expands each entry to cover the trailing-slash form and www, so
+     * none of them passes through a second redirect on the way.
+     * scripts/check-urls.mjs reads the literal entries here.
+     */
+    const retired: RetiredRedirect[] = [
       // Consolidate overlapping commercial intent into two canonical pillars.
       { source: "/cash-for-cars", destination: "/", permanent: true },
       { source: "/sell-my-car-gold-coast", destination: "/", permanent: true },
@@ -166,6 +184,54 @@ const nextConfig = (phase: string): NextConfig => ({
         destination: "/blog",
         permanent: true,
       },
+    ];
+    const retiredInBothSlashForms = retired.flatMap(inBothSlashForms);
+
+    /*
+     * Order matters: the first match wins. Host rules come first so a request
+     * on www or the vercel.app alias leaves that host in the same redirect that
+     * fixes its path, and each host's general rule sits after its specific ones.
+     */
+    return [
+      // www → apex. A retired URL goes straight to its destination, and any
+      // other path loses its trailing slash in the same hop.
+      ...retiredInBothSlashForms.map(fromWww),
+      {
+        source: "/:path+/",
+        has: wwwHost,
+        destination: `${canonicalOrigin}/:path+`,
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: wwwHost,
+        destination: `${canonicalOrigin}/:path*`,
+        permanent: true,
+      },
+      /*
+       * The project's production alias served the full site with 200 and
+       * index,follow — a second copy of every page, held off only by the
+       * canonical. Exact host only: preview and per-deployment *.vercel.app
+       * URLs must stay reachable (they are noindexed separately), and /api/ is
+       * left alone so nothing calling the alias directly gets a redirect.
+       */
+      {
+        source: "/:path((?!api/).+)/",
+        has: [{ type: "host", value: "unique-cash-for-cars.vercel.app" }],
+        destination: `${canonicalOrigin}/:path`,
+        permanent: true,
+      },
+      {
+        source: "/:path((?!api/).*)",
+        has: [{ type: "host", value: "unique-cash-for-cars.vercel.app" }],
+        destination: `${canonicalOrigin}/:path`,
+        permanent: true,
+      },
+
+      ...retiredInBothSlashForms,
+
+      // Everything else: the rule Next would otherwise have applied first.
+      { source: "/:path+/", destination: "/:path+", permanent: true },
     ];
   },
 

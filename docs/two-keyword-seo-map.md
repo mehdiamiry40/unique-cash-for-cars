@@ -44,11 +44,13 @@ not promoted by the guide hub.
 Unique content from those pages was merged into the appropriate owner before
 the redirects were introduced.
 
-The slashless legacy form reaches its owner in one permanent hop. Because Next
-normalises trailing slashes before applying custom redirects, an original
-WordPress trailing-slash form can take one normalisation hop plus the
-consolidation hop. Automated tests cap the chain there and require a direct-200
-final destination.
+Both the slashless legacy form and the original WordPress trailing-slash form
+reach their owner in one permanent hop, on the apex and on `www`. Next's
+built-in slash normalisation runs before custom redirects and used to add a hop
+to the slash form; since 19 November 2026 it is switched off
+(`skipTrailingSlashRedirect`) and `next.config.ts` redirects both forms itself,
+then removes the slash from every other path. Automated tests require exactly
+one hop and a direct-200 final destination.
 
 ## Consolidated location URLs
 

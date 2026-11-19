@@ -338,6 +338,16 @@ export default function HomePage() {
                   write-offs, unwanted projects and vehicles that must leave a property by a
                   deadline are all suitable for a direct quote.
                 </p>
+                <p>
+                  Unregistered, or unlikely to pass a roadworthy? Our guide to{" "}
+                  <Link
+                    href="/sell-car-without-roadworthy-qld"
+                    className="font-bold text-brand hover:underline"
+                  >
+                    selling an unregistered car without a roadworthy in Queensland
+                  </Link>{" "}
+                  explains when a safety certificate is required and when it is not.
+                </p>
               </div>
             </div>
             <div>

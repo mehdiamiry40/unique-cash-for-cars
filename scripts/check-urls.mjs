@@ -79,6 +79,10 @@ async function collectSuburbRedirects() {
  * TypeScript. Entries with `has:` (host-conditional, e.g. the www → apex rule)
  * and pattern sources (`:path*`) are skipped: neither is a plain 1:1 mapping
  * that a legacy URL can be checked against.
+ *
+ * Only the slashless entries written out in the config are read. The config
+ * expands each one to its trailing-slash and www forms when Next loads it;
+ * tests/rendered-html.test.mjs checks those against a running server.
  */
 async function collectConfigRedirects() {
   const source = await readFile(join(ROOT, "next.config.ts"), "utf8");
