@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { site } from "@/content/site";
+import { suburbPath, suburbs } from "@/content/suburbs";
 import { Container } from "@/components/ui";
 
 const otherLinks = [
@@ -96,9 +97,17 @@ export function Footer() {
             <h2 className="mb-4 text-sm font-extrabold uppercase tracking-widest text-ink-heading">
               Areas We Serve
             </h2>
+            {/* Each suburb in site.areaServed has its own page. */}
             <ul className="space-y-2">
-              {site.areaServed.slice(1).map((area) => (
-                <li key={area}>{area}</li>
+              {suburbs.map((suburb) => (
+                <li key={suburb.slug}>
+                  <Link
+                    href={suburbPath(suburb.slug)}
+                    className="hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                  >
+                    {suburb.name}
+                  </Link>
+                </li>
               ))}
             </ul>
           </div>

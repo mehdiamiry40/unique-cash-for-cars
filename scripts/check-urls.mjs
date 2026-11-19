@@ -164,6 +164,16 @@ async function main() {
     missing.push(`${route.file} is shadowed by a redirect for ${route.url} — delete it or drop the redirect`);
   }
 
+  // The same trap for the [suburb] route: a slug that is both a page in
+  // `suburbs` and a key in `retiredSuburbRedirects` is prerendered and then
+  // never served, because the redirect matches first.
+  for (const slug of suburbSlugs) {
+    const url = `/cash-for-cars/${slug}`;
+    if (redirects.some((redirect) => redirect.from === url)) {
+      missing.push(`${url} is a suburb page shadowed by a redirect — remove it from retiredSuburbRedirects or from suburbs`);
+    }
+  }
+
   const width = Math.max(...summary.map(([u]) => u.length), 10);
   for (const [url, kind, extra] of summary) {
     console.log(`  ${url.padEnd(width)}  ${kind.padEnd(14)} ${extra}`);

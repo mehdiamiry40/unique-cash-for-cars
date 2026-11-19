@@ -42,6 +42,10 @@ export const site = {
   /**
    * Registered as a service-area business: we travel to the customer.
    * Keep this list aligned with the service area set in Google Business Profile.
+   *
+   * Every suburb after "Gold Coast" has a page in src/content/suburbs.ts, in
+   * the same order. A test fails if the two lists differ, so adding a suburb
+   * here means writing its page as well.
    */
   areaServed: [
     "Gold Coast",

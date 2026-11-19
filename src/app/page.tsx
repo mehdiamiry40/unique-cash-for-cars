@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 import { site } from "@/content/site";
+import { suburbPath, suburbs } from "@/content/suburbs";
 import { pageMeta } from "@/lib/seo";
 import { breadcrumbSchema, faqSchema, graph, serviceSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
@@ -404,17 +405,25 @@ export default function HomePage() {
       <Section tone="alt">
         <SectionHeading>Gold Coast car collection coverage</SectionHeading>
         <p className="mx-auto mb-8 max-w-2xl text-center text-lg">
-          We serve the Gold Coast as a service-area operator. Confirm your exact
+          We serve the Gold Coast as a service-area operator. Each suburb page
+          below explains what to tell us about access there. Confirm your exact
           suburb and access when you request a quote so we can give you an accurate
           collection window.
         </p>
+        {/*
+          One link per suburb page, in the order of site.areaServed. The anchor
+          names the suburb so it never reads as a second link to this page's own
+          "cash for cars gold coast" query.
+        */}
         <ul className="mx-auto grid max-w-4xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {site.areaServed.slice(1).map((area) => (
-            <li
-              key={area}
-              className="rounded border border-hairline bg-surface px-4 py-3 text-center font-semibold text-ink-heading"
-            >
-              {area}
+          {suburbs.map((suburb) => (
+            <li key={suburb.slug}>
+              <Link
+                href={suburbPath(suburb.slug)}
+                className="block h-full rounded border border-hairline bg-surface px-4 py-3 text-center font-semibold text-ink-heading transition-colors hover:border-brand hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              >
+                Cash for cars {suburb.name}
+              </Link>
             </li>
           ))}
         </ul>
