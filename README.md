@@ -16,9 +16,18 @@ each:
 
 About, Contact and Guides support those pillars without using either exact
 query in their title or H1. Navigation, footer and contextual CTAs reinforce
-both owners. The former cash-for-cars hub, adjacent commercial pages and every
-location landing page redirect directly to the closest pillar; none appears in
-the sitemap or internal navigation.
+both owners. The former cash-for-cars hub and the adjacent commercial pages
+redirect directly to the closest pillar; none appears in the sitemap or
+internal navigation.
+
+Eight suburb pages sit beside the pillars at `/cash-for-cars/<suburb>`:
+Southport, Surfers Paradise, Robina, Burleigh Heads, Labrador, Nerang,
+Helensvale and Mermaid Waters, the suburbs in `site.areaServed`. They were
+folded into the homepage in August 2026 and restored on 19 November 2026,
+after Search Console showed the retired location URLs going from 1,239
+impressions in 28 days to none. Each targets its suburb name only and has to
+say something specific to that suburb. Twelve other location URLs, which never
+had a page here, still redirect to the homepage.
 
 See `docs/two-keyword-seo-map.md` for the complete URL map, editorial rules and
 post-deployment checks.
@@ -74,6 +83,7 @@ This runs:
 | `typecheck` | TypeScript errors |
 | `lint` | ESLint and Next.js rules |
 | `check:urls` | Every legacy WordPress URL resolves or redirects |
+| `check:duplication` | No two suburb pages share their sentences or phrasing |
 | `test` | Production build plus crawler-visible output tests |
 
 The rendered-output suite starts a real production server. It verifies
@@ -81,6 +91,10 @@ canonicals, unique keyword ownership, title/description uniqueness, one H1 per
 page, two-pillar internal links, direct permanent redirects, sitemap contents,
 structured-data IDs, article metadata, robots directives, 404 behavior,
 security headers, images, accessibility state and preview-deployment noindex.
+For the suburb pages it also checks that each is a direct 200 at its slashless
+URL, that an unknown suburb slug is a 404, the suburb-scoped structured data,
+the links between neighbouring suburbs and from the homepage, and that the copy
+makes no claim about pickup frequency, payment method or customers.
 
 Next emits `308 Permanent Redirect` for `permanent: true`. Google treats 301
 and 308 as permanent redirects for signal consolidation. A retired URL reaches
@@ -99,6 +113,7 @@ src/
   app/
     (posts)/                         Supporting guides at legacy root URLs
     car-removal-gold-coast/          Removal keyword pillar
+    cash-for-cars/[suburb]/          The eight suburb pages
     api/quote/                       Quote endpoint
     page.tsx                         Cash-for-cars keyword pillar
     sitemap.ts                       Indexable URL inventory
@@ -108,13 +123,14 @@ src/
   content/
     site.ts                          Brand, contact and service-area details
     services.ts                      Car-removal pillar content
-    suburbs.ts                       Direct redirects for retired locations
+    suburbs.ts                       Suburb page copy, and redirects for retired locations
     posts.ts                         Guide metadata
   lib/
     schema.ts                        JSON-LD graph builders
     seo.ts                           Canonical and social metadata
 scripts/
   check-urls.mjs                     Legacy URL parity guard
+  check-duplication.mjs              Suburb page doorway-content guard
   legacy-urls.json                  WordPress URL inventory
 tests/
   rendered-html.test.mjs             Crawler-visible regression suite
@@ -147,7 +163,8 @@ August 2026 and expires on 20 November 2026; recheck it before and after renewal
 After production deploy:
 
 1. Submit `/sitemap.xml` in Google Search Console.
-2. Request indexing for `/` and `/car-removal-gold-coast`.
+2. Request indexing for `/`, `/car-removal-gold-coast` and the eight
+   `/cash-for-cars/<suburb>` pages.
 3. Confirm retired URLs return one 308 hop to the intended owner.
 4. Monitor query-to-page mapping so each phrase keeps its single owner.
 5. Update the Google Business Profile and citations to the same brand, phone,
@@ -155,5 +172,9 @@ After production deploy:
 6. Add genuine Gold Coast proof: consented pickup photos, verified reviews and
    accurate collection examples.
 
-Do not recreate keyword-swapped suburb pages. If a new page is proposed, it
-needs a distinct user purpose and evidence that cannot live on either pillar.
+Do not recreate keyword-swapped suburb pages. The eight suburb pages exist
+because each has copy specific to its suburb; `docs/two-keyword-seo-map.md`
+lists the rules they must keep. If a new page is proposed, including a page for
+one of the twelve retired locations, it needs a distinct user purpose, evidence
+that the business serves the area, and content that cannot live on either
+pillar.

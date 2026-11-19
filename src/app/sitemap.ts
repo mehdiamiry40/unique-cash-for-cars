@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { site } from "@/content/site";
 import { posts } from "@/content/posts";
+import { suburbPath, suburbs } from "@/content/suburbs";
 
 /**
  * Replaces the Yoast sitemap index. Submit https://uniquecashforcars.com.au/sitemap.xml
@@ -41,5 +42,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(p.updated ?? p.date),
     }));
 
-  return [...staticPages, ...postPages];
+  // The eight suburb pages. `updated` is set by hand in suburbs.ts when a
+  // page's content changes, so it is a real date and not the build time.
+  const suburbPages: MetadataRoute.Sitemap = suburbs.map((suburb) => ({
+    url: `${site.url}${suburbPath(suburb.slug)}`,
+    lastModified: new Date(suburb.updated),
+  }));
+
+  return [...staticPages, ...suburbPages, ...postPages];
 }

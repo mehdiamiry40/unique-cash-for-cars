@@ -1,6 +1,7 @@
 # Two-keyword SEO map
 
-Audit date: 6 August 2026
+Audit date: 6 August 2026. Suburb pages restored: 19 November 2026 (see
+"Suburb pages" below).
 
 ## Objective
 
@@ -14,7 +15,9 @@ making every URL compete for the same terms:
 
 Only the owner page may use its exact query in the SEO title and H1. Supporting
 pages may mention the services naturally in descriptions and body copy, but
-must link authority back to both owners with descriptive anchors.
+must link authority back to both owners with descriptive anchors. The eight
+suburb pages target their suburb name only ("cash for cars southport") and
+follow the same rule.
 
 ## Indexable URL roles
 
@@ -26,6 +29,7 @@ must link authority back to both owners with descriptive anchors.
 | `/contact-us` | Branded contact/conversion utility |
 | `/blog` | Supporting guide hub |
 | Current guide URLs | Informational support; contextual links to both pillars |
+| `/cash-for-cars/<suburb>` (eight) | Suburb-name queries; access and paperwork guidance specific to the suburb |
 
 The privacy policy is `noindex, follow` and excluded from the sitemap. The
 archived 2020 article remains reachable and noindexed for inbound links, but is
@@ -52,18 +56,66 @@ to the slash form; since 19 November 2026 it is switched off
 then removes the slash from every other path. Automated tests require exactly
 one hop and a direct-200 final destination.
 
-## Consolidated location URLs
+## Suburb pages
 
-All former `/cash-for-cars/<location>` landing pages redirect directly to `/`:
+Eight suburb pages are live at `/cash-for-cars/<suburb>`, the URLs they had
+before the August consolidation:
 
 `southport`, `surfers-paradise`, `robina`, `burleigh-heads`, `labrador`,
-`nerang`, `helensvale`, `mermaid-waters`, `ashmore`, `pacific-pines`,
-`upper-coomera`, `carrara`, `mudgeeraba`, `varsity-lakes`, `palm-beach`,
-`logan`, `ipswich`, `toowoomba`, `cash-for-cars-adelaide` and `adelaide`.
+`nerang`, `helensvale` and `mermaid-waters`.
 
-The homepage retains a factual, non-linked service-area list. It does not make
-unsupported claims about pickup frequency, local premises or suburb-specific
-customer behavior.
+They are the eight suburbs in `site.areaServed`, which is kept aligned with the
+Google Business Profile service area.
+
+Why they came back. All twenty location URLs were folded into the homepage on
+6 August 2026. The 19 November 2026 Search Console audit showed the retired
+location URLs had 1,239 impressions in the previous 28 days and none after:
+Google folded them into the homepage and stopped ranking them. The owner asked
+for the pages to be restored. Only the eight that had rewritten, suburb-specific
+pages in this repository were restored; the copy is in `src/content/suburbs.ts`.
+
+Rules the suburb pages must keep:
+
+- Title and H1 name the suburb ("Cash for Cars Southport"). Neither may contain
+  "cash for cars gold coast" or "car removal gold coast"; those stay with the
+  two owners.
+- Each page leads with something only true of that suburb: its streets,
+  landmarks, housing and the access problems that follow from them. A paragraph
+  that could be moved to another suburb by swapping the place name does not
+  belong. `npm run check:duplication` and `tests/suburb-duplication.test.mjs`
+  fail when two pages share sentences or phrasing.
+- No unsupported claims about pickup frequency, local premises or
+  suburb-specific customer behavior. The August pages said things like
+  "same-day pickup is often available" and "a lot of our Southport jobs are…".
+  The restored copy says what the seller should tell us and why, and a test
+  rejects that kind of wording.
+- Prices, payment, timing and removal say only what the two owners and
+  `site.ts` say. No payment method is named and no pickup time is promised.
+- Queensland process statements match the site's guides, and each page links
+  to the guides that carry the sources.
+- No testimonials, review counts or statistics without evidence.
+- Structured data is a `Service` scoped to the suburb as a `Place`, a two-level
+  `BreadcrumbList` (Home, then the suburb) and an `FAQPage` matching the
+  visible questions. The sitewide offer catalog still lists only the two owners.
+
+Internal links: the homepage coverage section links to all eight with the
+anchor "Cash for cars <suburb>", the footer lists them on every page, and each
+suburb page links to its neighbouring suburb pages and to both owners.
+
+There is no hub page. `/cash-for-cars` still redirects to `/`, because a hub
+would compete with the homepage for its own query.
+
+## Consolidated location URLs
+
+Twelve former `/cash-for-cars/<location>` URLs still redirect directly to `/`:
+
+`ashmore`, `pacific-pines`, `upper-coomera`, `carrara`, `mudgeeraba`,
+`varsity-lakes`, `palm-beach`, `logan`, `ipswich`, `toowoomba`,
+`cash-for-cars-adelaide` and `adelaide`.
+
+None of them ever had a page in this repository, and none is in
+`site.areaServed`. Do not write pages for them without evidence that the
+business serves the area and something true and specific to say about it.
 
 ## On-page rules
 
@@ -74,6 +126,7 @@ customer behavior.
 - Link every indexable page to both owners with descriptive anchor text.
 - Do not publish copied suburb variants, fabricated reviews, self-serving
   rating schema or unverifiable superlatives such as “#1” or “highest paying”.
+  The suburb pages are held to the rules in "Suburb pages" above.
 - Use one stable `Service` schema ID per owner and the same two services in the
   sitewide `AutomotiveBusiness` offer catalog.
 - Keep Gold Coast typed as `City`; its named suburbs are `Place` values.
@@ -104,13 +157,18 @@ the marketing objective.
 1. Submit the new sitemap and request recrawls for both owners.
 2. In Search Console, track each target query by page. The expected mapping is
    exact: cash query → `/`; removal query → `/car-removal-gold-coast`.
-3. Inspect the retired URLs and confirm a single permanent hop.
+3. Inspect the retired URLs and confirm a single permanent hop. Inspect the
+   eight suburb URLs and confirm each is a direct 200 with its own canonical,
+   then request indexing for them.
 4. Watch organic conversions separately on the two owners.
 5. Investigate any third URL beginning to receive either exact query before
-   changing copy; it may indicate internal-link or title drift.
+   changing copy; it may indicate internal-link or title drift. That includes a
+   suburb page: each should earn its suburb-name queries, not the Gold Coast
+   ones.
 6. Build real local entity confidence through consistent citations, verified
    reviews and consented first-party pickup evidence.
 
 Automated rendered-output tests enforce the keyword-owner map, direct redirect
 targets, internal pillar links, schema IDs, sitemap exclusions and noindex
-rules on every deployment.
+rules on every deployment, along with the suburb pages' URLs, canonicals,
+headings, structured data, links and copy rules.

@@ -121,6 +121,9 @@ const nextConfig = (phase: string): NextConfig => ({
   },
 
   async redirects() {
+    // Only the twelve location slugs that stay retired. The eight suburb pages
+    // in src/content/suburbs.ts are live routes under /cash-for-cars/[suburb];
+    // their trailing-slash form is handled by the general rule at the end.
     const suburbRedirects = Object.entries(retiredSuburbRedirects).map(
       ([slug, destination]) => ({
         source: `/cash-for-cars/${slug}`,
