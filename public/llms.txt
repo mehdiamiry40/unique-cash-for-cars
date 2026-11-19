@@ -13,7 +13,7 @@ ABN: 39 627 952 916
 
 ## Suburb pages
 
-Each covers access and paperwork questions specific to that suburb. All are inside the Gold Coast service area.
+Each covers access and paperwork questions specific to that place. The first eight are Gold Coast suburbs. Ipswich, Logan and Toowoomba are outside the Gold Coast: Toowoomba is a pickup reached by travelling there.
 
 - [Cash for Cars Southport](https://uniquecashforcars.com.au/cash-for-cars/southport): Unit-block basements, streets beside the light rail, cars left at rentals
 - [Cash for Cars Surfers Paradise](https://uniquecashforcars.com.au/cash-for-cars/surfers-paradise): Tower basements, loading docks, fixed leaving dates, interstate plates
@@ -23,6 +23,13 @@ Each covers access and paperwork questions specific to that suburb. All are insi
 - [Cash for Cars Nerang](https://uniquecashforcars.com.au/cash-for-cars/nerang): Acreage tracks, sheds, work vehicles, flood-affected cars
 - [Cash for Cars Helensvale](https://uniquecashforcars.com.au/cash-for-cars/helensvale): Gated estates, body corporate rules, finance owing
 - [Cash for Cars Mermaid Waters](https://uniquecashforcars.com.au/cash-for-cars/mermaid-waters): Canal cul-de-sacs, blocked-in cars, seized brakes
+- [Cash for Cars Ipswich](https://uniquecashforcars.com.au/cash-for-cars/ipswich): Queenslander blocks, Limestone Hill streets, the Bremer River
+- [Cash for Cars Logan](https://uniquecashforcars.com.au/cash-for-cars/logan): Houses, station carparks and motorway sheds across Logan City
+- [Cash for Cars Toowoomba](https://uniquecashforcars.com.au/cash-for-cars/toowoomba): A booked pickup over the range, not a local handover point
+
+## Selling
+
+- [Sell My Car Gold Coast](https://uniquecashforcars.com.au/sell-my-car-gold-coast): Registration, finance, plates and which Gold Coast street the car is on, before a quote
 
 ## Supporting pages
 
@@ -31,4 +38,4 @@ Each covers access and paperwork questions specific to that suburb. All are insi
 - [Guides](https://uniquecashforcars.com.au/blog): Vehicle value, write-offs, finance and Queensland paperwork
 - [XML sitemap](https://uniquecashforcars.com.au/sitemap.xml)
 
-Service areas include Southport, Surfers Paradise, Robina, Burleigh Heads, Labrador, Nerang, Helensvale and Mermaid Waters. Availability is confirmed for the exact pickup address when quoting.
+Service areas include Southport, Surfers Paradise, Robina, Burleigh Heads, Labrador, Nerang, Helensvale, Mermaid Waters, Ipswich, Logan and Toowoomba. Availability is confirmed for the exact pickup address when quoting. Adelaide is not a service area.

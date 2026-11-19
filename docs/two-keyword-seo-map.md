@@ -15,9 +15,10 @@ making every URL compete for the same terms:
 
 Only the owner page may use its exact query in the SEO title and H1. Supporting
 pages may mention the services naturally in descriptions and body copy, but
-must link authority back to both owners with descriptive anchors. The eight
-suburb pages target their suburb name only ("cash for cars southport") and
-follow the same rule.
+must link authority back to both owners with descriptive anchors. Suburb
+pages target their place name only ("cash for cars southport") and follow the
+same rule. `/sell-my-car-gold-coast` owns the seller's query "sell my car
+gold coast" and does not use either pillar phrase in its title or H1.
 
 ## Indexable URL roles
 
@@ -29,7 +30,8 @@ follow the same rule.
 | `/contact-us` | Branded contact/conversion utility |
 | `/blog` | Supporting guide hub |
 | Current guide URLs | Informational support; contextual links to both pillars |
-| `/cash-for-cars/<suburb>` (eight) | Suburb-name queries; access and paperwork guidance specific to the suburb |
+| `/sell-my-car-gold-coast` | Seller's checklist for "sell my car gold coast"; links back to both pillars |
+| `/cash-for-cars/<suburb>` (eleven) | Place-name queries; access guidance specific to that place |
 
 The privacy policy is `noindex, follow` and excluded from the sitemap. The
 archived 2020 article remains reachable and noindexed for inbound links, but is
@@ -40,7 +42,6 @@ not promoted by the guide hub.
 | Retired URL | Direct permanent destination |
 |---|---|
 | `/cash-for-cars` | `/` |
-| `/sell-my-car-gold-coast` | `/` |
 | `/unwanted-car-buyer` | `/` |
 | `/car-wreckers-gold-coast` | `/car-removal-gold-coast` |
 | `/company-info-cash-for-cars-gold-coast-and-free-car-removal` | `/about` |
@@ -58,21 +59,27 @@ one hop and a direct-200 final destination.
 
 ## Suburb pages
 
-Eight suburb pages are live at `/cash-for-cars/<suburb>`, the URLs they had
-before the August consolidation:
+Eleven location pages are live at `/cash-for-cars/<suburb>`:
 
 `southport`, `surfers-paradise`, `robina`, `burleigh-heads`, `labrador`,
-`nerang`, `helensvale` and `mermaid-waters`.
+`nerang`, `helensvale`, `mermaid-waters`, `ipswich`, `logan` and `toowoomba`.
 
-They are the eight suburbs in `site.areaServed`, which is kept aligned with the
-Google Business Profile service area.
+They are the places in `site.areaServed` after "Gold Coast", in the same order.
+The first eight are Gold Coast suburbs. Ipswich (4305), Logan City and
+Toowoomba (4350) are outside that city: the page eyebrow says so, and Toowoomba
+is written as a pickup reached by travelling over the range, not as a local
+depot. Ipswich and Logan neighbour each other. Logan also links to Helensvale.
+Toowoomba's only neighbour page is Ipswich. A place named only as nearby is not
+claimed as coverage.
 
 Why they came back. All twenty location URLs were folded into the homepage on
 6 August 2026. The 19 November 2026 Search Console audit showed the retired
 location URLs had 1,239 impressions in the previous 28 days and none after:
 Google folded them into the homepage and stopped ranking them. The owner asked
-for the pages to be restored. Only the eight that had rewritten, suburb-specific
-pages in this repository were restored; the copy is in `src/content/suburbs.ts`.
+for the pages to be restored. The eight Gold Coast suburbs that already had
+rewritten pages came back first. Ipswich, Logan and Toowoomba came back next,
+because those three URLs were still collecting impressions while they 308'd to
+the homepage. The copy is in `src/content/suburbs.ts`.
 
 Rules the suburb pages must keep:
 
@@ -98,24 +105,24 @@ Rules the suburb pages must keep:
   `BreadcrumbList` (Home, then the suburb) and an `FAQPage` matching the
   visible questions. The sitewide offer catalog still lists only the two owners.
 
-Internal links: the homepage coverage section links to all eight with the
-anchor "Cash for cars <suburb>", the footer lists them on every page, and each
-suburb page links to its neighbouring suburb pages and to both owners.
+Internal links: the homepage coverage section links to every suburb page with
+the anchor "Cash for cars <suburb>", the footer lists them on every page, and
+each suburb page links to its neighbouring suburb pages and to both owners.
+Gold Coast suburb pages, and the homepage, also link to `/sell-my-car-gold-coast`.
 
 There is no hub page. `/cash-for-cars` still redirects to `/`, because a hub
 would compete with the homepage for its own query.
 
 ## Consolidated location URLs
 
-Twelve former `/cash-for-cars/<location>` URLs still redirect directly to `/`:
+Nine former `/cash-for-cars/<location>` URLs still redirect directly to `/`:
 
 `ashmore`, `pacific-pines`, `upper-coomera`, `carrara`, `mudgeeraba`,
-`varsity-lakes`, `palm-beach`, `logan`, `ipswich`, `toowoomba`,
-`cash-for-cars-adelaide` and `adelaide`.
+`varsity-lakes`, `palm-beach`, `cash-for-cars-adelaide` and `adelaide`.
 
-None of them ever had a page in this repository, and none is in
-`site.areaServed`. Do not write pages for them without evidence that the
-business serves the area and something true and specific to say about it.
+The seven Gold Coast names still have no page of their own. Adelaide stays
+redirected for a different reason: it is in South Australia, not a service
+area, and a page for it would be a doorway page. It is not in `site.areaServed`.
 
 ## On-page rules
 
@@ -158,8 +165,8 @@ the marketing objective.
 2. In Search Console, track each target query by page. The expected mapping is
    exact: cash query → `/`; removal query → `/car-removal-gold-coast`.
 3. Inspect the retired URLs and confirm a single permanent hop. Inspect the
-   eight suburb URLs and confirm each is a direct 200 with its own canonical,
-   then request indexing for them.
+   location URLs and `/sell-my-car-gold-coast` and confirm each is a direct 200
+   with its own canonical, then request indexing for them.
 4. Watch organic conversions separately on the two owners.
 5. Investigate any third URL beginning to receive either exact query before
    changing copy; it may indicate internal-link or title drift. That includes a

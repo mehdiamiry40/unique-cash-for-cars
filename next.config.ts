@@ -121,9 +121,9 @@ const nextConfig = (phase: string): NextConfig => ({
   },
 
   async redirects() {
-    // Only the twelve location slugs that stay retired. The eight suburb pages
-    // in src/content/suburbs.ts are live routes under /cash-for-cars/[suburb];
-    // their trailing-slash form is handled by the general rule at the end.
+    // Only the location slugs that stay retired. Live suburb pages are routes
+    // under /cash-for-cars/[suburb]; their trailing-slash form is handled by
+    // the general rule at the end.
     const suburbRedirects = Object.entries(retiredSuburbRedirects).map(
       ([slug, destination]) => ({
         source: `/cash-for-cars/${slug}`,
@@ -141,7 +141,6 @@ const nextConfig = (phase: string): NextConfig => ({
     const retired: RetiredRedirect[] = [
       // Consolidate overlapping commercial intent into two canonical pillars.
       { source: "/cash-for-cars", destination: "/", permanent: true },
-      { source: "/sell-my-car-gold-coast", destination: "/", permanent: true },
       { source: "/unwanted-car-buyer", destination: "/", permanent: true },
       {
         source: "/car-wreckers-gold-coast",

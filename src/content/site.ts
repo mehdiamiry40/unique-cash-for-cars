@@ -43,9 +43,10 @@ export const site = {
    * Registered as a service-area business: we travel to the customer.
    * Keep this list aligned with the service area set in Google Business Profile.
    *
-   * Every suburb after "Gold Coast" has a page in src/content/suburbs.ts, in
-   * the same order. A test fails if the two lists differ, so adding a suburb
-   * here means writing its page as well.
+   * Every place after "Gold Coast" has a page in src/content/suburbs.ts, in
+   * the same order. A test fails if the two lists differ, so adding a place
+   * here means writing its page as well. Ipswich, Logan and Toowoomba are
+   * outside the Gold Coast. Adelaide is not listed: it is in South Australia.
    */
   areaServed: [
     "Gold Coast",
@@ -57,6 +58,9 @@ export const site = {
     "Nerang",
     "Helensvale",
     "Mermaid Waters",
+    "Ipswich",
+    "Logan",
+    "Toowoomba",
   ],
 
   openingHours: [

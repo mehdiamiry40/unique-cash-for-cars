@@ -27,6 +27,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
        */
       { url: site.url },
       { url: `${site.url}/car-removal-gold-coast` },
+      { url: `${site.url}/sell-my-car-gold-coast` },
       { url: `${site.url}/about` },
       { url: `${site.url}/contact-us` },
       { url: `${site.url}/blog` },
@@ -42,7 +43,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(p.updated ?? p.date),
     }));
 
-  // The eight suburb pages. `updated` is set by hand in suburbs.ts when a
+  // Suburb pages. `updated` is set by hand in suburbs.ts when a
   // page's content changes, so it is a real date and not the build time.
   const suburbPages: MetadataRoute.Sitemap = suburbs.map((suburb) => ({
     url: `${site.url}${suburbPath(suburb.slug)}`,

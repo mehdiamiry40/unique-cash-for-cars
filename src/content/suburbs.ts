@@ -25,8 +25,12 @@
  *     the rule at length.
  *  5. No testimonials, review counts or statistics without evidence.
  *
- * The eight suburbs are the ones in `site.areaServed`, in the same order.
- * tests/rendered-html.test.mjs holds the two lists together.
+ * Every entry in `suburbs` is also in `site.areaServed`, in the same order.
+ * tests/rendered-html.test.mjs holds the two lists together. The Gold Coast
+ * eight came back on 19 November 2026. Ipswich, Logan and Toowoomba followed:
+ * those URLs were still collecting impressions while they 308'd to the homepage.
+ * Adelaide stays redirected. It is in South Australia, outside this service
+ * area, and a page for it would be a doorway.
  *
  * This module is imported by next.config.ts, so it must not import anything
  * at runtime.
@@ -38,6 +42,16 @@ export type Suburb = {
   slug: string;
   name: string;
   postcode: string;
+  /**
+   * Eyebrow region. "Gold Coast" only for the coastal suburbs. Ipswich, Logan
+   * and Toowoomba are outside that city and must not inherit its label.
+   */
+  region: string;
+  /**
+   * Eyebrow text when "{region} · {postcode}" would be wrong. Logan City has
+   * no single postcode, so it sets this instead of implying one.
+   */
+  placeLabel?: string;
   /** Unique <title>. Must not contain either pillar keyword. */
   title: string;
   /** Unique meta description, 100 to 165 characters. */
@@ -68,6 +82,7 @@ export const suburbs: Suburb[] = [
     slug: "southport",
     name: "Southport",
     postcode: "4215",
+    region: "Gold Coast",
     title: "Cash for Cars Southport | Unit Block and Kerbside Pickup",
     metaDescription:
       "Unit-block basement or a street beside the light rail? Get a Southport car quote from a licensed Queensland buyer, with removal planned around the access.",
@@ -128,6 +143,7 @@ export const suburbs: Suburb[] = [
     slug: "surfers-paradise",
     name: "Surfers Paradise",
     postcode: "4217",
+    region: "Gold Coast",
     title: "Cash for Cars Surfers Paradise | Tower Basement Pickup",
     metaDescription:
       "Car parked in a Surfers Paradise tower? We quote the vehicle, then plan removal around basement height limits, loading docks and visitor access.",
@@ -188,6 +204,7 @@ export const suburbs: Suburb[] = [
     slug: "robina",
     name: "Robina",
     postcode: "4226",
+    region: "Gold Coast",
     title: "Cash for Cars Robina | Driveway and Garage Car Pickup",
     metaDescription:
       "Get a vehicle-specific quote for a car in Robina, with removal from driveways, garages and townhouse complexes near Robina Town Centre and the station.",
@@ -244,6 +261,7 @@ export const suburbs: Suburb[] = [
     slug: "burleigh-heads",
     name: "Burleigh Heads",
     postcode: "4220",
+    region: "Gold Coast",
     title: "Cash for Cars Burleigh Heads | Rust and Failed Roadworthy",
     metaDescription:
       "Rust from the salt air or a failed roadworthy in Burleigh Heads? We quote corroded and unwanted cars and plan removal for headland streets and unit blocks.",
@@ -300,6 +318,7 @@ export const suburbs: Suburb[] = [
     slug: "labrador",
     name: "Labrador",
     postcode: "4215",
+    region: "Gold Coast",
     title: "Cash for Cars Labrador | Long-Parked and Estate Cars",
     metaDescription:
       "We quote long-parked, one-owner and deceased estate cars in Labrador, with removal from the older streets between the Broadwater and Brisbane Road.",
@@ -359,6 +378,7 @@ export const suburbs: Suburb[] = [
     slug: "nerang",
     name: "Nerang",
     postcode: "4211",
+    region: "Gold Coast",
     title: "Cash for Cars Nerang | Acreage, Shed and Yard Pickups",
     metaDescription:
       "Work utes, project cars and flood-affected vehicles quoted in Nerang, with removal planned for acreage tracks, sheds and industrial yards off the M1.",
@@ -418,6 +438,7 @@ export const suburbs: Suburb[] = [
     slug: "helensvale",
     name: "Helensvale",
     postcode: "4212",
+    region: "Gold Coast",
     title: "Cash for Cars Helensvale | Gated Estate Car Pickup",
     metaDescription:
       "A quote for your car in Helensvale from a licensed Queensland buyer, with removal planned around gated estates, body corporate rules and the station.",
@@ -476,6 +497,7 @@ export const suburbs: Suburb[] = [
     slug: "mermaid-waters",
     name: "Mermaid Waters",
     postcode: "4218",
+    region: "Gold Coast",
     title: "Cash for Cars Mermaid Waters | Canal Street Car Pickup",
     metaDescription:
       "Canal cul-de-sac, narrow frontage or a boat in the driveway? We quote your Mermaid Waters car and plan the removal around the street it is parked in.",
@@ -529,6 +551,186 @@ export const suburbs: Suburb[] = [
     ],
     updated: "2026-11-19",
   },
+
+  {
+    slug: "ipswich",
+    name: "Ipswich",
+    postcode: "4305",
+    region: "Ipswich",
+    title: "Cash for Cars Ipswich | Bremer River and Backyard Cars",
+    metaDescription:
+      "Car beside an Ipswich Queenslander, or on a steep street toward Queens Park? Describe the access with the vehicle and we will quote it.",
+    h1: "Cash for Cars Ipswich",
+    hook:
+      "Ipswich is an older river city, and the car is often down the side of a Queenslander, behind a second vehicle, or on a street that climbs toward Limestone Hill.",
+    accessNote:
+      "Say whether the car is at the kerb, down the side of the house, or inside a fenced yard, and whether another vehicle blocks it.",
+    localAngle: {
+      heading: "Reaching a car on an Ipswich block",
+      body: [
+        "Ipswich stands on the Bremer River, west of Brisbane. Brisbane Street and Limestone Street make the old centre, and the railway station sits just to their north. Postcode 4305 takes in that centre plus East Ipswich along Brisbane Road, West Ipswich and Woodend, Brassall across the river, and North Ipswich beside the former railway workshops.",
+        "The houses are often Queenslanders or low-set timber homes. The car lives down the side, under the house, or in a backyard behind a gate. A tilt tray wants a straight line to the vehicle. A fence, a retaining wall or a second car in front changes that line. Describe the side passage, say how wide it is, and say whether the blocking car can be shifted on the day.",
+        "The hill and the river flats are different ground. Streets rising toward Queens Park are short and steep, with cars nosed hard into the kerb. Around North Ipswich and the workshops precinct the land is flatter, and some sites are industrial: a gate, a sign-in, and other vehicles sharing the yard. Name the street and the kind of property so the loading place can be agreed before the drive inland is booked.",
+        "If the registration is still in another person's name after a move out from Brisbane, authority to sell has to be sorted before the day. The Queensland transfer guide is the reference for that paperwork. A car that failed its safety inspection can still be quoted as it stands. Read the roadworthy guide before paying for repairs only to obtain a certificate.",
+      ],
+    },
+    coverage: [
+      "Brisbane Street, Limestone Street and the railway station",
+      "East Ipswich along Brisbane Road",
+      "West Ipswich and Woodend",
+      "Brassall, on the far side of the Bremer",
+      "North Ipswich and the workshops precinct",
+      "Streets climbing toward Queens Park",
+    ],
+    nearbyPlaces: ["Goodna", "Redbank", "Booval", "Ripley"],
+    neighbours: ["logan"],
+    faqs: [
+      {
+        question: "The car is down the side of a Queenslander and another car is parked in front. Can it be loaded from there?",
+        answer:
+          "Describe the side passage, including its width and any gate, and say whether the front car can be moved on the day. A narrow gap or a car that stays put changes how the vehicle is brought out to the street, and that is settled before the drive to Ipswich is booked.",
+      },
+      {
+        question: "My street near Queens Park is steep and already lined with parked cars. Where would a truck stop?",
+        answer:
+          "Give the street name and point out the nearest driveway or wider stretch of kerb. Steep parking on that hill leaves little room to line a tray up, so the stopping place is part of the booking, not something left until arrival.",
+      },
+      {
+        question: "The registration is still in a relative's name after the car came to Ipswich. Can the sale go ahead?",
+        answer:
+          "Only with authority to sell. A registration record in someone else's name does not, by itself, give you that authority. Use the Queensland transfer guide to see what Transport and Main Roads asks for, then include the ownership papers with the enquiry.",
+      },
+      {
+        question: "Goodna, Redbank and Ripley are close. Are they covered by this page?",
+        answer:
+          "They are named so you can place Ipswich on the map. Naming them is not a promise that those suburbs are covered. The enquiry needs its own suburb and street, and that address is confirmed before you accept an offer.",
+      },
+    ],
+    guides: ["transferring-car-registration-in-queensland", "sell-car-without-roadworthy-qld"],
+    updated: "2026-11-19",
+  },
+
+  {
+    slug: "logan",
+    name: "Logan",
+    // 4114 is Logan Central, the civic centre. Logan City uses many postcodes,
+    // so the eyebrow is "Logan City" rather than any one of them.
+    postcode: "4114",
+    region: "Logan",
+    placeLabel: "Logan City",
+    title: "Cash for Cars Logan | Houses, Stations and Sheds",
+    metaDescription:
+      "Logan stretches from the Beenleigh railway to the Pacific Motorway. Say if the car is at a house, a unit near a station, or a commercial shed.",
+    h1: "Cash for Cars Logan",
+    hook:
+      "Logan is a city between Brisbane and the northern Gold Coast, cut by a motorway and a railway, so which side the car is on decides the pickup.",
+    accessNote:
+      "Name the suburb inside Logan, the street, and whether the car is at a house, in a unit carpark, or on a commercial lot.",
+    localAngle: {
+      heading: "House, station precinct, or shed",
+      body: [
+        "Logan City runs from Brisbane's southern edge down toward the coast. The Pacific Motorway is one spine and the Beenleigh railway is the other. Logan Central, around Wembley Road and the civic precinct, is a different collection from Woodridge or Kingston beside the stations, and different again from Springwood, where the bulky-goods buildings sit against the motorway.",
+        "A house in Shailer Park, Browns Plains or the residential streets off Wembley Road usually means a driveway question. Is the car nose-in under a carport? Is a trailer in front of it? Is the crossover wide enough for a tray to square up? A unit near Woodridge or Kingston station is the other case: a building name, a parking level, and any height bar over the entry, plus a street that fills on weekdays. Send the details that match the property you actually have.",
+        "Commercial lots add a third case. A van or ute at a shed in Springwood or Slacks Creek may be behind a roller door, inside a locked compound, or hemmed in by stock. Say whether the registration is in a company name or a person's name, because the authority to sell is different, and mention anything that has to move before the vehicle can come forward.",
+        "Helensvale, on the northern Gold Coast, has its own page for cars on that side of the motorway. Yatala, Rochedale, Underwood and Redbank Plains appear here only as landmarks. Put the real suburb on the enquiry. An address outside Logan is confirmed on its own, and a shared boundary is not coverage.",
+      ],
+    },
+    coverage: [
+      "Logan Central and Wembley Road",
+      "Woodridge and Kingston beside the Beenleigh line",
+      "Springwood and Slacks Creek along the motorway",
+      "Browns Plains",
+      "Shailer Park",
+    ],
+    nearbyPlaces: ["Yatala", "Rochedale", "Underwood", "Redbank Plains"],
+    neighbours: ["ipswich", "helensvale"],
+    faqs: [
+      {
+        question: "The car is in a unit carpark near Woodridge station. What should the enquiry include?",
+        answer:
+          "The building name, the level the car is on, and the signed clearance if a bar hangs over the entry. Weekday parking around the station can also block a truck, so mention a visitor bay or a quieter side street if one exists.",
+      },
+      {
+        question: "It is a work van in a company name, parked at a shed in Springwood. Who is allowed to sell it?",
+        answer:
+          "The seller has to be able to act for the registered holder. A company registration usually means a director or a person the company has authorised, which is a different set of papers from a car in someone's own name. Say which it is, and say if stock or another vehicle is in front of the van.",
+      },
+      {
+        question: "We are in Shailer Park and the car sits under a carport behind a boat trailer. Does the trailer matter?",
+        answer:
+          "It matters for the loading plan. Say whether the trailer can be rolled clear on the day, and how much width the driveway keeps beside it. A low carport beam can stop a tray in the driveway, in which case the car has to be brought to the street first.",
+      },
+      {
+        question: "Yatala and Redbank Plains share a boundary with Logan. Does this page cover them?",
+        answer:
+          "No. They are on this page so the map makes sense, not because a boundary equals coverage. The street address on the enquiry is what gets confirmed, including when that address is outside Logan.",
+      },
+    ],
+    guides: [
+      "cancel-car-registration-queensland-after-sale",
+      "statutory-vs-repairable-write-off-queensland",
+    ],
+    updated: "2026-11-19",
+  },
+
+  {
+    slug: "toowoomba",
+    name: "Toowoomba",
+    postcode: "4350",
+    region: "Toowoomba",
+    title: "Cash for Cars Toowoomba | A Pickup Over the Range",
+    metaDescription:
+      "A Toowoomba collection is a booked trip over the range to the address you name. Describe the street, the slope and whether the car rolls.",
+    h1: "Cash for Cars Toowoomba",
+    hook:
+      "Toowoomba sits on the range, a long way west of the coast, so a collection here is a trip to one address rather than a stop around the corner.",
+    accessNote:
+      "Include the street, whether it is on the escarpment or the flat city grid, and whether the car rolls and steers.",
+    localAngle: {
+      heading: "One trip up the range, so the first description has to be right",
+      body: [
+        "Toowoomba's centre, postcode 4350, is the grid of Ruthven Street and Margaret Street, with the railway station on Railway Street and Queens Park a few blocks east. East Toowoomba climbs the escarpment toward Picnic Point. South Toowoomba, North Toowoomba, Newtown and Harristown sit on the flatter top of the range. A truck reaches them from the coast by the Warrego Highway and the Toowoomba bypass, coming through Ipswich on the way.",
+        "The drive is long enough that the booking should be loadable in a single visit. A car nose-in on a sloping East Toowoomba driveway, a car in a laneway off Ruthven Street, and a car in a shed near the railway are three different approaches. The escarpment may need a level patch of street to work from. The city grid may only need a gap at the kerb. Say which one you have, so the trip is planned around it.",
+        "Also say whether the wheels turn and the steering is free. A vehicle that has stood since last winter can have flat tyres or brakes that will not release, and the gear for that has to ride up the range with the truck. If you still have the keys, say so. If you do not, say that too, in the same note.",
+        "Highfields, Withcott and Oakey are nearby towns, and this page does not cover them by mentioning them. An address outside 4350 is confirmed on its own merits. There is no handover point in Toowoomba for you to deliver the car to. The booking is a pickup at the address that was agreed, done by travelling there.",
+        "Do not drive a failed car down the range to chase a safety certificate. Queensland gives other paths for an unregistered car and for a registered car sold for parts, and the roadworthy guide sets them out. If the engine itself is the reason the car cannot make a trip, the blown-engine guide is the one to read before you spend money on a repair the car may not be worth.",
+      ],
+    },
+    coverage: [
+      "Ruthven Street, Margaret Street and the city grid",
+      "The Toowoomba railway station",
+      "East Toowoomba and the streets toward Picnic Point",
+      "South Toowoomba",
+      "North Toowoomba and Newtown",
+      "Harristown",
+    ],
+    nearbyPlaces: ["Highfields", "Withcott", "Oakey"],
+    neighbours: ["ipswich"],
+    faqs: [
+      {
+        question: "Why does a Toowoomba enquiry need the slope and the street up front?",
+        answer:
+          "The truck travels from the coast, over the range, for the address you name. A wrong description, or a car that will not roll, only becomes obvious after that drive. The street, the slope and whether the car moves are part of arranging the trip.",
+      },
+      {
+        question: "The driveway in East Toowoomba is steep and the car has not moved for months. What should I describe?",
+        answer:
+          "How steep the drive is, whether another vehicle sits below it, and whether the tyres hold air and the wheels turn. A steep escarpment drive can mean moving the car to a level section of street before it is loaded, and that belongs in the plan for the trip.",
+      },
+      {
+        question: "Can I leave the car at a drop-off point in Toowoomba instead?",
+        answer:
+          "No. There is nowhere in Toowoomba to hand the car over. The arrangement is a pickup at the address you give, reached by travelling there.",
+      },
+      {
+        question: "I live on the coast and the car is at a relative's place in Toowoomba. Who needs to be present?",
+        answer:
+          "The person selling needs authority to sell, and someone who can show identity and the ownership papers usually needs to be with the car. If you will not be in Toowoomba that day, say so, and name the person who will meet the truck.",
+      },
+    ],
+    guides: ["sell-car-without-roadworthy-qld", "blown-engine-repair-or-sell"],
+    updated: "2026-11-19",
+  },
 ];
 
 export function getSuburb(slug: string): Suburb | undefined {
@@ -543,11 +745,13 @@ export function suburbPath(slug: string): string {
 /**
  * Location URLs that stay retired. Each redirects straight to the homepage.
  *
- * These twelve existed on WordPress and never had a rewritten page in this
- * repository. They are outside the service area in `site.areaServed`, so there
- * is nothing true and specific to publish for them. Every one reaches the
- * homepage in a single permanent redirect, in both slash forms, on the apex
- * and on www (see next.config.ts).
+ * Nine location URLs stay here. Seven are Gold Coast places that still have no
+ * page of their own. The other two are Adelaide: that city is in South
+ * Australia, not a service area, and publishing a page for it would be a
+ * doorway page. Ipswich, Logan and Toowoomba moved out of this list once each
+ * had something true to say. Every remaining slug reaches the homepage in a
+ * single permanent redirect, in both slash forms, on the apex and on www
+ * (see next.config.ts).
  *
  * A slug must not appear both here and in `suburbs` above: the redirect would
  * win and the page could never be reached. check:urls fails on exactly that.
@@ -560,9 +764,6 @@ export const retiredSuburbRedirects: Record<string, string> = {
   mudgeeraba: "/",
   "varsity-lakes": "/",
   "palm-beach": "/",
-  logan: "/",
-  ipswich: "/",
-  toowoomba: "/",
   "cash-for-cars-adelaide": "/",
   adelaide: "/",
 };

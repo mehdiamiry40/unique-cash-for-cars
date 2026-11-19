@@ -69,7 +69,6 @@ const pillarRoutes = ["/", "/car-removal-gold-coast"];
 const serviceRoutes = ["/car-removal-gold-coast"];
 const retiredCommercialRoutes = new Map([
   ["/cash-for-cars", "/"],
-  ["/sell-my-car-gold-coast", "/"],
   ["/unwanted-car-buyer", "/"],
   ["/car-wreckers-gold-coast", "/car-removal-gold-coast"],
   ["/car-disposals", "/car-removal-gold-coast"],
@@ -78,9 +77,11 @@ const retiredCommercialRoutes = new Map([
   ["/company-info-cash-for-cars-gold-coast-and-free-car-removal", "/about"],
 ]);
 /*
- * The eight suburb pages, restored on 19 November 2026 at the URLs they had
- * before the August consolidation. Written out, not derived from suburbs.ts,
- * so a suburb cannot be added or dropped without this file changing too.
+ * Suburb pages at the URLs they had before the August consolidation. Written
+ * out, not derived from suburbs.ts, so a suburb cannot be added or dropped
+ * without this file changing too. Ipswich, Logan and Toowoomba joined the
+ * eight Gold Coast pages because those URLs were still collecting impressions
+ * while they redirected home.
  */
 const suburbPages = new Map([
   ["/cash-for-cars/southport", "Southport"],
@@ -91,6 +92,9 @@ const suburbPages = new Map([
   ["/cash-for-cars/nerang", "Nerang"],
   ["/cash-for-cars/helensvale", "Helensvale"],
   ["/cash-for-cars/mermaid-waters", "Mermaid Waters"],
+  ["/cash-for-cars/ipswich", "Ipswich"],
+  ["/cash-for-cars/logan", "Logan"],
+  ["/cash-for-cars/toowoomba", "Toowoomba"],
 ]);
 /** Location URLs that never had a page here and still redirect to the homepage. */
 const retiredLocationRoutes = [
@@ -101,9 +105,6 @@ const retiredLocationRoutes = [
   "/cash-for-cars/mudgeeraba",
   "/cash-for-cars/varsity-lakes",
   "/cash-for-cars/palm-beach",
-  "/cash-for-cars/logan",
-  "/cash-for-cars/ipswich",
-  "/cash-for-cars/toowoomba",
   "/cash-for-cars/cash-for-cars-adelaide",
   "/cash-for-cars/adelaide",
 ];
@@ -129,6 +130,7 @@ const postRoutes = [
 /** Pages that render an FAQ block, and so must carry FAQPage. */
 const faqRoutes = [
   "/",
+  "/sell-my-car-gold-coast",
   ...serviceRoutes,
   ...suburbPages.keys(),
   "/sell-car-without-roadworthy-qld",
@@ -396,10 +398,13 @@ test("structured data is valid, typed per page, and every @id reference resolves
         "Nerang",
         "Helensvale",
         "Mermaid Waters",
+        "Ipswich",
+        "Logan",
+        "Toowoomba",
       ],
-      // The first entry is the city and the remainder are Gold Coast suburbs.
-      // This prevents out-of-area locations from creeping back into entity data.
-      `${path}: business must remain Gold Coast only`,
+      // Gold Coast is the city. Every later name matches site.areaServed and
+      // has a page. Adelaide is absent: it is not a service area.
+      `${path}: business areaServed must match the published service area`,
     );
     assert.equal(business.areaServed[0]["@type"], "City", `${path}: Gold Coast area type`);
     assert.ok(
@@ -556,23 +561,24 @@ function retiredUrlsAndDestinations() {
   const stillRetired = legacy.filter((url) => !suburbPages.has(url));
 
   /*
-   * Exact counts guard the selector. Of the twenty legacy location URLs, eight
-   * are live suburb pages again and twelve stay consolidated into the
-   * homepage. A location must be one or the other, never both and never
-   * neither.
+   * Exact counts guard the selector. Of the twenty legacy location URLs, eleven
+   * are live suburb pages and nine stay consolidated into the homepage.
+   * Adelaide is two of those nine: it is in South Australia, not a service
+   * area, so a page there would be a doorway. A location must be a page or a
+   * redirect, never both and never neither.
    */
   assert.equal(legacy.length, 20, `found ${legacy.length} legacy location URLs, expected 20`);
   assert.deepEqual(
     [...stillRetired].sort(),
     [...retiredLocationRoutes].sort(),
-    "the retired location URLs are not the expected twelve",
+    "the retired location URLs are not the expected nine",
   );
   assert.deepEqual(
     Object.keys(retiredSuburbRedirects)
       .map((slug) => `/cash-for-cars/${slug}`)
       .sort(),
     [...retiredLocationRoutes].sort(),
-    "retiredSuburbRedirects must list exactly the twelve retired locations",
+    "retiredSuburbRedirects must list exactly the nine retired locations",
   );
   for (const path of suburbPages.keys()) {
     assert.ok(legacy.includes(path), `${path} is not one of the original location URLs`);
@@ -723,6 +729,18 @@ test("each restored suburb page is a direct, self-canonical page with one suburb
       `${path}: title must lead with the suburb — ${titleOf(source)}`,
     );
 
+    const placeLabels = {
+      "/cash-for-cars/ipswich": "Ipswich · 4305",
+      "/cash-for-cars/logan": "Logan City",
+      "/cash-for-cars/toowoomba": "Toowoomba · 4350",
+    };
+    if (placeLabels[path]) {
+      assert.match(source, new RegExp(`>${placeLabels[path]}<`), `${path}: place label`);
+      assert.doesNotMatch(source, /Gold Coast ·/, `${path}: must not be labelled Gold Coast`);
+    } else {
+      assert.match(source, /Gold Coast · \d{4}/, `${path}: Gold Coast place label`);
+    }
+
     // The quote form and both pillar links are on every suburb page.
     assert.match(source, /<form\b[^>]*id="quote"/i, `${path}: no quote form`);
     assert.match(source, /href="#quote"[^>]*data-cta="quote-suburb-hero"/, `${path}: no tracked quote CTA`);
@@ -784,11 +802,11 @@ test("suburb pages mark up their own service, breadcrumb and visible FAQs", asyn
   }
 });
 
-test("suburb pages link to their neighbouring suburb pages, and the homepage links to all eight", async () => {
+test("suburb pages link to their neighbouring suburb pages, and the homepage links to every suburb page", async () => {
   for (const suburb of suburbs) {
     const path = `/cash-for-cars/${suburb.slug}`;
     const links = linksIn(await html(path));
-    assert.ok(suburb.neighbours.length >= 2, `${path}: needs at least two neighbouring pages`);
+    assert.ok(suburb.neighbours.length >= 1, `${path}: needs a neighbouring page`);
     for (const slug of suburb.neighbours) {
       const neighbour = suburbs.find((other) => other.slug === slug);
       assert.ok(neighbour, `${path}: neighbour ${slug} is not a suburb page`);
@@ -802,6 +820,12 @@ test("suburb pages link to their neighbouring suburb pages, and the homepage lin
       );
     }
   }
+
+  const bySlug = Object.fromEntries(suburbs.map((suburb) => [suburb.slug, suburb]));
+  assert.deepEqual(bySlug.ipswich.neighbours, ["logan"], "Ipswich neighbours Logan");
+  assert.ok(bySlug.logan.neighbours.includes("ipswich"), "Logan neighbours Ipswich");
+  assert.ok(bySlug.logan.neighbours.includes("helensvale"), "Logan may point at Helensvale");
+  assert.deepEqual(bySlug.toowoomba.neighbours, ["ipswich"], "Toowoomba may only neighbour Ipswich");
 
   const home = linksIn(await html("/"));
   for (const [path, name] of suburbPages) {
@@ -829,6 +853,46 @@ test("a restored suburb page answers on one URL only: slashless, on the apex", a
       assert.equal(response.statusCode, 308, `${variant} on ${host}: ${response.statusCode}`);
       assert.equal(response.headers.location, `${publicOrigin}${path}`, `${variant} on ${host}`);
     }
+  }
+});
+
+test("sell my car Gold Coast is its own slashless page, one hop from the slash and www forms", async () => {
+  const path = "/sell-my-car-gold-coast";
+  const response = await get(path);
+  assert.equal(response.status, 200, `${path} returned ${response.status}`);
+  const source = await response.text();
+  assert.equal(canonicalOf(source), `${publicOrigin}${path}`);
+  assert.equal(h1Of(source), "Sell My Car Gold Coast");
+  assert.doesNotMatch(
+    `${plainText(titleOf(source))} ${h1Of(source)}`.toLowerCase(),
+    /cash for cars gold coast|car removal gold coast/,
+  );
+  assert.ok((await sitemapPaths()).includes(path), `${path} missing from the sitemap`);
+
+  const slash = await redirectChain(`${path}/`);
+  assert.equal(slash.hops.length, 1, `${path}/ took ${slash.hops.length} hops`);
+  assert.equal(slash.hops[0].status, 308);
+  assert.equal(slash.pathname, path);
+  assert.equal(slash.status, 200);
+
+  for (const variant of [path, `${path}/`]) {
+    const www = await getWithHost(variant, "www.uniquecashforcars.com.au");
+    assert.equal(www.statusCode, 308, `${variant} on www returned ${www.statusCode}`);
+    assert.equal(www.headers.location, `${publicOrigin}${path}`);
+  }
+
+  const home = linksIn(await html("/"));
+  assert.ok(
+    home.some((link) => link.href === path && /sell my car gold coast/i.test(link.text)),
+    "the homepage does not link to the sell page",
+  );
+  for (const [suburbPath, name] of suburbPages) {
+    if (["Ipswich", "Logan", "Toowoomba"].includes(name)) continue;
+    const links = linksIn(await html(suburbPath));
+    assert.ok(
+      links.some((link) => link.href === path),
+      `${suburbPath}: Gold Coast suburb page does not link to the sell page`,
+    );
   }
 });
 
@@ -1775,8 +1839,8 @@ test("every indexable page links to both keyword pillars with descriptive anchor
 });
 
 test("indexable pages do not link internally to consolidated URLs", async () => {
-  // The eight restored suburb pages are live again, so linking to them is the
-  // point; the other twelve location URLs still redirect and must not be linked.
+  // Live suburb pages are linked on purpose. Retired location URLs, including
+  // both Adelaide slugs, still redirect and must not be linked.
   const retired = new Set([
     ...retiredCommercialRoutes.keys(),
     ...legacyLocationUrls().filter((url) => !suburbPages.has(url)),
