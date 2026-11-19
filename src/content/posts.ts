@@ -141,6 +141,7 @@ export const posts: Post[] = [
     image: "/wp-content/uploads/2020/01/cash-for-cars.jpg",
     imageAlt: "Close view of a car ready for a Queensland sale and roadworthy check",
     date: "2026-08-13",
+    updated: "2026-11-19",
     readingMinutes: 6,
   },
   {

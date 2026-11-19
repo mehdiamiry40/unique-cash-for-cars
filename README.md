@@ -83,10 +83,14 @@ structured-data IDs, article metadata, robots directives, 404 behavior,
 security headers, images, accessibility state and preview-deployment noindex.
 
 Next emits `308 Permanent Redirect` for `permanent: true`. Google treats 301
-and 308 as permanent redirects for signal consolidation. Canonical slashless
-legacy URLs reach their owner in one hop. An old WordPress trailing-slash form
-first passes through Next's slash normalisation, so the suite caps that path at
-two permanent hops and verifies the final page is a direct 200.
+and 308 as permanent redirects for signal consolidation. A retired URL reaches
+its owner in one hop in both its slashless form and the trailing-slash form
+WordPress served, on the apex and on `www`. Next's built-in slash redirect runs
+before every custom redirect and added a hop to the slash form, so
+`skipTrailingSlashRedirect` turns it off and `redirects()` in `next.config.ts`
+ends with its own slash-removal rule instead. The suite requires exactly one
+permanent hop to a direct 200, and a 308 from `/page/` to `/page` for every
+live page.
 
 ## Project map
 
