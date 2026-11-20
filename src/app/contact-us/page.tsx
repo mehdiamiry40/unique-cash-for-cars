@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { site } from "@/content/site";
+import { suburbPath, suburbs } from "@/content/suburbs";
 import { pageMeta } from "@/lib/seo";
 import { breadcrumbSchema, contactPageSchema, graph } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
@@ -92,17 +94,43 @@ export default function ContactPage() {
       </Section>
 
       <Section tone="alt">
-        <SectionHeading>Gold Coast service area</SectionHeading>
+        <SectionHeading>Gold Coast suburbs</SectionHeading>
         <p className="mx-auto mb-8 max-w-2xl text-center text-lg">
-          We provide quotes and vehicle collection for Gold Coast residents.
-          Call us to confirm availability in your suburb.
+          Quotes and collection for these Gold Coast suburbs. Call to confirm the
+          address before a pickup is booked.
         </p>
         <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {site.areaServed.slice(1).map((area) => (
-            <Card key={area} className="text-center font-bold text-ink-heading">
-              {area}
-            </Card>
-          ))}
+          {suburbs
+            .filter((suburb) => suburb.region === "Gold Coast")
+            .map((suburb) => (
+              <Link
+                key={suburb.slug}
+                href={suburbPath(suburb.slug)}
+                className="rounded border border-hairline bg-surface p-6 text-center font-bold text-ink-heading shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              >
+                {suburb.name}
+              </Link>
+            ))}
+        </div>
+        <h3 className="heading-md mx-auto mt-12 mb-3 max-w-2xl text-center">
+          Ipswich, Logan and Toowoomba
+        </h3>
+        <p className="mx-auto mb-8 max-w-2xl text-center text-lg">
+          Ipswich and Logan are inland of the coast. Toowoomba is a trip over the
+          range to the address you name.
+        </p>
+        <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-3">
+          {suburbs
+            .filter((suburb) => suburb.region !== "Gold Coast")
+            .map((suburb) => (
+              <Link
+                key={suburb.slug}
+                href={suburbPath(suburb.slug)}
+                className="rounded border border-hairline bg-surface p-6 text-center font-bold text-ink-heading shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              >
+                {suburb.name}
+              </Link>
+            ))}
         </div>
       </Section>
 

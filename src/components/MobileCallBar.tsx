@@ -13,7 +13,11 @@ const ON_PAGE_QUOTE_PATHS = new Set([
 ]);
 
 function hasOnPageQuote(pathname: string) {
-  return ON_PAGE_QUOTE_PATHS.has(pathname);
+  return (
+    ON_PAGE_QUOTE_PATHS.has(pathname) ||
+    pathname === "/sell-my-car-gold-coast" ||
+    pathname.startsWith("/cash-for-cars/")
+  );
 }
 
 /**

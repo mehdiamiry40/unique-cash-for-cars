@@ -20,14 +20,17 @@ both owners. The former cash-for-cars hub and the adjacent commercial pages
 redirect directly to the closest pillar; none appears in the sitemap or
 internal navigation.
 
-Eight suburb pages sit beside the pillars at `/cash-for-cars/<suburb>`:
+Eleven location pages sit beside the pillars at `/cash-for-cars/<suburb>`:
 Southport, Surfers Paradise, Robina, Burleigh Heads, Labrador, Nerang,
-Helensvale and Mermaid Waters, the suburbs in `site.areaServed`. They were
-folded into the homepage in August 2026 and restored on 19 November 2026,
-after Search Console showed the retired location URLs going from 1,239
-impressions in 28 days to none. Each targets its suburb name only and has to
-say something specific to that suburb. Twelve other location URLs, which never
-had a page here, still redirect to the homepage.
+Helensvale, Mermaid Waters, Ipswich, Logan and Toowoomba, the places in
+`site.areaServed`. The Gold Coast eight were folded into the homepage in
+August 2026 and restored on 19 November 2026. Ipswich, Logan and Toowoomba
+followed because those URLs were still collecting Search Console impressions
+while they redirected home. Toowoomba is a pickup reached by travelling there.
+`/sell-my-car-gold-coast` is the seller's checklist and does not use either
+pillar phrase in its title or H1. Nine other location URLs still redirect to
+the homepage, including both Adelaide slugs: Adelaide is in South Australia,
+not a service area, and a page for it would be a doorway.
 
 See `docs/two-keyword-seo-map.md` for the complete URL map, editorial rules and
 post-deployment checks.
@@ -113,7 +116,8 @@ src/
   app/
     (posts)/                         Supporting guides at legacy root URLs
     car-removal-gold-coast/          Removal keyword pillar
-    cash-for-cars/[suburb]/          The eight suburb pages
+    cash-for-cars/[suburb]/          The eleven location pages
+    sell-my-car-gold-coast/          Seller checklist for the Gold Coast
     api/quote/                       Quote endpoint
     page.tsx                         Cash-for-cars keyword pillar
     sitemap.ts                       Indexable URL inventory
@@ -163,8 +167,8 @@ August 2026 and expires on 20 November 2026; recheck it before and after renewal
 After production deploy:
 
 1. Submit `/sitemap.xml` in Google Search Console.
-2. Request indexing for `/`, `/car-removal-gold-coast` and the eight
-   `/cash-for-cars/<suburb>` pages.
+2. Request indexing for `/`, `/car-removal-gold-coast`,
+   `/sell-my-car-gold-coast` and the `/cash-for-cars/<suburb>` pages.
 3. Confirm retired URLs return one 308 hop to the intended owner.
 4. Monitor query-to-page mapping so each phrase keeps its single owner.
 5. Update the Google Business Profile and citations to the same brand, phone,
@@ -172,9 +176,9 @@ After production deploy:
 6. Add genuine Gold Coast proof: consented pickup photos, verified reviews and
    accurate collection examples.
 
-Do not recreate keyword-swapped suburb pages. The eight suburb pages exist
-because each has copy specific to its suburb; `docs/two-keyword-seo-map.md`
+Do not recreate keyword-swapped suburb pages. The location pages exist
+because each has copy specific to that place; `docs/two-keyword-seo-map.md`
 lists the rules they must keep. If a new page is proposed, including a page for
-one of the twelve retired locations, it needs a distinct user purpose, evidence
+one of the retired locations, it needs a distinct user purpose, evidence
 that the business serves the area, and content that cannot live on either
-pillar.
+pillar. Adelaide fails that test: it is in South Australia.

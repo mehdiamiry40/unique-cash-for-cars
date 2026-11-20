@@ -125,6 +125,9 @@ const faqs = [
   },
 ] as const;
 
+const coastalSuburbs = suburbs.filter((suburb) => suburb.region === "Gold Coast");
+const furtherSuburbs = suburbs.filter((suburb) => suburb.region !== "Gold Coast");
+
 export default function HomePage() {
   return (
     <>
@@ -234,6 +237,17 @@ export default function HomePage() {
                 Car Removal Gold Coast
               </Link>{" "}
               page explains access, timing, paperwork and what happens after collection.
+            </p>
+            <p className="mb-4 text-lg">
+              If you are working out whether to sell, and what to have ready, start
+              with{" "}
+              <Link
+                href="/sell-my-car-gold-coast"
+                className="font-bold text-brand hover:underline"
+              >
+                sell my car Gold Coast
+              </Link>
+              .
             </p>
             <p className="text-lg">
               Reach us on{" "}
@@ -416,7 +430,27 @@ export default function HomePage() {
           "cash for cars gold coast" query.
         */}
         <ul className="mx-auto grid max-w-4xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {suburbs.map((suburb) => (
+          {coastalSuburbs.map((suburb) => (
+            <li key={suburb.slug}>
+              <Link
+                href={suburbPath(suburb.slug)}
+                className="block h-full rounded border border-hairline bg-surface px-4 py-3 text-center font-semibold text-ink-heading transition-colors hover:border-brand hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              >
+                Cash for cars {suburb.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <h3 className="heading-md mx-auto mt-12 mb-3 max-w-2xl text-center">
+          Ipswich, Logan and Toowoomba
+        </h3>
+        <p className="mx-auto mb-8 max-w-2xl text-center text-lg">
+          These three sit outside the Gold Coast. Ipswich and Logan are trips
+          inland. Toowoomba is a pickup we travel to, over the range, for the
+          address you give us. Each page says what to tell us about access there.
+        </p>
+        <ul className="mx-auto grid max-w-4xl gap-3 sm:grid-cols-3">
+          {furtherSuburbs.map((suburb) => (
             <li key={suburb.slug}>
               <Link
                 href={suburbPath(suburb.slug)}

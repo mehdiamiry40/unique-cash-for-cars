@@ -24,8 +24,8 @@ export function generateStaticParams() {
 /**
  * Only the slugs in `suburbs` exist. An unknown slug answers 404 from the
  * static route table instead of being rendered on demand, so a crawler probing
- * /cash-for-cars/<anything> costs nothing. The twelve retired location slugs
- * never reach this route: next.config.ts redirects them first.
+ * /cash-for-cars/<anything> costs nothing. The retired location slugs never
+ * reach this route: next.config.ts redirects them first.
  */
 export const dynamicParams = false;
 
@@ -98,7 +98,7 @@ export default async function SuburbPage({ params }: Props) {
             </nav>
 
             <p className="mb-2 text-lg text-brand">
-              Gold Coast · {suburb.postcode}
+              {suburb.placeLabel ?? `${suburb.region} · ${suburb.postcode}`}
             </p>
             <h1 className="heading-xl mb-4">{suburb.h1}</h1>
             <p className="mb-6 text-xl">{suburb.hook}</p>
@@ -136,6 +136,18 @@ export default async function SuburbPage({ params }: Props) {
             {suburb.localAngle.body.map((para) => (
               <p key={para.slice(0, 40)}>{para}</p>
             ))}
+            {suburb.region === "Gold Coast" ? (
+              <p>
+                Deciding whether to sell, and what to have ready, is set out on{" "}
+                <Link
+                  href="/sell-my-car-gold-coast"
+                  className="font-bold text-brand hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                >
+                  sell my car Gold Coast
+                </Link>
+                .
+              </p>
+            ) : null}
           </div>
         </div>
       </Section>

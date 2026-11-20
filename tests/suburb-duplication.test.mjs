@@ -25,7 +25,7 @@ const source = readFileSync(
 );
 const pages = suburbPagesFrom(source);
 
-test("the eight suburb pages are read from suburbs.ts with their own copy", () => {
+test("the suburb pages are read from suburbs.ts with their own copy", () => {
   assert.deepEqual(
     pages.map((page) => page.slug),
     [
@@ -37,6 +37,9 @@ test("the eight suburb pages are read from suburbs.ts with their own copy", () =
       "nerang",
       "helensvale",
       "mermaid-waters",
+      "ipswich",
+      "logan",
+      "toowoomba",
     ],
   );
   for (const page of pages) {
@@ -49,7 +52,7 @@ test("the eight suburb pages are read from suburbs.ts with their own copy", () =
 test("no two suburb pages share their sentences or phrasing", () => {
   const result = compareSuburbPages(pages);
   assert.deepEqual(result.failures, []);
-  assert.equal(result.pairs.length, 28, "eight pages make 28 pairs");
+  assert.equal(result.pairs.length, 55, "eleven pages make 55 pairs");
 });
 
 test("the guard fails when one suburb's copy is reused for another", () => {

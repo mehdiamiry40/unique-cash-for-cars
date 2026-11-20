@@ -12,6 +12,7 @@ const otherLinks = [
 
 const services = [
   { label: "Cash For Cars Gold Coast", href: "/" },
+  { label: "Sell My Car Gold Coast", href: "/sell-my-car-gold-coast" },
   { label: "Car Removal Gold Coast", href: "/car-removal-gold-coast" },
 ];
 

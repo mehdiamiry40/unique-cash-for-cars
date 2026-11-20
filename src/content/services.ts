@@ -7,10 +7,10 @@ import { site } from "@/content/site";
  *   /                        Cash For Cars Gold Coast
  *   /car-removal-gold-coast  Car Removal Gold Coast
  *
- * The homepage is authored directly. This file holds the removal pillar only;
- * former sell-my-car, unwanted-car and wrecker pages permanently redirect into
- * the most relevant pillar so their signals are not split across lookalike
- * commercial pages.
+ * The homepage is authored directly. This file holds the removal pillar only.
+ * /sell-my-car-gold-coast is its own page for the seller's preparation
+ * questions. Unwanted-car and wrecker URLs still redirect into the closest
+ * pillar so those signals are not split across lookalike commercial pages.
  */
 export type ServicePage = {
   slug: string;
