@@ -109,6 +109,7 @@ const retiredLocationRoutes = [
   "/cash-for-cars/adelaide",
 ];
 const postRoutes = [
+  "/sell-car-defect-notice-qld",
   "/selling-nsw-registered-car-queensland",
   "/blown-engine-repair-or-sell",
   "/dead-hybrid-battery-repair-or-sell",
@@ -134,6 +135,7 @@ const faqRoutes = [
   ...serviceRoutes,
   ...suburbPages.keys(),
   "/sell-car-without-roadworthy-qld",
+  "/sell-car-defect-notice-qld",
   "/deceased-estate-car-sale-queensland",
   "/selling-car-with-lpg-queensland",
   "/unregistered-vehicle-permit-queensland",

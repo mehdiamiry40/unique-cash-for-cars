@@ -40,6 +40,17 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    slug: "sell-car-defect-notice-qld",
+    title: "Selling a car with a defect notice in Queensland",
+    description:
+      "What major, minor and self-clearing notices allow, how a notice is cleared, and the two sale paths TMR describes if the repair is not worth doing.",
+    category: "QLD paperwork",
+    image: "/img/unwanted-car-gold-coast.jpg",
+    imageAlt: "A car parked at a Gold Coast home after a roadside defect notice, waiting for its owner to decide on repair or sale",
+    date: "2026-10-03",
+    readingMinutes: 7,
+  },
+  {
     slug: "selling-nsw-registered-car-queensland",
     title: "Selling a NSW registered car in Queensland",
     description:
