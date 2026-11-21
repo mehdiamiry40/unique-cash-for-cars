@@ -109,6 +109,7 @@ const retiredLocationRoutes = [
   "/cash-for-cars/adelaide",
 ];
 const postRoutes = [
+  "/sell-car-on-behalf-of-someone-else-qld",
   "/selling-nsw-registered-car-queensland",
   "/blown-engine-repair-or-sell",
   "/dead-hybrid-battery-repair-or-sell",
@@ -142,6 +143,7 @@ const faqRoutes = [
   "/dead-hybrid-battery-repair-or-sell",
   "/blown-engine-repair-or-sell",
   "/selling-nsw-registered-car-queensland",
+  "/sell-car-on-behalf-of-someone-else-qld",
 ];
 /**
  * Everything except the privacy policy shows a breadcrumb trail.
