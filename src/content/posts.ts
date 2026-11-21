@@ -40,6 +40,17 @@ export type Post = {
 
 export const posts: Post[] = [
   {
+    slug: "flood-damaged-car-queensland",
+    title: "Flood damaged car in Queensland: claim, repair or sell",
+    description:
+      "Why you should not start it, how the insurer decides between repair and write-off, what changes when there is no insurer, and how to sell it honestly.",
+    category: "Damaged cars",
+    image: "/img/accident-damaged-car.jpg",
+    imageAlt: "A damaged car waiting to be assessed at a Gold Coast home",
+    date: "2026-10-04",
+    readingMinutes: 8,
+  },
+  {
     slug: "selling-nsw-registered-car-queensland",
     title: "Selling a NSW registered car in Queensland",
     description:
