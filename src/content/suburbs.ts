@@ -136,7 +136,7 @@ export const suburbs: Suburb[] = [
       "abandoned-car-private-property-queensland",
       "transferring-car-registration-in-queensland",
     ],
-    updated: "2026-11-19",
+    updated: "2026-11-26",
   },
 
   {
@@ -173,7 +173,7 @@ export const suburbs: Suburb[] = [
     neighbours: ["southport", "mermaid-waters"],
     faqs: [
       {
-        question: "I am leaving the Gold Coast on a set date. Can the pickup be booked before then?",
+        question: "I am moving out of Surfers Paradise on a set date. Can the pickup be booked before then?",
         answer:
           "Tell us the date when you ask for a quote. We confirm the pickup window before collection, and timing depends on the route, the building access and the paperwork, so the earlier we know, the better the chance of a time that works. Have your photo ID and proof of ownership ready.",
       },
@@ -185,7 +185,7 @@ export const suburbs: Suburb[] = [
       {
         question: "Can I sell a car with interstate plates in Surfers Paradise?",
         answer:
-          "Yes, but the sale is recorded with the state that registered the car. For a NSW registered car that means Service NSW, not Transport and Main Roads, even when the seller and buyer are both on the Gold Coast. For any other state, check with that state's transport authority before the pickup.",
+          "Yes, but the sale is recorded with the state that registered the car. For a NSW registered car that means Service NSW, not Transport and Main Roads, even when the seller and buyer are both in Queensland. For any other state, check with that state's transport authority before the pickup.",
       },
       {
         question: "The car has sat unregistered in a building carpark. Can it still be sold?",
@@ -197,7 +197,7 @@ export const suburbs: Suburb[] = [
       "selling-nsw-registered-car-queensland",
       "cancel-car-registration-queensland-after-sale",
     ],
-    updated: "2026-11-19",
+    updated: "2026-11-26",
   },
 
   {
@@ -254,7 +254,7 @@ export const suburbs: Suburb[] = [
       },
     ],
     guides: ["blown-engine-repair-or-sell", "statutory-vs-repairable-write-off-queensland"],
-    updated: "2026-11-19",
+    updated: "2026-11-26",
   },
 
   {
@@ -311,7 +311,7 @@ export const suburbs: Suburb[] = [
       },
     ],
     guides: ["sell-car-without-roadworthy-qld", "how-much-is-my-scrap-car-worth-gold-coast"],
-    updated: "2026-11-19",
+    updated: "2026-11-26",
   },
 
   {
@@ -371,7 +371,7 @@ export const suburbs: Suburb[] = [
       "deceased-estate-car-sale-queensland",
       "selling-car-personalised-plates-queensland",
     ],
-    updated: "2026-11-19",
+    updated: "2026-11-26",
   },
 
   {
@@ -431,7 +431,7 @@ export const suburbs: Suburb[] = [
       "what-to-do-with-a-damaged-car-on-the-gold-coast-a-complete-guide",
       "unregistered-vehicle-permit-queensland",
     ],
-    updated: "2026-11-19",
+    updated: "2026-11-26",
   },
 
   {
@@ -490,7 +490,7 @@ export const suburbs: Suburb[] = [
       "selling-a-car-with-finance-owing-queensland",
       "dead-hybrid-battery-repair-or-sell",
     ],
-    updated: "2026-11-19",
+    updated: "2026-11-26",
   },
 
   {
@@ -549,7 +549,7 @@ export const suburbs: Suburb[] = [
       "where-do-old-junk-cars-go-in-gold-coast-car-selling-options-in-gold-coast-qld",
       "how-much-is-my-scrap-car-worth-gold-coast",
     ],
-    updated: "2026-11-19",
+    updated: "2026-11-26",
   },
 
   {

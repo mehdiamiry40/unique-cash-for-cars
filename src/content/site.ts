@@ -12,8 +12,13 @@ export const site = {
   /** Registered corporation operating the Unique Cash For Cars service. */
   registeredEntityName: "A Plus Car Removal Pty Ltd",
   url: "https://uniquecashforcars.com.au",
+  /**
+   * Homepage meta description, and the fallback wherever a page has none. It
+   * is also the WebSite and homepage Service description in the schema, so it
+   * has to describe the whole service in at most 155 characters.
+   */
   description:
-    "Get a quote from a licensed Queensland car buyer for any make or condition, with payment confirmed before free car removal across the Gold Coast, 7 days.",
+    "Cash for cars on the Gold Coast from a licensed Queensland buyer. Any make or condition, free removal, payment method confirmed before pickup. Open 7 days.",
 
   phone: {
     /**
