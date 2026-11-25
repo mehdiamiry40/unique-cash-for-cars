@@ -1,4 +1,7 @@
-import type { ServicePage } from "@/content/services";
+import { Fragment } from "react";
+import Link from "next/link";
+
+import type { RichText, ServicePage } from "@/content/services";
 import { site } from "@/content/site";
 import { breadcrumbSchema, faqSchema, graph, serviceSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/JsonLd";
@@ -7,7 +10,38 @@ import { FaqAccordion } from "@/components/FaqAccordion";
 import { HowItWorks } from "@/components/HowItWorks";
 import { FurtherReading } from "@/components/FurtherReading";
 import { PrimaryServiceLinks } from "@/components/PrimaryServiceLinks";
-import { CallButton, Container, Section, SectionHeading } from "@/components/ui";
+import { CallButton, CheckList, Container, Section, SectionHeading } from "@/components/ui";
+
+/** The words of a paragraph or list item, without its links. Used as a key. */
+function plainText(text: RichText): string {
+  if (typeof text === "string") return text;
+  return text.map((part) => (typeof part === "string" ? part : part.text)).join("");
+}
+
+/**
+ * A paragraph or list item from services.ts. Copy there is plain text, with
+ * `{ text, href }` wherever a sentence links to another page on this site.
+ */
+function Rich({ text }: { text: RichText }) {
+  if (typeof text === "string") return <>{text}</>;
+  return (
+    <>
+      {text.map((part, index) =>
+        typeof part === "string" ? (
+          <Fragment key={index}>{part}</Fragment>
+        ) : (
+          <Link
+            key={index}
+            href={part.href}
+            className="font-bold text-brand hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          >
+            {part.text}
+          </Link>
+        ),
+      )}
+    </>
+  );
+}
 
 export function ServicePageTemplate({ page }: { page: ServicePage }) {
   return (
@@ -35,7 +69,12 @@ export function ServicePageTemplate({ page }: { page: ServicePage }) {
         <div className="grid items-start gap-10 lg:grid-cols-[1fr_26rem]">
           <div>
             <h1 className="heading-xl mb-4">{page.h1}</h1>
-            <p className="mb-7 text-xl">{page.intro}</p>
+            <p className="mb-6 text-xl">{page.intro}</p>
+            {page.highlights && (
+              <div className="mb-8">
+                <CheckList items={page.highlights} />
+              </div>
+            )}
             <CallButton className="text-xl" />
           </div>
           <QuoteForm id="quote" />
@@ -48,18 +87,22 @@ export function ServicePageTemplate({ page }: { page: ServicePage }) {
             <SectionHeading align="left">{section.heading}</SectionHeading>
             <div className="space-y-4 text-lg">
               {section.body.map((para) => (
-                <p key={para.slice(0, 40)}>{para}</p>
+                <p key={plainText(para).slice(0, 40)}>
+                  <Rich text={para} />
+                </p>
               ))}
             </div>
             {section.list && (
               <ul className="mt-5 space-y-2.5">
                 {section.list.map((item) => (
-                  <li key={item} className="flex gap-3">
+                  <li key={plainText(item)} className="flex gap-3">
                     <span
                       aria-hidden="true"
                       className="mt-2 size-1.5 shrink-0 rounded-full bg-brand"
                     />
-                    <span>{item}</span>
+                    <span>
+                      <Rich text={item} />
+                    </span>
                   </li>
                 ))}
               </ul>

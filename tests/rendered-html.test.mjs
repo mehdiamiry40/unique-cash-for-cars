@@ -928,6 +928,32 @@ test("the sitemap dates each suburb page with the day its copy last changed", as
   }
 });
 
+test("static sitemap entries carry a hand-set content date or none, never the build time", async () => {
+  const xml = await html("/sitemap.xml");
+  const lastmodOf = (path) => {
+    const loc = path === "/" ? publicOrigin : `${publicOrigin}${path}`;
+    const entry = xml.match(
+      new RegExp(`<url>\\s*<loc>${loc.replace(/[.]/g, "\\.")}</loc>([\\s\\S]*?)</url>`),
+    )?.[1];
+    assert.ok(entry !== undefined, `${loc} is not in the sitemap`);
+    return entry.match(/<lastmod>([^<]+)<\/lastmod>/)?.[1];
+  };
+
+  // The three pages whose body copy was rewritten have an editorial date. It
+  // is a calendar day set by hand in sitemap.ts, so it falls exactly on
+  // midnight UTC. A build-time stamp would carry the time of day.
+  for (const path of ["/", "/car-removal-gold-coast", "/sell-my-car-gold-coast"]) {
+    const lastmod = lastmodOf(path);
+    assert.ok(lastmod, `${path}: rewritten page has no lastmod`);
+    assert.match(lastmod, /^\d{4}-\d{2}-\d{2}T00:00:00\.000Z$/, `${path}: lastmod ${lastmod}`);
+  }
+
+  // Pages with no known content date stay undated instead of borrowing one.
+  for (const path of ["/about", "/contact-us", "/blog"]) {
+    assert.equal(lastmodOf(path), undefined, `${path}: must not carry a lastmod`);
+  }
+});
+
 test("suburb copy makes no claim about pickup frequency, payment method or customers", () => {
   /*
    * docs/two-keyword-seo-map.md: the site "does not make unsupported claims

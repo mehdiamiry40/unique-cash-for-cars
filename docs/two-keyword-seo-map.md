@@ -1,7 +1,8 @@
 # Two-keyword SEO map
 
 Audit date: 6 August 2026. Suburb pages restored: 19 November 2026 (see
-"Suburb pages" below).
+"Suburb pages" below). Homepage, removal pillar and seller page rewritten:
+26 November 2026 (see "What each commercial page answers" below).
 
 ## Objective
 
@@ -109,9 +110,38 @@ Internal links: the homepage coverage section links to every suburb page with
 the anchor "Cash for cars <suburb>", the footer lists them on every page, and
 each suburb page links to its neighbouring suburb pages and to both owners.
 Gold Coast suburb pages, and the homepage, also link to `/sell-my-car-gold-coast`.
+Since 26 November 2026 each Gold Coast suburb page also links to `/` from its
+body copy with the anchor "cash for cars Gold Coast". Search Console showed the
+Surfers Paradise page collecting impressions for the city-wide query (61 in six
+months, at position 57.5), so the suburb pages now hand that query back to its
+owner in the text and not only in the service cards. The sentence lives in the
+suburb template, not in `suburbs.ts`. The removal pillar links to each Gold
+Coast suburb page with an anchor that names that suburb's access problem.
 
 There is no hub page. `/cash-for-cars` still redirects to `/`, because a hub
 would compete with the homepage for its own query.
+
+## What each commercial page answers
+
+The 26 November 2026 rewrite gave the three commercial pages separate jobs, so
+they stop answering each other's query. Search Console had the homepage
+outranking the removal pillar for "car removal gold coast" (position 23.2
+against 61.5 over six months).
+
+| Page | Speaks as | Covers | Hands off |
+|---|---|---|---|
+| `/` | The buyer | Who is buying, what is bought, how the quote and the payment confirmation work, that removal is included, where the truck goes | Collection detail to the removal pillar; paperwork to the seller page |
+| `/car-removal-gold-coast` | The collection | What free removal covers, access types, cars that will not move, what to have ready, timing, how a removal differs from a tow or a wrecker | The offer to `/`; paperwork to the seller page |
+| `/sell-my-car-gold-coast` | The seller's checklist | Who can buy the car, registration, finance, plates, transfer or cancellation afterwards | The offer to `/`; collection to the removal pillar |
+
+No homepage section heading repeats the removal pillar's exact phrase. Prices,
+payment and timing say the same thing on all three: one published cap
+(`site.maxPayout`), a payment method that is confirmed before pickup and never
+named, and same-day collection that may be available and is never promised.
+
+The sitemap dates these three pages by hand in `src/app/sitemap.ts`
+(`contentDates`). Change a date only when that page's copy changes. About,
+Contact and the guide hub have no content date and stay without a lastmod.
 
 ## Consolidated location URLs
 

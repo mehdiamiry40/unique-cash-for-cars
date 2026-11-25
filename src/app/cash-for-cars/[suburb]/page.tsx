@@ -136,9 +136,24 @@ export default async function SuburbPage({ params }: Props) {
             {suburb.localAngle.body.map((para) => (
               <p key={para.slice(0, 40)}>{para}</p>
             ))}
+            {/*
+              The city-wide query belongs to the homepage, so each Gold Coast
+              suburb page hands it back there in the body, not only in the
+              service cards further down. Shared wording lives here, in the
+              template, and stays out of suburbs.ts.
+            */}
             {suburb.region === "Gold Coast" ? (
               <p>
-                Deciding whether to sell, and what to have ready, is set out on{" "}
+                This page is about access in {suburb.name}. Who the buyer is, how
+                an offer is worked out and where else we collect are on our{" "}
+                <Link
+                  href="/"
+                  className="font-bold text-brand hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                >
+                  cash for cars Gold Coast
+                </Link>{" "}
+                page. Deciding whether to sell, and what to have ready, is set out
+                on{" "}
                 <Link
                   href="/sell-my-car-gold-coast"
                   className="font-bold text-brand hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
